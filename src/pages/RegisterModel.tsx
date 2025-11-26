@@ -60,9 +60,9 @@ Dit is een geautomatiseerd bericht. Je ontvangt deze e-mail omdat je je hebt aan
       window.open(`mailto:${formData.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
       
       setSubmitted(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      alert('Er ging iets mis. Probeer het opnieuw.');
+      alert(`Er ging iets mis: ${error.message || error.error_description || JSON.stringify(error)}`);
     } finally {
       setLoading(false);
     }

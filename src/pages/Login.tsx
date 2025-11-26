@@ -20,10 +20,12 @@ export default function Login() {
       });
 
       if (error) throw error;
-      navigate('/dashboard');
-    } catch (error) {
+      
+      // Forceer navigatie naar dashboard
+      window.location.href = '/dashboard';
+    } catch (error: any) {
       console.error('Login error:', error);
-      alert('Login mislukt. Controleer je gegevens.');
+      alert(`Login mislukt: ${error.message}`);
     } finally {
       setLoading(false);
     }

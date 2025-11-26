@@ -32,6 +32,7 @@ export default function Dashboard() {
   const [editFormData, setEditFormData] = useState<Model | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
+  const [loggedInEmployees, setLoggedInEmployees] = useState<string[]>([]);
 
   const motivationalQuotes = [
     "Vandaag gaan we knallen. Niet lullen maar vullen… die agenda!",
@@ -44,7 +45,6 @@ export default function Dashboard() {
   ];
 
   useEffect(() => {
-    checkAuth();
     fetchModels();
     
     // Rotate quotes every 15 seconds
@@ -61,13 +61,6 @@ export default function Dashboard() {
   useEffect(() => {
     filterModels();
   }, [models, searchTerm, genderFilter, minAge, maxAge]);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/");
-    }
-  };
 
   const fetchModels = async () => {
     try {
