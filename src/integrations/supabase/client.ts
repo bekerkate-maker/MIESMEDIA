@@ -7,6 +7,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Supabase URL of Anon Key ontbreekt in .env bestand');
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+// Fallback waarden om crash te voorkomen als env vars ontbreken
+const url = supabaseUrl || 'https://placeholder.supabase.co';
+const key = supabaseAnonKey || 'placeholder';
+
+export const supabase = createClient(url, key);
 
 export default supabase;
