@@ -144,7 +144,7 @@ Dit is een geautomatiseerd bericht. Je ontvangt deze e-mail omdat je je hebt aan
                 Geslacht *
               </label>
               <select required value={formData.gender} onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                style={{ width: '100%', minWidth: '100%', padding: '12px 16px', background: '#E5DDD5', color: formData.gender ? '#1F2B4A' : '#9CA3AF', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: formData.gender ? '#1F2B4A' : '#9CA3AF', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', boxSizing: 'border-box', minWidth: '0' }}
               >
                 <option value="">Selecteer geslacht</option>
                 <option value="man">Man</option>
@@ -157,7 +157,7 @@ Dit is een geautomatiseerd bericht. Je ontvangt deze e-mail omdat je je hebt aan
               <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
                 Geboortedatum *
               </label>
-              <input required type="date" value={formData.birthdate || ''} onChange={(e) => setFormData({...formData, birthdate: e.target.value})}
+              <input required type="text" placeholder="dd/mm/jjjj" value={formData.birthdate || ''} onChange={(e) => setFormData({...formData, birthdate: e.target.value})}
                 style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
               />
             </div>
