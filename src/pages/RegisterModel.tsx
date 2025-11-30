@@ -140,6 +140,15 @@ Dit is een geautomatiseerd bericht. Je ontvangt deze e-mail omdat je je hebt aan
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
             <div>
               <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
+                Woonplaats *
+              </label>
+              <input required type="text" placeholder="Rotterdam" value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})}
+                style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
                 Geslacht *
               </label>
               <select required value={formData.gender} onChange={(e) => setFormData({...formData, gender: e.target.value})}
@@ -150,15 +159,6 @@ Dit is een geautomatiseerd bericht. Je ontvangt deze e-mail omdat je je hebt aan
                 <option value="vrouw">Vrouw</option>
                 <option value="anders">Anders</option>
               </select>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                Leeftijd *
-              </label>
-              <input required type="number" min="16" max="99" value={formData.age} onChange={(e) => setFormData({...formData, age: e.target.value})}
-                style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-              />
             </div>
           </div>
 
