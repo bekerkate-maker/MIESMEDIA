@@ -407,71 +407,69 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
           {filteredModels.map((model) => (
-            <div key={model.id} style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', position: 'relative' }}>
-              {/* Edit knop rechtsboven */}
-              <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
-                <button
-                  onClick={() => handleEditModel(model)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                    fontSize: 24,
-                    lineHeight: 1,
-                    fontFamily: 'inherit'
-                  }}
-                  title="Bewerken"
-                >
-                  ✏️
-                </button>
+            <div key={model.id} style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+              {/* Foto bovenaan - hele foto zichtbaar */}
+              <div style={{ 
+                width: '100%', 
+                height: 500,
+                background: '#E5DDD5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 64,
+                fontWeight: 700,
+                color: '#2B3E72',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                {model.photo_url ? (
+                  <img 
+                    src={model.photo_url} 
+                    alt={`${model.first_name} ${model.last_name}`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0
+                    }}
+                  />
+                ) : (
+                  `${model.first_name.charAt(0)}${model.last_name.charAt(0)}`
+                )}
               </div>
-              
-              <div style={{ padding: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-                  <div style={{ 
-                    width: 70, 
-                    height: 70, 
-                    borderRadius: '50%', 
-                    background: '#E5DDD5',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 28,
-                    fontWeight: 700,
-                    color: '#2B3E72',
-                    flexShrink: 0,
-                    border: '3px solid #E5DDD5',
-                    overflow: 'hidden',
-                    position: 'relative'
-                  }}>
-                    {model.photo_url ? (
-                      <img 
-                        src={model.photo_url} 
-                        alt={`${model.first_name} ${model.last_name}`}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          position: 'absolute',
-                          top: 0,
-                          left: 0
-                        }}
-                      />
-                    ) : (
-                      `${model.first_name.charAt(0)}${model.last_name.charAt(0)}`
-                    )}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: 22, fontWeight: 700, margin: 0, color: '#1F2B4A', marginBottom: 4 }}>
-                      {model.first_name} {model.last_name}
-                    </h3>
-                    <p style={{ color: '#6B7280', margin: 0, fontSize: 14 }}>
-                      {model.gender} • {model.birthdate ? `${calculateAge(model.birthdate)} jaar` : 'Leeftijd onbekend'}
-                    </p>
-                  </div>
+
+              {/* Info onderaan */}
+              <div style={{ flex: 1, padding: 24, position: 'relative' }}>
+                {/* Edit knop rechtsboven */}
+                <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
+                  <button
+                    onClick={() => handleEditModel(model)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      fontSize: 24,
+                      lineHeight: 1,
+                      fontFamily: 'inherit'
+                    }}
+                    title="Bewerken"
+                  >
+                    ✏️
+                  </button>
+                </div>
+
+                <div>
+                  <h3 style={{ fontSize: 26, fontWeight: 700, margin: 0, color: '#1F2B4A', marginBottom: 6 }}>
+                    {model.first_name} {model.last_name}
+                  </h3>
+                  <p style={{ color: '#6B7280', margin: 0, fontSize: 16, marginBottom: 16 }}>
+                    {model.gender} • {model.birthdate ? `${calculateAge(model.birthdate)} jaar` : 'Leeftijd onbekend'}
+                  </p>
                 </div>
 
                 <div style={{ marginBottom: 12 }}>
@@ -485,11 +483,16 @@ export default function Dashboard() {
                 </div>
 
                 <div style={{ marginBottom: 12 }}>
+                  <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: '#1F2B4A' }}>Woonplaats</p>
+                  <p style={{ margin: 0, color: '#6B7280', fontSize: 14 }}>{model.city}</p>
+                </div>
+
+                <div style={{ marginBottom: 12 }}>
                   <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: '#1F2B4A' }}>Geboortedatum</p>
                   <p style={{ margin: 0, color: '#6B7280', fontSize: 14 }}>{model.birthdate ? new Date(model.birthdate).toLocaleDateString() : 'Onbekend'}</p>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                   <Instagram style={{ height: 16, width: 16, color: '#6B7280' }} />
                   <a 
                     href={`https://instagram.com/${model.instagram.replace("@", "")}`} 
@@ -501,7 +504,7 @@ export default function Dashboard() {
                   </a>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   <button 
                     onClick={() => handleContactModel(model)} 
                     style={{ 

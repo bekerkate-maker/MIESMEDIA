@@ -165,43 +165,53 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-6">
           {filteredModels.map((model) => (
-            <Card key={model.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-xl">
+            <Card key={model.id} className="hover:shadow-lg transition-shadow overflow-hidden">
+              {model.photo_url && (
+                <div className="w-full" style={{ height: '500px' }}>
+                  <img 
+                    src={model.photo_url} 
+                    alt={`${model.first_name} ${model.last_name}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">
                   {model.first_name} {model.last_name}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   {model.gender} • {model.age} jaar
                 </p>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 pt-0">
                 <div>
-                  <p className="text-sm font-medium text-foreground">E-mail</p>
-                  <p className="text-sm text-muted-foreground">{model.email}</p>
+                  <p className="text-xs font-medium text-foreground">E-mail</p>
+                  <p className="text-xs text-muted-foreground">{model.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">Telefoon</p>
-                  <p className="text-sm text-muted-foreground">{model.phone}</p>
+                  <p className="text-xs font-medium text-foreground">Telefoon</p>
+                  <p className="text-xs text-muted-foreground">{model.phone}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Instagram className="h-4 w-4 text-muted-foreground" />
+                  <Instagram className="h-3 w-3 text-muted-foreground" />
                   <a
                     href={`https://instagram.com/${model.instagram.replace("@", "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline"
+                    className="text-xs text-primary hover:underline"
                   >
                     {model.instagram}
                   </a>
                 </div>
                 <Button
                   onClick={() => handleContactModel(model)}
-                  className="w-full mt-4"
+                  className="w-full mt-3"
                   variant="default"
+                  size="sm"
                 >
-                  <Mail className="h-4 w-4 mr-2" />
+                  <Mail className="h-3 w-3 mr-2" />
                   Contact opnemen
                 </Button>
               </CardContent>
