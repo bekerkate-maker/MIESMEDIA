@@ -128,14 +128,20 @@ export default function Dashboard() {
     if (minAge !== "") {
       const min = parseInt(minAge);
       if (!isNaN(min)) {
-        filtered = filtered.filter((model) => model.age >= min);
+        filtered = filtered.filter((model) => {
+          const age = calculateAge(model.birthdate);
+          return age !== null && age >= min;
+        });
       }
     }
 
     if (maxAge !== "") {
       const max = parseInt(maxAge);
       if (!isNaN(max)) {
-        filtered = filtered.filter((model) => model.age <= max);
+        filtered = filtered.filter((model) => {
+          const age = calculateAge(model.birthdate);
+          return age !== null && age <= max;
+        });
       }
     }
 
