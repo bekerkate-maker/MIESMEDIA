@@ -80,8 +80,7 @@ export default function Dashboard() {
     try {
       const { data, error } = await supabase
         .from("models")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*");
 
       if (error) throw error;
       console.log("Fetched models:", data); // DEBUG
