@@ -28,6 +28,21 @@ export default function RegisterModel() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPhotoFile(file);
+      // Maak preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -40,6 +55,31 @@ export default function RegisterModel() {
     setLoading(true);
 
     try {
+      let photoUrl = '';
+
+      // Upload foto als er een is geselecteerd
+      if (photoFile) {
+        const fileExt = photoFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `model-photos/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('model-photos')
+          .upload(filePath, photoFile);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error('Foto upload mislukt: ' + uploadError.message);
+        }
+
+        // Haal publieke URL op
+        const { data: urlData } = supabase.storage
+          .from('model-photos')
+          .getPublicUrl(filePath);
+
+        photoUrl = urlData.publicUrl;
+      }
+
       const instagramHandle = formData.instagram.startsWith('@') 
         ? formData.instagram 
         : `@${formData.instagram}`;
@@ -47,7 +87,8 @@ export default function RegisterModel() {
       const { error } = await supabase.from('models').insert([{
         ...formData,
         instagram: instagramHandle,
-        age: parseInt(formData.age)
+        age: parseInt(formData.age),
+        photo_url: photoUrl || null
       }]);
 
       if (error) throw error;
@@ -80,7 +121,8 @@ Dit is een geautomatiseerd bericht. Je ontvangt deze e-mail omdat je je hebt aan
   };
 
   const handleFileUpload = () => {
-    alert('Foto upload functionaliteit - integreer met je favoriete cloud storage');
+    // Trigger file input click
+    document.getElementById('photo-upload-input')?.click();
   };
 
   if (submitted) {
@@ -242,12 +284,33 @@ Dit is een geautomatiseerd bericht. Je ontvangt deze e-mail omdat je je hebt aan
 
           <div style={{ marginBottom: 32 }}>
             <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-              Foto
+              Foto {photoFile && '✅'}
             </label>
+            <input
+              id="photo-upload-input"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+            {photoPreview && (
+              <div style={{ marginBottom: 12, textAlign: 'center' }}>
+                <img 
+                  src={photoPreview} 
+                  alt="Preview" 
+                  style={{ 
+                    maxWidth: '200px', 
+                    maxHeight: '200px', 
+                    borderRadius: 8,
+                    objectFit: 'cover'
+                  }} 
+                />
+              </div>
+            )}
             <button type="button" onClick={handleFileUpload}
               style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxSizing: 'border-box' }}
             >
-              <span>📤</span> Upload foto
+              <span>📤</span> {photoFile ? 'Wijzig foto' : 'Upload foto'}
             </button>
           </div>
 
