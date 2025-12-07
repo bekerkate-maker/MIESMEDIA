@@ -84,9 +84,12 @@ export default function Dashboard() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      console.log("Fetched models:", data); // DEBUG
+      console.log("Number of models:", data?.length); // DEBUG
       setModels(data || []);
     } catch (error) {
       console.error("Error fetching models:", error);
+      alert("Fout bij ophalen modellen: " + JSON.stringify(error));
     } finally {
       setLoading(false);
     }
@@ -111,6 +114,7 @@ export default function Dashboard() {
 
   const filterModels = () => {
     let filtered = [...models];
+    console.log("Before filtering:", filtered.length); // DEBUG
 
     if (searchTerm) {
       filtered = filtered.filter(
@@ -119,10 +123,12 @@ export default function Dashboard() {
           model.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           model.email.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      console.log("After search filter:", filtered.length); // DEBUG
     }
 
     if (genderFilter !== "all") {
       filtered = filtered.filter((model) => model.gender === genderFilter);
+      console.log("After gender filter:", filtered.length); // DEBUG
     }
 
     if (minAge !== "") {
@@ -132,6 +138,7 @@ export default function Dashboard() {
           const age = calculateAge(model.birthdate);
           return age !== null && age >= min;
         });
+        console.log("After min age filter:", filtered.length); // DEBUG
       }
     }
 
@@ -142,9 +149,11 @@ export default function Dashboard() {
           const age = calculateAge(model.birthdate);
           return age !== null && age <= max;
         });
+        console.log("After max age filter:", filtered.length); // DEBUG
       }
     }
 
+    console.log("Final filtered:", filtered.length); // DEBUG
     setFilteredModels(filtered);
   };
 
