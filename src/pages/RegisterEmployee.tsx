@@ -15,7 +15,8 @@ export default function RegisterEmployee() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // 1. Maak gebruiker aan in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -25,7 +26,26 @@ export default function RegisterEmployee() {
         },
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
+
+      // 2. Voeg gebruiker toe aan employees tabel
+      if (authData.user) {
+        const { error: dbError } = await supabase
+          .from('employees')
+          .insert([
+            {
+              user_id: authData.user.id,
+              name: name,
+              email: email,
+              role: 'employee'
+            }
+          ]);
+
+        if (dbError) {
+          console.error('Database insert error:', dbError);
+          throw new Error('Fout bij opslaan in database: ' + dbError.message);
+        }
+      }
 
       alert('✅ Account succesvol aangemaakt! Je wordt nu doorgestuurd naar het dashboard.');
       navigate('/dashboard');

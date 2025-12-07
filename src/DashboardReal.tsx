@@ -59,6 +59,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchModels();
+    fetchEmployees();
     
     // Rotate quotes every 15 seconds
     const quoteInterval = setInterval(() => {
@@ -88,6 +89,23 @@ export default function Dashboard() {
       console.error("Error fetching models:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("employees")
+        .select("name, email")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      
+      // Zet de namen van de employees in de state
+      const employeeNames = (data || []).map(emp => emp.name || emp.email);
+      setLoggedInEmployees(employeeNames);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
     }
   };
 
