@@ -84,32 +84,49 @@ export default function RegisterModel() {
         ? formData.instagram 
         : `@${formData.instagram}`;
 
+      // Converteer geboortedatum van dd/mm/yyyy naar yyyy-mm-dd
+      let birthdateFormatted = null;
+      if (formData.birthdate) {
+        const parts = formData.birthdate.split('/');
+        if (parts.length === 3) {
+          birthdateFormatted = `${parts[2]}-${parts[1]}-${parts[0]}`; // yyyy-mm-dd
+        }
+      }
+
       const { error } = await supabase.from('models').insert([{
-        ...formData,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        gender: formData.gender,
+        birthdate: birthdateFormatted,
         instagram: instagramHandle,
-        age: parseInt(formData.age),
+        email: formData.email,
+        phone: formData.phone,
+        city: formData.city,
         photo_url: photoUrl || null
       }]);
 
       if (error) throw error;
       
-      // Send email notification
-      const emailSubject = 'Welkom bij MIES MEDIA! 🎉';
-      const emailBody = `Gefeliciteerd! Je bent officieel aangemeld als MIES MEDIA MODEL.
+      // Send welcome email via Supabase Edge Function
+      try {
+        const { data: functionData, error: functionError } = await supabase.functions.invoke('send-welcome-email', {
+          body: {
+            email: formData.email,
+            firstName: formData.first_name,
+            lastName: formData.last_name
+          }
+        });
 
-Hartelijk dank voor jouw inschrijving en het vertrouwen in MIES MEDIA!
-
-We hebben je gegevens ontvangen en je gaf ons toestemming om deze te verwerken en op te slaan. Je gegevens worden zorgvuldig behandeld conform onze privacyverklaring.
-
-We nemen binnenkort contact met je op voor de volgende stappen.
-
-Met vriendelijke groet,
-Team MIES MEDIA
-
----
-Dit is een geautomatiseerd bericht. Je ontvangt deze e-mail omdat je je hebt aangemeld via miesmedia.nl`;
-
-      window.open(`mailto:${formData.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
+        if (functionError) {
+          console.error('Email send error:', functionError);
+          // Don't fail the registration if email fails
+        } else {
+          console.log('Welcome email sent successfully:', functionData);
+        }
+      } catch (emailError) {
+        console.error('Email error:', emailError);
+        // Don't fail the registration if email fails
+      }
       
       setSubmitted(true);
     } catch (error: any) {
