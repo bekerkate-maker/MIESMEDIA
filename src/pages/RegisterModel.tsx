@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
+import logoCasu from '@/components/logo_klanten/logo_casu.png';
+import logoKoekela from '@/components/logo_klanten/logo-koekela-winkels-denieuwebinnenweg.png';
+import logoJordys from '@/components/logo_klanten/JORDYS_LOGO.png';
+import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
+import logoDudok from '@/components/logo_klanten/dudok_logo.png';
 
 export default function RegisterModel() {
   // Automatisch '/' toevoegen bij geboortedatum invoer
@@ -170,22 +175,115 @@ export default function RegisterModel() {
     <div style={{ 
       minHeight: '100vh', 
       background: '#E5DDD5',
-      padding: '60px 20px',
       fontFamily: 'system-ui, -apple-system, sans-serif'
     }}>
-      <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-            <MiesLogo size={110} />
-          </div>
-          <h1 style={{ fontSize: 42, fontWeight: 700, margin: 0, color: '#1F2B4A', marginBottom: 8 }}>
-            Registreer hier als MIES MEDIA Model
-          </h1>
-          <p style={{ fontSize: 16, color: '#6B7280', margin: 0 }}>
-            Vul je gegevens in om je aan te melden als model
-          </p>
-        </div>
+      
+      {/* Banner bovenaan met scrollende logos */}
+      <div style={{ 
+        background: '#fff',
+        padding: '12px 0',
+        overflow: 'hidden',
+        position: 'relative',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+        minHeight: '60px'
+      }}>
+        {/* Scrollende logos - volledige breedte */}
+        <div style={{ 
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          <div className="logo-scroll" style={{
+            display: 'flex',
+            gap: 60,
+            alignItems: 'center',
+            paddingRight: '60px'
+          }}>
+            {/* Eerste set logos */}
+            <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
+            <img src={logoKoekela} alt="Koekela" className="logo-small" />
+            <img src={logoJordys} alt="Jordys" className="logo-normal" />
+            <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
+            <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
+            
+            {/* Duplicaat voor seamless loop */}
+            <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
+            <img src={logoKoekela} alt="Koekela" className="logo-small" />
+            <img src={logoJordys} alt="Jordys" className="logo-normal" />
+            <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
+            <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
 
+            {/* Extra duplicaat voor grotere schermen */}
+            <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
+            <img src={logoKoekela} alt="Koekela" className="logo-small" />
+            <img src={logoJordys} alt="Jordys" className="logo-normal" />
+            <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
+            <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
+          </div>
+        </div>
+      </div>
+
+      {/* Hamburger menu knop links onder de banner */}
+      <div style={{ position: 'relative', zIndex: 20 }}>
+        <button
+          onClick={() => {
+            window.location.href = '/open-shoots';
+          }}
+          title="Meld je aan voor openstaande shoots"
+          style={{
+            position: 'absolute',
+            top: '10px',
+            left: '20px',
+            width: '40px',
+            height: '40px',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '5px',
+            padding: 0
+          }}
+          onMouseEnter={(e) => {
+            const lines = e.currentTarget.querySelectorAll('div');
+            lines.forEach(line => (line as HTMLElement).style.background = '#D1D5DB');
+          }}
+          onMouseLeave={(e) => {
+            const lines = e.currentTarget.querySelectorAll('div');
+            lines.forEach(line => (line as HTMLElement).style.background = '#fff');
+          }}
+        >
+          <div style={{ width: '24px', height: '2px', background: '#fff', borderRadius: '2px', transition: 'all 0.3s ease' }}></div>
+          <div style={{ width: '24px', height: '2px', background: '#fff', borderRadius: '2px', transition: 'all 0.3s ease' }}></div>
+          <div style={{ width: '24px', height: '2px', background: '#fff', borderRadius: '2px', transition: 'all 0.3s ease' }}></div>
+        </button>
+      </div>
+
+      {/* Rest van de pagina */}
+      <div style={{ padding: '60px 20px' }}>
+      {/* Header centraal */}
+      <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+          <MiesLogo size={110} />
+        </div>
+        <h1 style={{ fontSize: 42, fontWeight: 700, margin: 0, color: '#1F2B4A', marginBottom: 8 }}>
+          Registreer hier als MIES MEDIA Model
+        </h1>
+        <p style={{ fontSize: 16, color: '#6B7280', margin: 0 }}>
+          Vul je gegevens in om je aan te melden als model
+        </p>
+      </div>
+
+      <div style={{ maxWidth: 800, margin: '0 auto' }}>
         <form onSubmit={handleSubmit} style={{ background: '#fff', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
             <div>
@@ -369,6 +467,45 @@ export default function RegisterModel() {
           </button>
         </form>
       </div>
+      </div>
+
+      <style>{`
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(calc(-100% / 3));
+          }
+        }
+        
+        .logo-scroll {
+          animation: scroll 30s linear infinite;
+          will-change: transform;
+        }
+
+        .logo-scroll img {
+          width: auto;
+          object-fit: contain;
+          filter: grayscale(100%);
+        }
+
+        .logo-small {
+          height: 25px;
+        }
+
+        .logo-normal {
+          height: 40px;
+        }
+
+        .logo-large {
+          height: 50px;
+        }
+
+        .logo-xlarge {
+          height: 60px;
+        }
+      `}</style>
     </div>
   );
 }

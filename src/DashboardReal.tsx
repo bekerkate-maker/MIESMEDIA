@@ -39,13 +39,16 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [genderFilter, setGenderFilter] = useState<string>("all");
-  const [minAge, setMinAge] = useState<string>("");
-  const [maxAge, setMaxAge] = useState<string>("");
+  const [cityFilter, setCityFilter] = useState<string>("all");
+  const [minAge, setMinAge] = useState<number>(0);
+  const [maxAge, setMaxAge] = useState<number>(100);
   const [editingModel, setEditingModel] = useState<Model | null>(null);
   const [editFormData, setEditFormData] = useState<Model | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [loggedInEmployees, setLoggedInEmployees] = useState<string[]>([]);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [imageZoom, setImageZoom] = useState(1);
 
   const motivationalQuotes = [
     "Vandaag gaan we knallen. Niet lullen maar vullen… die agenda!",
@@ -74,7 +77,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     filterModels();
-  }, [models, searchTerm, genderFilter, minAge, maxAge]);
+  }, [models, searchTerm, genderFilter, cityFilter, minAge, maxAge]);
 
   const fetchModels = async () => {
     try {
@@ -130,27 +133,18 @@ export default function Dashboard() {
       console.log("After gender filter:", filtered.length); // DEBUG
     }
 
-    if (minAge !== "") {
-      const min = parseInt(minAge);
-      if (!isNaN(min)) {
-        filtered = filtered.filter((model) => {
-          const age = calculateAge(model.birthdate);
-          return age !== null && age >= min;
-        });
-        console.log("After min age filter:", filtered.length); // DEBUG
-      }
+    if (cityFilter !== "all") {
+      filtered = filtered.filter((model) => model.city.toLowerCase() === cityFilter.toLowerCase());
+      console.log("After city filter:", filtered.length); // DEBUG
     }
 
-    if (maxAge !== "") {
-      const max = parseInt(maxAge);
-      if (!isNaN(max)) {
-        filtered = filtered.filter((model) => {
-          const age = calculateAge(model.birthdate);
-          return age !== null && age <= max;
-        });
-        console.log("After max age filter:", filtered.length); // DEBUG
-      }
-    }
+    // Leeftijdsfilter
+    filtered = filtered.filter((model) => {
+      const age = calculateAge(model.birthdate);
+      if (age === null) return false;
+      return age >= minAge && age <= maxAge;
+    });
+    console.log("After age filter:", filtered.length); // DEBUG
 
     console.log("Final filtered:", filtered.length); // DEBUG
     setFilteredModels(filtered);
@@ -161,13 +155,8 @@ export default function Dashboard() {
     navigate("/");
   };
 
-  const handleCopyRegistrationLink = () => {
-    const registrationUrl = window.location.origin;
-    navigator.clipboard.writeText(registrationUrl).then(() => {
-      alert('✅ Aanmeldlink gekopieerd! Je kunt deze nu delen met potentiële modellen.');
-    }).catch(() => {
-      alert(`Link: ${registrationUrl}\n\nKopieer deze link handmatig.`);
-    });
+  const handleManageShoots = () => {
+    window.location.href = '/manage-shoots';
   };
 
   const handleContactModel = (model: Model) => {
@@ -329,18 +318,32 @@ export default function Dashboard() {
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <button 
-              onClick={handleCopyRegistrationLink}
+              onClick={handleManageShoots}
               style={{ 
                 background: 'transparent',
-                border: 'none',
-                fontSize: 24,
+                color: '#1F2B4A',
+                border: '2px solid #E5DDD5',
+                fontSize: 14,
+                fontWeight: 600,
                 cursor: 'pointer',
-                padding: 0,
-                lineHeight: 1
+                padding: '8px 16px',
+                borderRadius: 8,
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
               }}
-              title="Deel aanmeldlink"
+              title="Beheer shoots"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#E5DDD5';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
-              🔗
+              📸 Shoots Beheren
             </button>
             <button 
               onClick={handleLogout}
@@ -368,7 +371,7 @@ export default function Dashboard() {
         </div>
 
         <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginBottom: 32, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 0.5fr 0.5fr', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr', gap: 20, alignItems: 'center' }}>
             <input
               placeholder="Zoek op naam of email..."
               value={searchTerm}
@@ -385,45 +388,84 @@ export default function Dashboard() {
               <option value="anders">Anders</option>
             </select>
 
-            <input
-              type="number"
-              placeholder="Min leeftijd"
-              value={minAge}
-              onChange={(e: any) => setMinAge(e.target.value)}
-              min="16"
-              max="99"
-              style={{ padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit' }}
-            />
+            <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}
+              style={{ padding: '12px 16px', background: '#E5DDD5', color: cityFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer' }}
+            >
+              <option value="all">Kies locatie</option>
+              {Array.from(new Set(models.map(m => m.city))).sort().map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
 
-            <input
-              type="number"
-              placeholder="Max leeftijd"
-              value={maxAge}
-              onChange={(e: any) => setMaxAge(e.target.value)}
-              min="16"
-              max="99"
-              style={{ padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit' }}
-            />
+            {/* Leeftijd invoervelden */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <input
+                type="number"
+                placeholder="Min leeftijd"
+                min="0"
+                max="100"
+                value={minAge === 0 ? '' : minAge}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                  setMinAge(value);
+                }}
+                style={{
+                  padding: '12px 16px',
+                  background: '#E5DDD5',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 15,
+                  color: '#1F2B4A',
+                  fontFamily: 'inherit',
+                  outline: 'none'
+                }}
+              />
+              <input
+                type="number"
+                placeholder="Max leeftijd"
+                min="0"
+                max="100"
+                value={maxAge === 100 ? '' : maxAge}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 100 : parseInt(e.target.value);
+                  setMaxAge(value);
+                }}
+                style={{
+                  padding: '12px 16px',
+                  background: '#E5DDD5',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 15,
+                  color: '#1F2B4A',
+                  fontFamily: 'inherit',
+                  outline: 'none'
+                }}
+              />
+            </div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+        <div className="models-grid">
           {filteredModels.map((model) => (
-            <div key={model.id} style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-              {/* Foto bovenaan - hele foto zichtbaar */}
-              <div style={{ 
-                width: '100%', 
-                height: 500,
-                background: '#E5DDD5',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 64,
-                fontWeight: 700,
-                color: '#2B3E72',
-                overflow: 'hidden',
-                position: 'relative'
-              }}>
+            <div key={model.id} style={{ background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.2s' }}>
+              {/* Foto bovenaan */}
+              <div 
+                onClick={() => model.photo_url && setLightboxImage(model.photo_url)}
+                style={{ 
+                  width: '100%', 
+                  height: 380,
+                  background: '#E5DDD5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 48,
+                  fontWeight: 700,
+                  color: '#2B3E72',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  cursor: model.photo_url ? 'pointer' : 'default'
+                }}
+              >
                 {model.photo_url ? (
                   <img 
                     src={model.photo_url} 
@@ -434,26 +476,47 @@ export default function Dashboard() {
                       objectFit: 'cover',
                       position: 'absolute',
                       top: 0,
-                      left: 0
+                      left: 0,
+                      transition: 'filter 0.3s ease'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.filter = 'blur(3px) brightness(0.8)'}
+                    onMouseLeave={(e) => e.currentTarget.style.filter = 'none'}
                   />
                 ) : (
                   `${model.first_name.charAt(0)}${model.last_name.charAt(0)}`
                 )}
+                
+                {/* Naam linksboven in foto */}
+                <div style={{ 
+                  position: 'absolute', 
+                  top: 10, 
+                  left: 10, 
+                  background: 'rgba(0, 0, 0, 0.3)', 
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  zIndex: 2
+                }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: '#fff', letterSpacing: '0.3px' }}>
+                    {model.first_name} {model.last_name}
+                  </h3>
+                </div>
               </div>
 
               {/* Info onderaan */}
-              <div style={{ flex: 1, padding: 24, position: 'relative' }}>
+              <div style={{ flex: 1, padding: 16, position: 'relative' }}>
                 {/* Edit knop rechtsboven */}
-                <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
+                <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>
                   <button
                     onClick={() => handleEditModel(model)}
                     style={{
-                      background: 'transparent',
-                      border: 'none',
-                      padding: 0,
+                      background: 'rgba(255,255,255,0.9)',
+                      border: '1px solid #E5DDD5',
+                      borderRadius: 6,
+                      padding: '6px 10px',
                       cursor: 'pointer',
-                      fontSize: 24,
+                      fontSize: 18,
                       lineHeight: 1,
                       fontFamily: 'inherit'
                     }}
@@ -463,68 +526,59 @@ export default function Dashboard() {
                   </button>
                 </div>
 
-                <div>
-                  <h3 style={{ fontSize: 26, fontWeight: 700, margin: 0, color: '#1F2B4A', marginBottom: 6 }}>
-                    {model.first_name} {model.last_name}
-                  </h3>
-                  <p style={{ color: '#6B7280', margin: 0, fontSize: 16, marginBottom: 16 }}>
+                <div style={{ marginBottom: 10 }}>
+                  <p style={{ color: '#6B7280', margin: 0, fontSize: 13, marginBottom: 10 }}>
                     {model.gender} • {model.birthdate ? `${calculateAge(model.birthdate)} jaar` : 'Leeftijd onbekend'}
                   </p>
                 </div>
 
-                <div style={{ marginBottom: 12 }}>
-                  <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: '#1F2B4A' }}>E-mail</p>
-                  <p style={{ margin: 0, color: '#6B7280', fontSize: 14 }}>{model.email}</p>
+                <div style={{ marginBottom: 7 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: '#6B7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{model.email}</p>
                 </div>
 
-                <div style={{ marginBottom: 12 }}>
-                  <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: '#1F2B4A' }}>Telefoon</p>
-                  <p style={{ margin: 0, color: '#6B7280', fontSize: 14 }}>{model.phone}</p>
+                <div style={{ marginBottom: 7 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: '#6B7280' }}>{model.phone}</p>
                 </div>
 
-                <div style={{ marginBottom: 12 }}>
-                  <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: '#1F2B4A' }}>Woonplaats</p>
-                  <p style={{ margin: 0, color: '#6B7280', fontSize: 14 }}>{model.city}</p>
+                <div style={{ marginBottom: 7 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: '#6B7280' }}>{model.city}</p>
                 </div>
 
-                <div style={{ marginBottom: 12 }}>
-                  <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: '#1F2B4A' }}>Geboortedatum</p>
-                  <p style={{ margin: 0, color: '#6B7280', fontSize: 14 }}>{model.birthdate ? new Date(model.birthdate).toLocaleDateString() : 'Onbekend'}</p>
-                </div>
+                {model.instagram && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
+                    <Instagram style={{ height: 13, width: 13, color: '#6B7280' }} />
+                    <a 
+                      href={`https://instagram.com/${(model.instagram || '').replace("@", "")}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      style={{ color: '#2B3E72', textDecoration: 'none', fontSize: 12, fontWeight: 500 }}
+                    >
+                      {model.instagram}
+                    </a>
+                  </div>
+                )}
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                  <Instagram style={{ height: 16, width: 16, color: '#6B7280' }} />
-                  <a 
-                    href={`https://instagram.com/${model.instagram.replace("@", "")}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    style={{ color: '#2B3E72', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}
-                  >
-                    {model.instagram}
-                  </a>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                   <button 
                     onClick={() => handleContactModel(model)} 
                     style={{ 
                       background: '#2B3E72', 
                       color: '#fff',
                       border: 'none',
-                      padding: '12px 16px',
-                      borderRadius: 8,
+                      padding: '10px 12px',
+                      borderRadius: 6,
                       fontWeight: 600,
-                      fontSize: 13,
+                      fontSize: 12,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: 6,
+                      gap: 5,
                       fontFamily: 'inherit',
-                      whiteSpace: 'nowrap'
+                      flex: 1
                     }}
                   >
-                    <Mail style={{ height: 16, width: 16 }} />
+                    <Mail style={{ height: 13, width: 13 }} />
                     <span>Contact</span>
                   </button>
 
@@ -534,21 +588,21 @@ export default function Dashboard() {
                         background: '#E5DDD5', 
                         color: '#1F2B4A',
                         border: 'none',
-                        padding: '12px 16px',
-                        borderRadius: 8,
+                        padding: '10px 12px',
+                        borderRadius: 6,
                         fontWeight: 600,
-                        fontSize: 13,
+                        fontSize: 12,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: 6,
+                        gap: 5,
                         fontFamily: 'inherit',
-                        whiteSpace: 'nowrap'
+                        flex: 1
                       }}
                     >
                       <span>📄</span>
-                      <span>Upload QuitClaim</span>
+                      <span>QuitClaim</span>
                       <input
                         type="file"
                         accept=".pdf"
@@ -599,21 +653,21 @@ export default function Dashboard() {
                         background: '#22c55e',
                         color: '#fff',
                         border: 'none',
-                        padding: '12px 16px',
-                        borderRadius: 8,
+                        padding: '10px 12px',
+                        borderRadius: 6,
                         fontWeight: 600,
-                        fontSize: 13,
+                        fontSize: 12,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: 6,
+                        gap: 5,
                         fontFamily: 'inherit',
-                        whiteSpace: 'nowrap'
+                        flex: 1
                       }}
                     >
-                      <span>�️</span>
-                      <span>Preview QuitClaim</span>
+                      <span>✅</span>
+                      <span>Download</span>
                     </button>
                   )}
                 </div>
@@ -1001,6 +1055,154 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Lightbox voor foto's */}
+      {lightboxImage && (
+        <div 
+          onClick={() => {
+            setLightboxImage(null);
+            setImageZoom(1);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            padding: 40,
+            cursor: 'zoom-out'
+          }}
+        >
+          <div style={{
+            position: 'absolute',
+            top: 20,
+            right: 20,
+            color: '#fff',
+            fontSize: 40,
+            cursor: 'pointer',
+            zIndex: 2001,
+            background: 'rgba(0,0,0,0.5)',
+            borderRadius: '50%',
+            width: 50,
+            height: 50,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            lineHeight: 1
+          }}>
+            ×
+          </div>
+          
+          <div style={{
+            position: 'absolute',
+            bottom: 20,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            gap: 12,
+            background: 'rgba(0,0,0,0.6)',
+            padding: '12px 20px',
+            borderRadius: 30,
+            zIndex: 2001
+          }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setImageZoom(Math.max(0.5, imageZoom - 0.25));
+              }}
+              style={{
+                background: '#fff',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontSize: 18,
+                fontWeight: 600
+              }}
+            >
+              −
+            </button>
+            <span style={{ color: '#fff', fontSize: 16, alignSelf: 'center', minWidth: 60, textAlign: 'center' }}>
+              {Math.round(imageZoom * 100)}%
+            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setImageZoom(Math.min(3, imageZoom + 0.25));
+              }}
+              style={{
+                background: '#fff',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontSize: 18,
+                fontWeight: 600
+              }}
+            >
+              +
+            </button>
+          </div>
+
+          <img 
+            src={lightboxImage}
+            alt="Model foto"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '90%',
+              maxHeight: '90%',
+              objectFit: 'contain',
+              transform: `scale(${imageZoom})`,
+              transition: 'transform 0.2s ease',
+              cursor: 'grab'
+            }}
+            onWheel={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const delta = e.deltaY > 0 ? -0.1 : 0.1;
+              setImageZoom(Math.max(0.5, Math.min(3, imageZoom + delta)));
+            }}
+          />
+        </div>
+      )}
+      
+      <style>{`
+        /* Responsive grid voor modellen */
+        .models-grid {
+          display: grid;
+          gap: 20px;
+          grid-template-columns: repeat(4, 1fr);
+        }
+
+        /* 3 kolommen op medium schermen */
+        @media (max-width: 1400px) {
+          .models-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        /* 2 kolommen op kleinere schermen */
+        @media (max-width: 1024px) {
+          .models-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        /* 1 kolom op mobiel */
+        @media (max-width: 640px) {
+          .models-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+      `}</style>
     </div>
   );
 }

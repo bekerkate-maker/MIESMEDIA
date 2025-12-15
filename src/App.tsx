@@ -5,6 +5,8 @@ import Dashboard from './DashboardReal'
 import RegisterModel from './pages/RegisterModel'
 import RegisterEmployee from './pages/RegisterEmployee'
 import Login from './pages/Login'
+import OpenShoots from './pages/OpenShoots'
+import ManageShoots from './pages/ManageShoots'
 
 // Beveiligde route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -48,6 +50,7 @@ export default function App() {
         <Route path="/" element={<RegisterModel />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register-employee" element={<RegisterEmployee />} />
+        <Route path="/open-shoots" element={<OpenShoots />} />
         
         {/* Beveiligde routes */}
         <Route 
@@ -55,6 +58,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/manage-shoots" 
+          element={
+            <ProtectedRoute>
+              <ManageShoots />
             </ProtectedRoute>
           } 
         />
