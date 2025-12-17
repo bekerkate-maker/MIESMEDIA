@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
 import logoCasu from '@/components/logo_klanten/logo_casu.png';
@@ -8,6 +9,7 @@ import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
 import logoDudok from '@/components/logo_klanten/dudok_logo.png';
 
 export default function ManageShoots() {
+  const navigate = useNavigate();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingShoot, setEditingShoot] = useState<number | null>(null);
   const [newShoot, setNewShoot] = useState({
@@ -17,8 +19,11 @@ export default function ManageShoots() {
     location: '',
     description: '',
     spots: '',
-    clientWebsite: ''
+    clientWebsite: '',
+    compensationType: 'bedrag',
+    compensationAmount: ''
   });
+  const [shoots, setShoots] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [expandedShoot, setExpandedShoot] = useState<number | null>(null);
 
@@ -36,7 +41,14 @@ export default function ManageShoots() {
     try {
       const { data, error } = await supabase
         .from('shoot_registrations')
-        .select('*')
+        .select(`
+          *,
+          models (
+            photo_url,
+            first_name,
+            last_name
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -54,78 +66,97 @@ export default function ManageShoots() {
     return registrations.filter(reg => reg.shoot_id === shootId);
   };
 
-  // Placeholder data - later vervangen door database
-  const [shoots, setShoots] = useState([
-    {
-      id: 1,
-      client: 'La Cazuela',
-      title: 'Zomer Campagne Fotoshoot',
-      date: '15 december 2025',
-      location: 'Rotterdam Centrum',
-      description: 'We zoeken diverse modellen voor onze zomercampagne.',
-      spots: 3,
-      status: 'Actief',
-      clientWebsite: 'https://lacazuela.nl'
-    },
-    {
-      id: 2,
-      client: 'Koekela',
-      title: 'Product Fotografie',
-      date: '20 december 2025',
-      location: 'De Nieuwe Binnenweg',
-      description: 'Fotoshoot voor nieuwe koekjes collectie.',
-      spots: 2,
-      status: 'Actief',
-      clientWebsite: 'https://koekela.nl'
-    }
-  ]);
+  // Haal shoots op uit database
+  useEffect(() => {
+    fetchShoots();
+  }, []);
 
-  const handleAddShoot = (e: React.FormEvent) => {
+  const fetchShoots = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('shoots')
+        .select('*')
+        .order('shoot_date', { ascending: true });
+
+      if (error) throw error;
+      setShoots(data || []);
+    } catch (error) {
+      console.error('Error fetching shoots:', error);
+      alert('Fout bij ophalen van shoots: ' + (error as Error).message);
+    }
+  };
+
+  const handleAddShoot = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingShoot !== null) {
-      // Bewerk bestaande shoot
-      setShoots(shoots.map(shoot => 
-        shoot.id === editingShoot 
-          ? { ...shoot, ...newShoot, spots: parseInt(newShoot.spots) }
-          : shoot
-      ));
-      setEditingShoot(null);
-      alert('✅ Shoot bijgewerkt!');
-    } else {
-      // Voeg nieuwe shoot toe
-      const shoot = {
-        id: shoots.length + 1,
-        ...newShoot,
-        spots: parseInt(newShoot.spots),
-        status: 'Actief'
+    try {
+      const shootData = {
+        client_name: newShoot.client,
+        description: newShoot.title + '\n\n' + newShoot.description,
+        shoot_date: newShoot.date,
+        location: newShoot.location,
+        client_website: newShoot.clientWebsite,
+        compensation_type: newShoot.compensationType,
+        compensation_amount: newShoot.compensationType === 'bedrag' || newShoot.compensationType === 'cadeaubon' 
+          ? parseFloat(newShoot.compensationAmount) || null
+          : null,
+        status: 'open'
       };
-      setShoots([...shoots, shoot]);
-      alert('✅ Nieuwe shoot toegevoegd!');
+
+      if (editingShoot !== null) {
+        // Update bestaande shoot
+        const { error } = await supabase
+          .from('shoots')
+          .update(shootData)
+          .eq('id', editingShoot);
+
+        if (error) throw error;
+        alert('✅ Shoot bijgewerkt!');
+        setEditingShoot(null);
+      } else {
+        // Nieuwe shoot toevoegen
+        const { error } = await supabase
+          .from('shoots')
+          .insert([shootData]);
+
+        if (error) throw error;
+        alert('✅ Nieuwe shoot toegevoegd!');
+      }
+
+      // Refresh shoots lijst
+      await fetchShoots();
+      
+      // Reset form
+      setNewShoot({
+        client: '',
+        title: '',
+        date: '',
+        location: '',
+        description: '',
+        spots: '',
+        clientWebsite: '',
+        compensationType: 'bedrag',
+        compensationAmount: ''
+      });
+      setShowAddForm(false);
+    } catch (error) {
+      console.error('Error saving shoot:', error);
+      alert('Fout bij opslaan: ' + (error as Error).message);
     }
-    
-    setNewShoot({
-      client: '',
-      title: '',
-      date: '',
-      location: '',
-      description: '',
-      spots: '',
-      clientWebsite: ''
-    });
-    setShowAddForm(false);
   };
 
   const handleEditShoot = (shoot: any) => {
     setEditingShoot(shoot.id);
     setNewShoot({
-      client: shoot.client,
-      title: shoot.title,
-      date: shoot.date,
-      location: shoot.location,
-      description: shoot.description,
-      spots: shoot.spots.toString(),
-      clientWebsite: shoot.clientWebsite || ''
+      client: shoot.client_name || shoot.client || '',
+      title: shoot.description?.split('\n\n')[0] || shoot.title || '',
+      date: shoot.shoot_date || shoot.date || '',
+      location: shoot.location || '',
+      description: shoot.description?.split('\n\n').slice(1).join('\n\n') || '',
+      spots: shoot.spots?.toString() || '',
+      clientWebsite: shoot.client_website || shoot.clientWebsite || '',
+      compensationType: shoot.compensation_type || 'bedrag',
+      compensationAmount: shoot.compensation_amount?.toString() || ''
     });
     setShowAddForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -141,14 +172,28 @@ export default function ManageShoots() {
       location: '',
       description: '',
       spots: '',
-      clientWebsite: ''
+      clientWebsite: '',
+      compensationType: 'bedrag',
+      compensationAmount: ''
     });
   };
 
-  const handleDeleteShoot = (id: number) => {
+  const handleDeleteShoot = async (id: number) => {
     if (window.confirm('Weet je zeker dat je deze shoot wilt verwijderen?')) {
-      setShoots(shoots.filter(shoot => shoot.id !== id));
-      alert('✅ Shoot verwijderd!');
+      try {
+        const { error } = await supabase
+          .from('shoots')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+        
+        alert('✅ Shoot verwijderd!');
+        await fetchShoots(); // Refresh lijst
+      } catch (error) {
+        console.error('Error deleting shoot:', error);
+        alert('Fout bij verwijderen: ' + (error as Error).message);
+      }
     }
   };
 
@@ -389,6 +434,41 @@ export default function ManageShoots() {
                 />
               </div>
 
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                  Soort Vergoeding *
+                </label>
+                <select
+                  required
+                  value={newShoot.compensationType}
+                  onChange={(e) => setNewShoot({...newShoot, compensationType: e.target.value, compensationAmount: e.target.value === 'eten' || e.target.value === 'geen' ? '' : newShoot.compensationAmount})}
+                  style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box', cursor: 'pointer' }}
+                >
+                  <option value="bedrag">💰 Bedrag</option>
+                  <option value="eten">🍽️ Eten wordt betaald</option>
+                  <option value="cadeaubon">🎁 Cadeaubon</option>
+                  <option value="geen">❌ Geen vergoeding</option>
+                </select>
+              </div>
+
+              {(newShoot.compensationType === 'bedrag' || newShoot.compensationType === 'cadeaubon') && (
+                <div style={{ marginBottom: 24 }}>
+                  <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    Bedrag (€) *
+                  </label>
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Bijv. 150.00"
+                    value={newShoot.compensationAmount}
+                    onChange={(e) => setNewShoot({...newShoot, compensationAmount: e.target.value})}
+                    style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                  />
+                </div>
+              )}
+
               <button
                 type="submit"
                 style={{
@@ -456,7 +536,7 @@ export default function ManageShoots() {
                     letterSpacing: '0.5px',
                     marginBottom: 8
                   }}>
-                    {shoot.client}
+                    {shoot.client_name || shoot.client}
                   </div>
                   <h3 style={{ 
                     fontSize: 20, 
@@ -464,7 +544,7 @@ export default function ManageShoots() {
                     color: '#1F2B4A',
                     marginBottom: 12
                   }}>
-                    {shoot.title}
+                    {shoot.description?.split('\n\n')[0] || shoot.title}
                   </h3>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12 }}>
                     <div style={{ 
@@ -474,7 +554,7 @@ export default function ManageShoots() {
                       alignItems: 'center',
                       gap: 8
                     }}>
-                      <span>📅</span> {shoot.date}
+                      <span>📅</span> {shoot.shoot_date || shoot.date}
                     </div>
                     <div style={{ 
                       fontSize: 14, 
@@ -504,6 +584,21 @@ export default function ManageShoots() {
                     }}>
                       <span>✓</span> {shoot.status}
                     </div>
+                    {shoot.compensation_type && (
+                      <div style={{ 
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: '#2B3E72',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8
+                      }}>
+                        {shoot.compensation_type === 'bedrag' && `💰 €${shoot.compensation_amount}`}
+                        {shoot.compensation_type === 'eten' && '🍽️ Eten betaald'}
+                        {shoot.compensation_type === 'cadeaubon' && `🎁 Cadeaubon €${shoot.compensation_amount}`}
+                        {shoot.compensation_type === 'geen' && '❌ Geen vergoeding'}
+                      </div>
+                    )}
                   </div>
                   <p style={{ 
                     fontSize: 14, 
@@ -511,11 +606,11 @@ export default function ManageShoots() {
                     lineHeight: 1.6,
                     marginBottom: 8
                   }}>
-                    {shoot.description}
+                    {shoot.description?.split('\n\n').slice(1).join('\n\n') || shoot.description}
                   </p>
-                  {shoot.clientWebsite && (
+                  {(shoot.client_website || shoot.clientWebsite) && (
                     <a
-                      href={shoot.clientWebsite}
+                      href={shoot.client_website || shoot.clientWebsite}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -577,9 +672,63 @@ export default function ManageShoots() {
                                   marginBottom: 8,
                                   flexWrap: 'wrap'
                                 }}>
-                                  <span style={{ fontWeight: 600, color: '#1F2B4A' }}>
-                                    {reg.name}
-                                  </span>
+                                  {reg.model_id ? (
+                                    <button
+                                      onClick={() => navigate(`/dashboard?model=${reg.model_id}`)}
+                                      style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        padding: 0,
+                                        fontWeight: 600,
+                                        color: '#2B3E72',
+                                        cursor: 'pointer',
+                                        textDecoration: 'underline',
+                                        fontSize: 13,
+                                        fontFamily: 'inherit',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 8
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.color = '#1F2B4A';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.color = '#2B3E72';
+                                      }}
+                                    >
+                                      <div style={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: '50%',
+                                        overflow: 'hidden',
+                                        background: '#E5DDD5',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                        border: '2px solid #2B3E72'
+                                      }}>
+                                        {reg.models?.photo_url ? (
+                                          <img 
+                                            src={reg.models.photo_url} 
+                                            alt={reg.name}
+                                            style={{
+                                              width: '100%',
+                                              height: '100%',
+                                              objectFit: 'cover'
+                                            }}
+                                          />
+                                        ) : (
+                                          <span style={{ fontSize: 16, color: '#2B3E72' }}>👤</span>
+                                        )}
+                                      </div>
+                                      <span>{reg.name}</span>
+                                    </button>
+                                  ) : (
+                                    <span style={{ fontWeight: 600, color: '#1F2B4A' }}>
+                                      {reg.name}
+                                    </span>
+                                  )}
                                   {reg.model_id && (
                                     <span style={{
                                       padding: '2px 8px',
@@ -600,8 +749,26 @@ export default function ManageShoots() {
                                   📱 {reg.phone}
                                 </div>
                                 {reg.instagram && (
-                                  <div style={{ color: '#6B7280', marginBottom: 4 }}>
-                                    📷 @{reg.instagram}
+                                  <div style={{ marginBottom: 4 }}>
+                                    <span style={{ color: '#6B7280' }}>📷 </span>
+                                    <a
+                                      href={`https://instagram.com/${reg.instagram.replace('@', '')}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{
+                                        color: '#2B3E72',
+                                        textDecoration: 'none',
+                                        fontWeight: 500
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.textDecoration = 'underline';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.textDecoration = 'none';
+                                      }}
+                                    >
+                                      @{reg.instagram.replace('@', '')}
+                                    </a>
                                   </div>
                                 )}
                                 {reg.message && (

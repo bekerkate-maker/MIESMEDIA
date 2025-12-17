@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
 import logoCasu from '@/components/logo_klanten/logo_casu.png';
@@ -14,39 +14,27 @@ export default function OpenShoots() {
   const [loggedInModel, setLoggedInModel] = useState<any>(null);
   const [loginError, setLoginError] = useState('');
   const [message, setMessage] = useState('');
+  const [openShoots, setOpenShoots] = useState<any[]>([]);
 
-  const openShoots = [
-    {
-      id: 1,
-      client: 'La Cazuela',
-      title: 'Zomer Campagne Fotoshoot',
-      date: '15 december 2025',
-      location: 'Rotterdam Centrum',
-      description: 'We zoeken diverse modellen voor onze zomercampagne.',
-      spots: 3,
-      clientWebsite: 'https://lacazuela.nl'
-    },
-    {
-      id: 2,
-      client: 'Koekela',
-      title: 'Product Fotografie',
-      date: '20 december 2025',
-      location: 'De Nieuwe Binnenweg',
-      description: 'Fotoshoot voor nieuwe koekjes collectie.',
-      spots: 2,
-      clientWebsite: 'https://koekela.nl'
-    },
-    {
-      id: 3,
-      client: 'Dudok',
-      title: 'Lifestyle Shoot',
-      date: '18 december 2025',
-      location: 'Rotterdam',
-      description: 'Gezellige sfeer fotoshoot voor social media content.',
-      spots: 4,
-      clientWebsite: 'https://dudok.nl'
+  // Haal shoots op uit database
+  useEffect(() => {
+    fetchShoots();
+  }, []);
+
+  const fetchShoots = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('shoots')
+        .select('*')
+        .eq('status', 'open')
+        .order('shoot_date', { ascending: true });
+
+      if (error) throw error;
+      setOpenShoots(data || []);
+    } catch (error) {
+      console.error('Error fetching shoots:', error);
     }
-  ];
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,12 +66,14 @@ export default function OpenShoots() {
     e.preventDefault();
     
     try {
+      const fullName = `${loggedInModel.first_name} ${loggedInModel.last_name}`;
+      
       const { error } = await supabase
         .from('shoot_registrations')
         .insert([{
           shoot_id: selectedShoot,
           model_id: loggedInModel.id,
-          name: loggedInModel.name,
+          name: fullName,
           email: loggedInModel.email,
           phone: loggedInModel.phone,
           instagram: loggedInModel.instagram || '',
@@ -96,7 +86,7 @@ export default function OpenShoots() {
         return;
       }
 
-      alert(`✅ Aanmelding ontvangen!\n\n${loggedInModel.name}, je bent aangemeld voor deze shoot!\n\nWe nemen zo snel mogelijk contact met je op!`);
+      alert(`✅ Aanmelding ontvangen!\n\n${fullName}, je bent aangemeld voor deze shoot!\n\nWe nemen zo snel mogelijk contact met je op!`);
       handleReset();
     } catch (err) {
       console.error('Error:', err);
@@ -384,7 +374,7 @@ export default function OpenShoots() {
                   gap: 8
                 }}>
                   <span>✓</span>
-                  <span>Ingelogd als <strong>{loggedInModel.name}</strong></span>
+                  <span>Ingelogd als <strong>{loggedInModel.first_name} {loggedInModel.last_name}</strong></span>
                 </div>
                 
                 <div style={{ marginBottom: 20, padding: 16, background: '#F9FAFB', borderRadius: 8 }}>
@@ -470,7 +460,9 @@ export default function OpenShoots() {
               borderRadius: 12,
               padding: 24,
               boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              flexDirection: 'column'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-4px)';
@@ -481,6 +473,7 @@ export default function OpenShoots() {
               e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
             }}
             >
+              <div style={{ flex: '1' }}>
               <div style={{ 
                 fontSize: 12, 
                 fontWeight: 600, 
@@ -489,7 +482,7 @@ export default function OpenShoots() {
                 letterSpacing: '0.5px',
                 marginBottom: 8
               }}>
-                {shoot.client}
+                {shoot.client_name || shoot.client}
               </div>
               <h3 style={{ 
                 fontSize: 20, 
@@ -497,7 +490,7 @@ export default function OpenShoots() {
                 color: '#1F2B4A',
                 marginBottom: 12
               }}>
-                {shoot.title}
+                {shoot.description?.split('\n\n')[0] || shoot.title}
               </h3>
               <div style={{ marginBottom: 16 }}>
                 <div style={{ 
@@ -508,7 +501,7 @@ export default function OpenShoots() {
                   alignItems: 'center',
                   gap: 8
                 }}>
-                  <span>📅</span> {shoot.date}
+                  <span>📅</span> {shoot.shoot_date || shoot.date}
                 </div>
                 <div style={{ 
                   fontSize: 14, 
@@ -523,12 +516,28 @@ export default function OpenShoots() {
                 <div style={{ 
                   fontSize: 14, 
                   color: '#6B7280',
+                  marginBottom: 8,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8
                 }}>
-                  <span>👥</span> {shoot.spots} plekken beschikbaar
+                  <span>👥</span> {shoot.spots || 'Onbeperkt'} plekken beschikbaar
                 </div>
+                {shoot.compensation_type && (
+                  <div style={{ 
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: '#2B3E72',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8
+                  }}>
+                    {shoot.compensation_type === 'bedrag' && `💰 Vergoeding: €${shoot.compensation_amount}`}
+                    {shoot.compensation_type === 'eten' && '🍽️ Eten wordt betaald'}
+                    {shoot.compensation_type === 'cadeaubon' && `🎁 Cadeaubon: €${shoot.compensation_amount}`}
+                    {shoot.compensation_type === 'geen' && '❌ Geen vergoeding'}
+                  </div>
+                )}
               </div>
               <p style={{ 
                 fontSize: 14, 
@@ -536,11 +545,11 @@ export default function OpenShoots() {
                 lineHeight: 1.6,
                 marginBottom: 16
               }}>
-                {shoot.description}
+                {shoot.description?.split('\n\n').slice(1).join('\n\n') || shoot.description}
               </p>
-              {shoot.clientWebsite && (
+              {(shoot.client_website || shoot.clientWebsite) && (
                 <a
-                  href={shoot.clientWebsite}
+                  href={shoot.client_website || shoot.clientWebsite}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -552,9 +561,10 @@ export default function OpenShoots() {
                     marginBottom: 16
                   }}
                 >
-                  🌐 Bezoek website van {shoot.client}
+                  🌐 Bezoek website van {shoot.client_name || shoot.client}
                 </a>
               )}
+              </div>
               <button
                 onClick={() => {
                   setSelectedShoot(shoot.id);
@@ -572,7 +582,8 @@ export default function OpenShoots() {
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
                   fontFamily: 'inherit',
-                  marginTop: 8
+                  marginTop: 'auto',
+                  flexShrink: 0
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = '#1F2B4A';

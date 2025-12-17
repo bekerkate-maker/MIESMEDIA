@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, Instagram } from "lucide-react";
 import MiesLogo from "@/components/MiesLogo";
@@ -34,6 +34,7 @@ export default function Dashboard() {
     return age;
   }
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [models, setModels] = useState<Model[]>([]);
   const [filteredModels, setFilteredModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +50,20 @@ export default function Dashboard() {
   const [loggedInEmployees, setLoggedInEmployees] = useState<string[]>([]);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [imageZoom, setImageZoom] = useState(1);
+  const [highlightedModelId, setHighlightedModelId] = useState<string | null>(null);
+  const modelRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  
+  // Notitie systeem state
+  const [viewingNotesFor, setViewingNotesFor] = useState<Model | null>(null);
+  const [modelNotes, setModelNotes] = useState<any[]>([]);
+  const [showAddNoteForm, setShowAddNoteForm] = useState(false);
+  const [newNote, setNewNote] = useState({
+    note_text: '',
+    shoot_name: '',
+    compensation_type: '',
+    compensation_amount: ''
+  });
+  const [currentEmployeeName, setCurrentEmployeeName] = useState<string>('Medewerker');
 
   const motivationalQuotes = [
     "Vandaag gaan we knallen. Niet lullen maar vullen… die agenda!",
@@ -78,6 +93,30 @@ export default function Dashboard() {
   useEffect(() => {
     filterModels();
   }, [models, searchTerm, genderFilter, cityFilter, minAge, maxAge]);
+
+  // Check voor model parameter in URL en scroll naar model
+  useEffect(() => {
+    const modelId = searchParams.get('model');
+    if (modelId && models.length > 0) {
+      setHighlightedModelId(modelId);
+      
+      // Wacht tot de DOM is gerenderd en scroll naar model
+      setTimeout(() => {
+        const modelElement = modelRefs.current[modelId];
+        if (modelElement) {
+          modelElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          
+          // Verwijder highlight na 5 seconden
+          setTimeout(() => {
+            setHighlightedModelId(null);
+          }, 5000);
+        }
+      }, 300);
+    }
+  }, [searchParams, models]);
 
   const fetchModels = async () => {
     try {
@@ -109,6 +148,11 @@ export default function Dashboard() {
       // Zet de namen van de employees in de state
       const employeeNames = (data || []).map(emp => emp.name || emp.email);
       setLoggedInEmployees(employeeNames);
+      
+      // Zet de eerste medewerker als current employee naam voor notities
+      if (employeeNames.length > 0) {
+        setCurrentEmployeeName(employeeNames[0]);
+      }
     } catch (error) {
       console.error("Error fetching employees:", error);
     }
@@ -157,6 +201,103 @@ export default function Dashboard() {
 
   const handleManageShoots = () => {
     window.location.href = '/manage-shoots';
+  };
+
+  // Notitie functies
+  const fetchNotesForModel = async (modelId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('model_notes')
+        .select('*')
+        .eq('model_id', modelId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setModelNotes(data || []);
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    }
+  };
+
+  const handleViewNotes = async (model: Model) => {
+    setViewingNotesFor(model);
+    await fetchNotesForModel(model.id);
+  };
+
+  const handleAddNote = async () => {
+    if (!viewingNotesFor || !newNote.note_text.trim()) {
+      alert('Vul minimaal een notitie in');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('model_notes')
+        .insert([{
+          model_id: viewingNotesFor.id,
+          employee_name: currentEmployeeName,
+          note_text: newNote.note_text,
+          shoot_name: newNote.shoot_name || null,
+          compensation_type: newNote.compensation_type || null,
+          compensation_amount: newNote.compensation_amount ? parseFloat(newNote.compensation_amount) : null
+        }]);
+
+      if (error) throw error;
+
+      // Refresh notes
+      await fetchNotesForModel(viewingNotesFor.id);
+      
+      // Reset form en sluit het
+      setShowAddNoteForm(false);
+      setNewNote({
+        note_text: '',
+        shoot_name: '',
+        compensation_type: '',
+        compensation_amount: ''
+      });
+
+      alert('✅ Notitie toegevoegd!');
+    } catch (error) {
+      console.error('Error adding note:', error);
+      alert('❌ Fout bij toevoegen notitie');
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!window.confirm('Weet je zeker dat je deze notitie wilt verwijderen?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('model_notes')
+        .delete()
+        .eq('id', noteId);
+
+      if (error) throw error;
+
+      // Refresh notes
+      if (viewingNotesFor) {
+        await fetchNotesForModel(viewingNotesFor.id);
+      }
+
+      alert('✅ Notitie verwijderd!');
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      alert('❌ Fout bij verwijderen notitie');
+    }
+  };
+
+  const handleCloseNotes = () => {
+    setViewingNotesFor(null);
+    setModelNotes([]);
+    setShowAddNoteForm(false);
+    setNewNote({
+      note_text: '',
+      shoot_name: '',
+      compensation_type: '',
+      compensation_amount: ''
+    });
   };
 
   const handleContactModel = (model: Model) => {
@@ -447,7 +588,23 @@ export default function Dashboard() {
 
         <div className="models-grid">
           {filteredModels.map((model) => (
-            <div key={model.id} style={{ background: '#fff', borderRadius: 10, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.2s' }}>
+            <div 
+              key={model.id} 
+              ref={(el) => { modelRefs.current[model.id] = el; }}
+              style={{ 
+                background: '#fff', 
+                borderRadius: 10, 
+                overflow: 'hidden', 
+                boxShadow: highlightedModelId === model.id 
+                  ? '0 0 0 4px #2B3E72, 0 4px 12px rgba(43, 62, 114, 0.3)' 
+                  : '0 1px 4px rgba(0,0,0,0.1)', 
+                position: 'relative', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                transition: 'all 0.3s ease',
+                transform: highlightedModelId === model.id ? 'scale(1.02)' : 'scale(1)'
+              }}
+            >
               {/* Foto bovenaan */}
               <div 
                 onClick={() => model.photo_url && setLightboxImage(model.photo_url)}
@@ -506,8 +663,24 @@ export default function Dashboard() {
 
               {/* Info onderaan */}
               <div style={{ flex: 1, padding: 16, position: 'relative' }}>
-                {/* Edit knop rechtsboven */}
-                <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>
+                {/* Knoppen rechtsboven */}
+                <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, display: 'flex', gap: 6 }}>
+                  <button
+                    onClick={() => handleViewNotes(model)}
+                    style={{
+                      background: 'rgba(255,255,255,0.9)',
+                      border: '1px solid #E5DDD5',
+                      borderRadius: 6,
+                      padding: '6px 10px',
+                      cursor: 'pointer',
+                      fontSize: 18,
+                      lineHeight: 1,
+                      fontFamily: 'inherit'
+                    }}
+                    title="Notities"
+                  >
+                    📝
+                  </button>
                   <button
                     onClick={() => handleEditModel(model)}
                     style={{
@@ -1203,6 +1376,386 @@ export default function Dashboard() {
         }
 
       `}</style>
+
+      {/* Notities Modal */}
+      {viewingNotesFor && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 20
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: 12,
+            maxWidth: 800,
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+          }}>
+            {/* Header */}
+            <div style={{
+              padding: 24,
+              borderBottom: '2px solid #E5DDD5',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'sticky',
+              top: 0,
+              background: '#fff',
+              zIndex: 10
+            }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 24, color: '#1F2B4A' }}>
+                  📝 Notities voor {viewingNotesFor.first_name} {viewingNotesFor.last_name}
+                </h2>
+              </div>
+              <button
+                onClick={handleCloseNotes}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 24,
+                  cursor: 'pointer',
+                  color: '#6B7280',
+                  padding: 8
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div style={{ padding: 24 }}>
+              {/* Nieuwe notitie knop/formulier */}
+              {!showAddNoteForm ? (
+                <button
+                  onClick={() => setShowAddNoteForm(true)}
+                  style={{
+                    width: '100%',
+                    padding: 16,
+                    background: '#2B3E72',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 16,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    marginBottom: 24,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#1F2B4A'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#2B3E72'}
+                >
+                  <span style={{ fontSize: 20 }}>➕</span>
+                  <span>Nieuwe notitie toevoegen</span>
+                </button>
+              ) : (
+                <div style={{
+                  background: '#F9FAFB',
+                  borderRadius: 8,
+                  padding: 20,
+                  marginBottom: 24,
+                  border: '2px solid #2B3E72'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h3 style={{ margin: 0, fontSize: 18, color: '#1F2B4A' }}>
+                      ➕ Nieuwe notitie toevoegen
+                    </h3>
+                    <button
+                      onClick={() => setShowAddNoteForm(false)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: 20,
+                        cursor: 'pointer',
+                        color: '#6B7280',
+                        padding: 4
+                      }}
+                      title="Annuleren"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div style={{ marginBottom: 16 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                      Notitie *
+                    </label>
+                    <textarea
+                      value={newNote.note_text}
+                      onChange={(e) => setNewNote({ ...newNote, note_text: e.target.value })}
+                      placeholder="Bijv. Shoot voor La Cazuela gedaan op 15 december..."
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: 12,
+                        background: '#fff',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: 6,
+                        fontSize: 14,
+                        fontFamily: 'inherit',
+                        resize: 'vertical',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                        Shoot naam (optioneel)
+                      </label>
+                      <input
+                        type="text"
+                        value={newNote.shoot_name}
+                        onChange={(e) => setNewNote({ ...newNote, shoot_name: e.target.value })}
+                        placeholder="La Cazuela Zomercampagne"
+                        style={{
+                          width: '100%',
+                          padding: 12,
+                          background: '#fff',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: 6,
+                          fontSize: 14,
+                          fontFamily: 'inherit',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                        Soort vergoeding
+                      </label>
+                      <select
+                        value={newNote.compensation_type}
+                        onChange={(e) => setNewNote({ ...newNote, compensation_type: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: 12,
+                          background: '#fff',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: 6,
+                          fontSize: 14,
+                          fontFamily: 'inherit',
+                          cursor: 'pointer',
+                          boxSizing: 'border-box'
+                        }}
+                      >
+                        <option value="">-- Selecteer --</option>
+                        <option value="bedrag">💰 Bedrag</option>
+                        <option value="eten">🍽️ Eten betaald</option>
+                        <option value="cadeaubon">🎁 Cadeaubon</option>
+                        <option value="geen">❌ Geen</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {(newNote.compensation_type === 'bedrag' || newNote.compensation_type === 'cadeaubon') && (
+                    <div style={{ marginBottom: 16 }}>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                        Bedrag (€)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={newNote.compensation_amount}
+                        onChange={(e) => setNewNote({ ...newNote, compensation_amount: e.target.value })}
+                        placeholder="150.00"
+                        style={{
+                          width: '100%',
+                          padding: 12,
+                          background: '#fff',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: 6,
+                          fontSize: 14,
+                          fontFamily: 'inherit',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button
+                      onClick={handleAddNote}
+                      style={{
+                        flex: 1,
+                        padding: 12,
+                        background: '#2B3E72',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 6,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        fontFamily: 'inherit'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#1F2B4A'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = '#2B3E72'}
+                    >
+                      Opslaan
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowAddNoteForm(false);
+                        setNewNote({
+                          note_text: '',
+                          shoot_name: '',
+                          compensation_type: '',
+                          compensation_amount: ''
+                        });
+                      }}
+                      style={{
+                        padding: 12,
+                        background: '#E5E7EB',
+                        color: '#1F2B4A',
+                        border: 'none',
+                        borderRadius: 6,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        minWidth: 100
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#D1D5DB'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = '#E5E7EB'}
+                    >
+                      Annuleren
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Bestaande notities */}
+              <div>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: 18, color: '#1F2B4A' }}>
+                  📋 Eerder toegevoegde notities ({modelNotes.length})
+                </h3>
+
+                {modelNotes.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: 40,
+                    color: '#9CA3AF',
+                    fontSize: 14
+                  }}>
+                    Nog geen notities toegevoegd voor dit model
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {modelNotes.map((note) => (
+                      <div key={note.id} style={{
+                        background: '#fff',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: 8,
+                        padding: 16,
+                        position: 'relative'
+                      }}>
+                        {/* Verwijder knop rechtsboven */}
+                        <button
+                          onClick={() => handleDeleteNote(note.id)}
+                          style={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            background: '#FEE2E2',
+                            border: 'none',
+                            borderRadius: 4,
+                            padding: '4px 8px',
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            color: '#DC2626',
+                            fontWeight: 600,
+                            fontFamily: 'inherit'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#FEE2E2';
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#FEE2E2';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                          title="Notitie verwijderen"
+                        >
+                          🗑️
+                        </button>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, paddingRight: 40 }}>
+                          <div style={{ fontSize: 12, color: '#6B7280' }}>
+                            👤 {note.employee_name}
+                          </div>
+                          <div style={{ fontSize: 12, color: '#9CA3AF' }}>
+                            {new Date(note.created_at).toLocaleDateString('nl-NL', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+
+                        {note.shoot_name && (
+                          <div style={{
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: '#2B3E72',
+                            marginBottom: 8
+                          }}>
+                            🎬 {note.shoot_name}
+                          </div>
+                        )}
+
+                        <div style={{
+                          fontSize: 14,
+                          color: '#1F2B4A',
+                          lineHeight: 1.6,
+                          marginBottom: 8,
+                          whiteSpace: 'pre-wrap'
+                        }}>
+                          {note.note_text}
+                        </div>
+
+                        {note.compensation_type && (
+                          <div style={{
+                            fontSize: 13,
+                            color: '#6B7280',
+                            padding: '6px 12px',
+                            background: '#F3F4F6',
+                            borderRadius: 4,
+                            display: 'inline-block'
+                          }}>
+                            {note.compensation_type === 'bedrag' && `💰 €${note.compensation_amount}`}
+                            {note.compensation_type === 'eten' && '🍽️ Eten betaald'}
+                            {note.compensation_type === 'cadeaubon' && `🎁 Cadeaubon €${note.compensation_amount}`}
+                            {note.compensation_type === 'geen' && '❌ Geen vergoeding'}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
