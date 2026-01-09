@@ -548,7 +548,7 @@ export default function Dashboard() {
         </div>
 
         <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginBottom: 32, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr', gap: 20, alignItems: 'center' }}>
+          <div className="filters-grid" style={{ display: 'grid', gap: 20, alignItems: 'center' }}>
             <input
               placeholder="Zoek op naam of email..."
               value={searchTerm}
@@ -1703,6 +1703,11 @@ export default function Dashboard() {
       )}
       
       <style>{`
+        /* Filters grid */
+        .filters-grid {
+          grid-template-columns: 2fr 1fr 1fr 1.5fr;
+        }
+
         /* Responsive grid voor modellen */
         .models-grid {
           display: grid;
@@ -1722,11 +1727,18 @@ export default function Dashboard() {
           .models-grid {
             grid-template-columns: repeat(2, 1fr);
           }
+          .filters-grid {
+            grid-template-columns: 1fr 1fr;
+          }
         }
 
-        /* 1 kolom op mobiel */
+        /* 2 kolommen op mobiel */
         @media (max-width: 640px) {
           .models-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+          }
+          .filters-grid {
             grid-template-columns: 1fr;
           }
         }
