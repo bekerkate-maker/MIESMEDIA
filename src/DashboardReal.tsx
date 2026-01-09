@@ -479,9 +479,22 @@ export default function Dashboard() {
     <div style={{ minHeight: '100vh', background: '#E5DDD5', paddingBottom: 40, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       <header style={{ background: '#fff', padding: '16px 20px', borderBottom: '1px solid #d0c8c0' }}>
         <div className="header-container" style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
             <MiesLogo size={70} />
-            <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <p className="motivational-quote desktop-quote" style={{ 
+              color: '#2B3E72', 
+              margin: 0,
+              fontSize: 14,
+              fontStyle: 'italic',
+              fontWeight: 500,
+              transition: 'opacity 0.5s ease-in-out',
+              flex: 1,
+              textAlign: 'center',
+              padding: '0 16px'
+            }}>
+              {motivationalQuotes[quoteIndex]}
+            </p>
+            <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
               <button 
                 onClick={handleManageShoots}
                 className="header-btn shoots-btn"
@@ -530,13 +543,15 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-          <p className="motivational-quote" style={{ 
+          <p className="motivational-quote mobile-quote" style={{ 
             color: '#2B3E72', 
             margin: '12px 0 0 0',
-            fontSize: 15,
+            fontSize: 13,
             fontStyle: 'italic',
             fontWeight: 500,
-            transition: 'opacity 0.5s ease-in-out'
+            transition: 'opacity 0.5s ease-in-out',
+            textAlign: 'center',
+            display: 'none'
           }}>
             {motivationalQuotes[quoteIndex]}
           </p>
@@ -1719,9 +1734,12 @@ export default function Dashboard() {
           grid-template-columns: repeat(4, 1fr);
         }
 
-        /* Motivational quote default hidden on desktop in header row */
-        .motivational-quote {
+        /* Desktop quote visible, mobile quote hidden */
+        .desktop-quote {
           display: block;
+        }
+        .mobile-quote {
+          display: none;
         }
 
         /* 3 kolommen op medium schermen */
@@ -1751,6 +1769,14 @@ export default function Dashboard() {
             grid-template-columns: 1fr;
           }
           
+          /* Quote: hide desktop, show mobile */
+          .desktop-quote {
+            display: none !important;
+          }
+          .mobile-quote {
+            display: block !important;
+          }
+          
           /* Header buttons smaller */
           .header-btn {
             padding: 6px 10px !important;
@@ -1761,13 +1787,6 @@ export default function Dashboard() {
           }
           .btn-text {
             display: none;
-          }
-          
-          /* Quote under buttons */
-          .motivational-quote {
-            font-size: 13px !important;
-            text-align: center;
-            padding: 0 10px;
           }
           
           /* Model cards op mobiel */
