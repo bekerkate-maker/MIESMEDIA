@@ -478,67 +478,68 @@ export default function Dashboard() {
   return (
     <div style={{ minHeight: '100vh', background: '#E5DDD5', paddingBottom: 40, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       <header style={{ background: '#fff', padding: '16px 20px', borderBottom: '1px solid #d0c8c0' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className="header-container" style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <MiesLogo size={70} />
-            <p style={{ 
-              color: '#2B3E72', 
-              margin: 0,
-              fontSize: 15,
-              fontStyle: 'italic',
-              fontWeight: 500,
-              transition: 'opacity 0.5s ease-in-out',
-              maxWidth: 500
-            }}>
-              {motivationalQuotes[quoteIndex]}
-            </p>
+            <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <button 
+                onClick={handleManageShoots}
+                className="header-btn shoots-btn"
+                style={{ 
+                  background: 'transparent',
+                  color: '#1F2B4A',
+                  border: '2px solid #E5DDD5',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8
+                }}
+                title="Beheer shoots"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#E5DDD5';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                📸 <span className="btn-text">Shoots Beheren</span>
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="header-btn logout-btn"
+                style={{ 
+                  padding: '10px 20px', 
+                  background: '#E5DDD5', 
+                  color: '#1F2B4A', 
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit'
+                }}
+              >
+                🚪 <span className="btn-text">Uitloggen</span>
+              </button>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <button 
-              onClick={handleManageShoots}
-              style={{ 
-                background: 'transparent',
-                color: '#1F2B4A',
-                border: '2px solid #E5DDD5',
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: 'pointer',
-                padding: '8px 16px',
-                borderRadius: 8,
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8
-              }}
-              title="Beheer shoots"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#E5DDD5';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              📸 Shoots Beheren
-            </button>
-            <button 
-              onClick={handleLogout}
-              style={{ 
-                padding: '10px 20px', 
-                background: '#E5DDD5', 
-                color: '#1F2B4A', 
-                border: 'none',
-                borderRadius: 8,
-                fontSize: 14,
-                fontWeight: 500,
-                cursor: 'pointer',
-                fontFamily: 'inherit'
-              }}
-            >
-              🚪 Uitloggen
-            </button>
-          </div>
+          <p className="motivational-quote" style={{ 
+            color: '#2B3E72', 
+            margin: '12px 0 0 0',
+            fontSize: 15,
+            fontStyle: 'italic',
+            fontWeight: 500,
+            transition: 'opacity 0.5s ease-in-out'
+          }}>
+            {motivationalQuotes[quoteIndex]}
+          </p>
         </div>
       </header>
 
@@ -1715,6 +1716,11 @@ export default function Dashboard() {
           grid-template-columns: repeat(4, 1fr);
         }
 
+        /* Motivational quote default hidden on desktop in header row */
+        .motivational-quote {
+          display: block;
+        }
+
         /* 3 kolommen op medium schermen */
         @media (max-width: 1400px) {
           .models-grid {
@@ -1740,6 +1746,25 @@ export default function Dashboard() {
           }
           .filters-grid {
             grid-template-columns: 1fr;
+          }
+          
+          /* Header buttons smaller */
+          .header-btn {
+            padding: 6px 10px !important;
+            font-size: 12px !important;
+          }
+          .header-buttons {
+            gap: 8px !important;
+          }
+          .btn-text {
+            display: none;
+          }
+          
+          /* Quote under buttons */
+          .motivational-quote {
+            font-size: 13px !important;
+            text-align: center;
+            padding: 0 10px;
           }
         }
 
