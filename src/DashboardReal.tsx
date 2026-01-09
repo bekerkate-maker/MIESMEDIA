@@ -644,6 +644,7 @@ export default function Dashboard() {
             >
               {/* Foto bovenaan */}
               <div 
+                className="model-photo"
                 onClick={() => {
                   if (model.photo_url) {
                     setViewingPhotosFor(model);
@@ -709,7 +710,7 @@ export default function Dashboard() {
                 )}
                 
                 {/* Naam linksboven in foto */}
-                <div style={{ 
+                <div className="model-name-overlay" style={{ 
                   position: 'absolute', 
                   top: 10, 
                   left: 10, 
@@ -720,18 +721,19 @@ export default function Dashboard() {
                   WebkitBackdropFilter: 'blur(8px)',
                   zIndex: 2
                 }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: '#fff', letterSpacing: '0.3px' }}>
+                  <h3 className="model-name-text" style={{ fontSize: 14, fontWeight: 600, margin: 0, color: '#fff', letterSpacing: '0.3px' }}>
                     {model.first_name} {model.last_name}
                   </h3>
                 </div>
               </div>
 
               {/* Info onderaan */}
-              <div style={{ flex: 1, padding: 16, position: 'relative' }}>
+              <div className="model-info" style={{ flex: 1, padding: 16, position: 'relative' }}>
                 {/* Knoppen rechtsboven */}
                 <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, display: 'flex', gap: 6 }}>
                   <button
                     onClick={() => handleViewNotes(model)}
+                    className="model-action-btn"
                     style={{
                       background: 'rgba(255,255,255,0.9)',
                       border: '1px solid #E5DDD5',
@@ -748,6 +750,7 @@ export default function Dashboard() {
                   </button>
                   <button
                     onClick={() => handleEditModel(model)}
+                    className="model-action-btn"
                     style={{
                       background: 'rgba(255,255,255,0.9)',
                       border: '1px solid #E5DDD5',
@@ -796,7 +799,7 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <div className="model-bottom-btns" style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                   <button 
                     onClick={() => handleContactModel(model)} 
                     style={{ 
@@ -1742,7 +1745,7 @@ export default function Dashboard() {
         @media (max-width: 640px) {
           .models-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 8px;
           }
           .filters-grid {
             grid-template-columns: 1fr;
@@ -1765,6 +1768,68 @@ export default function Dashboard() {
             font-size: 13px !important;
             text-align: center;
             padding: 0 10px;
+          }
+          
+          /* Model cards op mobiel */
+          .models-grid > div {
+            border-radius: 8px !important;
+          }
+          
+          /* Foto minder langwerpig - vierkanter */
+          .model-photo {
+            height: 140px !important;
+          }
+          
+          /* Model info compacter */
+          .model-info {
+            padding: 8px !important;
+          }
+          
+          /* Naam in foto kleiner */
+          .model-name-overlay {
+            padding: 3px 6px !important;
+            top: 6px !important;
+            left: 6px !important;
+          }
+          .model-name-text {
+            font-size: 10px !important;
+          }
+          
+          /* Info tekst kleiner */
+          .model-info p {
+            font-size: 9px !important;
+            margin-bottom: 3px !important;
+            line-height: 1.3 !important;
+          }
+          
+          /* Actie knoppen kleiner */
+          .model-action-btn {
+            padding: 3px 5px !important;
+            font-size: 12px !important;
+          }
+          
+          /* Contact/QuitClaim knoppen */
+          .model-bottom-btns {
+            gap: 4px !important;
+            margin-top: 6px !important;
+            flex-wrap: wrap;
+          }
+          .model-bottom-btns button,
+          .model-bottom-btns label {
+            padding: 5px 6px !important;
+            font-size: 9px !important;
+            flex: 1 1 45% !important;
+            min-width: 0 !important;
+          }
+          
+          /* Main padding kleiner */
+          main {
+            padding: 12px !important;
+          }
+          
+          /* Titel kleiner */
+          main h1 {
+            font-size: 24px !important;
           }
         }
 
