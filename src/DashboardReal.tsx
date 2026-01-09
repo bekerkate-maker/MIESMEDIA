@@ -44,6 +44,7 @@ export default function Dashboard() {
   const [cityFilter, setCityFilter] = useState<string>("all");
   const [minAge, setMinAge] = useState<number>(0);
   const [maxAge, setMaxAge] = useState<number>(100);
+  const [showFilters, setShowFilters] = useState(false);
   const [editingModel, setEditingModel] = useState<Model | null>(null);
   const [editFormData, setEditFormData] = useState<Model | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -564,14 +565,38 @@ export default function Dashboard() {
         </div>
 
         <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginBottom: 32, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <div className="filters-grid" style={{ display: 'grid', gap: 20, alignItems: 'center' }}>
+          {/* Zoekbalk + Filter toggle knop voor mobiel */}
+          <div className="search-row" style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
             <input
               placeholder="Zoek op naam of email..."
               value={searchTerm}
               onChange={(e: any) => setSearchTerm(e.target.value)}
-              style={{ padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit' }}
+              style={{ flex: 1, padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit' }}
             />
+            <button 
+              className="filter-toggle-btn"
+              onClick={() => setShowFilters(!showFilters)}
+              style={{ 
+                padding: '12px 16px', 
+                background: showFilters ? '#2B3E72' : '#E5DDD5', 
+                color: showFilters ? '#fff' : '#1F2B4A',
+                border: 'none', 
+                borderRadius: 8, 
+                fontSize: 14, 
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'none',
+                alignItems: 'center',
+                gap: 6,
+                fontFamily: 'inherit'
+              }}
+            >
+              🔍 Filters {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && <span style={{ background: '#EF4444', color: '#fff', borderRadius: '50%', width: 18, height: 18, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>!</span>}
+            </button>
+          </div>
 
+          {/* Desktop filters - altijd zichtbaar */}
+          <div className="filters-desktop" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
             <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}
               style={{ padding: '12px 16px', background: '#E5DDD5', color: genderFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer' }}
             >
@@ -590,51 +615,80 @@ export default function Dashboard() {
               ))}
             </select>
 
-            {/* Leeftijd invoervelden */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <input
                 type="number"
-                placeholder="Min leeftijd"
+                placeholder="Min"
                 min="0"
                 max="100"
                 value={minAge === 0 ? '' : minAge}
-                onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : parseInt(e.target.value);
-                  setMinAge(value);
-                }}
-                style={{
-                  padding: '12px 16px',
-                  background: '#E5DDD5',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontSize: 15,
-                  color: '#1F2B4A',
-                  fontFamily: 'inherit',
-                  outline: 'none'
-                }}
+                onChange={(e) => setMinAge(e.target.value === '' ? 0 : parseInt(e.target.value))}
+                style={{ padding: '12px 16px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, color: '#1F2B4A', fontFamily: 'inherit' }}
               />
               <input
                 type="number"
-                placeholder="Max leeftijd"
+                placeholder="Max"
                 min="0"
                 max="100"
                 value={maxAge === 100 ? '' : maxAge}
-                onChange={(e) => {
-                  const value = e.target.value === '' ? 100 : parseInt(e.target.value);
-                  setMaxAge(value);
-                }}
-                style={{
-                  padding: '12px 16px',
-                  background: '#E5DDD5',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontSize: 15,
-                  color: '#1F2B4A',
-                  fontFamily: 'inherit',
-                  outline: 'none'
-                }}
+                onChange={(e) => setMaxAge(e.target.value === '' ? 100 : parseInt(e.target.value))}
+                style={{ padding: '12px 16px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, color: '#1F2B4A', fontFamily: 'inherit' }}
               />
             </div>
+          </div>
+
+          {/* Mobiel filters - uitklapbaar */}
+          <div className="filters-mobile" style={{ display: 'none' }}>
+            {showFilters && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, paddingTop: 12, borderTop: '1px solid #E5DDD5' }}>
+                <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}
+                  style={{ padding: '10px 12px', background: '#E5DDD5', color: genderFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer' }}
+                >
+                  <option value="all">Geslacht</option>
+                  <option value="man">Man</option>
+                  <option value="vrouw">Vrouw</option>
+                  <option value="anders">Anders</option>
+                </select>
+
+                <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}
+                  style={{ padding: '10px 12px', background: '#E5DDD5', color: cityFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer' }}
+                >
+                  <option value="all">Locatie</option>
+                  {Array.from(new Set(models.map(m => m.city))).sort().map(city => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  placeholder="Min leeftijd"
+                  min="0"
+                  max="100"
+                  value={minAge === 0 ? '' : minAge}
+                  onChange={(e) => setMinAge(e.target.value === '' ? 0 : parseInt(e.target.value))}
+                  style={{ padding: '10px 12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 13, color: '#1F2B4A', fontFamily: 'inherit' }}
+                />
+                <input
+                  type="number"
+                  placeholder="Max leeftijd"
+                  min="0"
+                  max="100"
+                  value={maxAge === 100 ? '' : maxAge}
+                  onChange={(e) => setMaxAge(e.target.value === '' ? 100 : parseInt(e.target.value))}
+                  style={{ padding: '10px 12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 13, color: '#1F2B4A', fontFamily: 'inherit' }}
+                />
+
+                {/* Reset filters knop */}
+                {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && (
+                  <button 
+                    onClick={() => { setGenderFilter('all'); setCityFilter('all'); setMinAge(0); setMaxAge(100); }}
+                    style={{ gridColumn: '1 / -1', padding: '10px', background: '#EF4444', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                  >
+                    ✕ Filters resetten
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -1722,9 +1776,18 @@ export default function Dashboard() {
       )}
       
       <style>{`
-        /* Filters grid */
-        .filters-grid {
-          grid-template-columns: 2fr 1fr 1fr 1.5fr;
+        /* Desktop filters visible by default */
+        .filters-desktop {
+          display: grid;
+        }
+        .filters-mobile {
+          display: none;
+        }
+        .filter-toggle-btn {
+          display: none !important;
+        }
+        .search-row {
+          margin-bottom: 16px;
         }
 
         /* Responsive grid voor modellen */
@@ -1754,9 +1817,6 @@ export default function Dashboard() {
           .models-grid {
             grid-template-columns: repeat(2, 1fr);
           }
-          .filters-grid {
-            grid-template-columns: 1fr 1fr;
-          }
         }
 
         /* 2 kolommen op mobiel */
@@ -1765,8 +1825,19 @@ export default function Dashboard() {
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
           }
-          .filters-grid {
-            grid-template-columns: 1fr;
+          
+          /* Filters: hide desktop, show mobile toggle */
+          .filters-desktop {
+            display: none !important;
+          }
+          .filters-mobile {
+            display: block !important;
+          }
+          .filter-toggle-btn {
+            display: flex !important;
+          }
+          .search-row {
+            margin-bottom: 0;
           }
           
           /* Quote: hide desktop, show mobile */
