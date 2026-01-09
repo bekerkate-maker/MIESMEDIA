@@ -16,6 +16,7 @@ type Model = {
   phone: string;
   city: string;
   photo_url: string | null;
+  extra_photos?: string[] | null;
   contract_pdf: string | null;
   created_at?: string;
 };
@@ -64,6 +65,14 @@ export default function Dashboard() {
     compensation_amount: ''
   });
   const [currentEmployeeName, setCurrentEmployeeName] = useState<string>('Medewerker');
+  
+  // Quitclaim modal state
+  const [viewingQuitclaimFor, setViewingQuitclaimFor] = useState<Model | null>(null);
+  
+  // Foto gallery state
+  const [viewingPhotosFor, setViewingPhotosFor] = useState<Model | null>(null);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [editExtraPhotos, setEditExtraPhotos] = useState<string[]>([]);
 
   const motivationalQuotes = [
     "Vandaag gaan we knallen. Niet lullen maar vullen… die agenda!",
@@ -122,7 +131,8 @@ export default function Dashboard() {
     try {
       const { data, error } = await supabase
         .from("models")
-        .select("*");
+        .select("*")
+        .order("created_at", { ascending: true }); // Oudste eerst bovenaan
 
       if (error) throw error;
       console.log("Fetched models:", data); // DEBUG
@@ -311,6 +321,7 @@ export default function Dashboard() {
   const handleEditModel = (model: Model) => {
     setEditingModel(model);
     setEditFormData({ ...model });
+    setEditExtraPhotos(model.extra_photos || []);
   };
 
   const handleCancelEdit = () => {
@@ -322,9 +333,14 @@ export default function Dashboard() {
     if (!editFormData || !editingModel) return;
 
     try {
+      const updateData = {
+        ...editFormData,
+        extra_photos: editExtraPhotos.length > 0 ? editExtraPhotos : null
+      };
+      
       const { error } = await supabase
         .from('models')
-        .update(editFormData)
+        .update(updateData)
         .eq('id', editingModel.id);
 
       if (error) throw error;
@@ -332,6 +348,7 @@ export default function Dashboard() {
       fetchModels();
       setEditingModel(null);
       setEditFormData(null);
+      setEditExtraPhotos([]);
       alert('✅ Model succesvol bijgewerkt!');
     } catch (error) {
       console.error('Error updating model:', error);
@@ -378,6 +395,25 @@ export default function Dashboard() {
     } else {
       alert('⚠️ Upload alleen afbeeldingsbestanden (jpg, png, etc.)');
     }
+  };
+
+  const handleExtraPhotoUpload = (e: any) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    Array.from(files).forEach((file: any) => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setEditExtraPhotos(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  };
+
+  const handleRemoveExtraPhoto = (index: number) => {
+    setEditExtraPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteFromModal = async () => {
@@ -607,7 +643,12 @@ export default function Dashboard() {
             >
               {/* Foto bovenaan */}
               <div 
-                onClick={() => model.photo_url && setLightboxImage(model.photo_url)}
+                onClick={() => {
+                  if (model.photo_url) {
+                    setViewingPhotosFor(model);
+                    setCurrentPhotoIndex(0);
+                  }
+                }}
                 style={{ 
                   width: '100%', 
                   height: 380,
@@ -624,21 +665,44 @@ export default function Dashboard() {
                 }}
               >
                 {model.photo_url ? (
-                  <img 
-                    src={model.photo_url} 
-                    alt={`${model.first_name} ${model.last_name}`}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      transition: 'filter 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.filter = 'blur(3px) brightness(0.8)'}
-                    onMouseLeave={(e) => e.currentTarget.style.filter = 'none'}
-                  />
+                  <>
+                    <img 
+                      src={model.photo_url} 
+                      alt={`${model.first_name} ${model.last_name}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        transition: 'filter 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.filter = 'blur(3px) brightness(0.8)'}
+                      onMouseLeave={(e) => e.currentTarget.style.filter = 'none'}
+                    />
+                    {/* Badge voor aantal extra foto's */}
+                    {model.extra_photos && model.extra_photos.length > 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: 10,
+                        right: 10,
+                        background: 'rgba(0,0,0,0.6)',
+                        color: '#fff',
+                        padding: '6px 12px',
+                        borderRadius: 20,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        backdropFilter: 'blur(8px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        zIndex: 2
+                      }}>
+                        📷 +{model.extra_photos.length}
+                      </div>
+                    )}
+                  </>
                 ) : (
                   `${model.first_name.charAt(0)}${model.last_name.charAt(0)}`
                 )}
@@ -816,12 +880,7 @@ export default function Dashboard() {
                     </label>
                   ) : (
                     <button
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = model.contract_pdf!;
-                        link.download = `${model.first_name}_${model.last_name}_quitclaim.pdf`;
-                        link.click();
-                      }}
+                      onClick={() => setViewingQuitclaimFor(model)}
                       style={{
                         background: '#22c55e',
                         color: '#fff',
@@ -840,7 +899,7 @@ export default function Dashboard() {
                       }}
                     >
                       <span>✅</span>
-                      <span>Download</span>
+                      <span>Bekijk Quitclaim</span>
                     </button>
                   )}
                 </div>
@@ -980,6 +1039,86 @@ export default function Dashboard() {
                   style={{ display: 'none' }}
                 />
               </div>
+            </div>
+
+            {/* Extra Foto's Sectie */}
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
+                Extra foto's ({editExtraPhotos.length})
+              </label>
+              
+              {/* Grid van extra foto's */}
+              {editExtraPhotos.length > 0 && (
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(4, 1fr)', 
+                  gap: 12, 
+                  marginBottom: 12 
+                }}>
+                  {editExtraPhotos.map((photo, index) => (
+                    <div key={index} style={{ position: 'relative' }}>
+                      <img 
+                        src={photo} 
+                        alt={`Extra foto ${index + 1}`}
+                        style={{
+                          width: '100%',
+                          aspectRatio: '1',
+                          objectFit: 'cover',
+                          borderRadius: 8
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExtraPhoto(index)}
+                        style={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          width: 24,
+                          height: 24,
+                          borderRadius: '50%',
+                          background: 'rgba(239, 68, 68, 0.9)',
+                          color: '#fff',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 14,
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Upload button voor extra foto's */}
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 16px',
+                background: '#E5DDD5',
+                border: '2px dashed #6B7280',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontSize: 14,
+                color: '#1F2B4A',
+                fontWeight: 500
+              }}>
+                <span>📷</span> Extra foto's toevoegen
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleExtraPhotoUpload}
+                  style={{ display: 'none' }}
+                />
+              </label>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -1343,6 +1482,223 @@ export default function Dashboard() {
               setImageZoom(Math.max(0.5, Math.min(3, imageZoom + delta)));
             }}
           />
+        </div>
+      )}
+
+      {/* Foto Gallery Modal */}
+      {viewingPhotosFor && (
+        <div 
+          onClick={() => {
+            setViewingPhotosFor(null);
+            setCurrentPhotoIndex(0);
+            setImageZoom(1);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.9)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            padding: 20
+          }}
+        >
+          {/* Header met naam en sluiten */}
+          <div style={{
+            position: 'absolute',
+            top: 20,
+            left: 0,
+            right: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '0 20px',
+            zIndex: 2001
+          }}>
+            <h3 style={{ margin: 0, color: '#fff', fontSize: 20, fontWeight: 600 }}>
+              📷 {viewingPhotosFor.first_name} {viewingPhotosFor.last_name}
+            </h3>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setViewingPhotosFor(null);
+                setCurrentPhotoIndex(0);
+                setImageZoom(1);
+              }}
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                border: 'none',
+                color: '#fff',
+                fontSize: 28,
+                width: 50,
+                height: 50,
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Main foto display */}
+          {(() => {
+            const allPhotos = [
+              viewingPhotosFor.photo_url,
+              ...(viewingPhotosFor.extra_photos || [])
+            ].filter(Boolean) as string[];
+            
+            return (
+              <>
+                {/* Navigatie pijlen */}
+                {allPhotos.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentPhotoIndex(prev => 
+                          prev === 0 ? allPhotos.length - 1 : prev - 1
+                        );
+                      }}
+                      style={{
+                        position: 'absolute',
+                        left: 20,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'rgba(255,255,255,0.2)',
+                        border: 'none',
+                        color: '#fff',
+                        fontSize: 32,
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        zIndex: 2001,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentPhotoIndex(prev => 
+                          prev === allPhotos.length - 1 ? 0 : prev + 1
+                        );
+                      }}
+                      style={{
+                        position: 'absolute',
+                        right: 20,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'rgba(255,255,255,0.2)',
+                        border: 'none',
+                        color: '#fff',
+                        fontSize: 32,
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        zIndex: 2001,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
+
+                {/* Huidige foto */}
+                <img 
+                  src={allPhotos[currentPhotoIndex]}
+                  alt={`Foto ${currentPhotoIndex + 1}`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    maxWidth: '85%',
+                    maxHeight: '75vh',
+                    objectFit: 'contain',
+                    borderRadius: 8,
+                    transform: `scale(${imageZoom})`,
+                    transition: 'transform 0.2s ease'
+                  }}
+                  onWheel={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                    setImageZoom(Math.max(0.5, Math.min(3, imageZoom + delta)));
+                  }}
+                />
+
+                {/* Foto counter */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: 100,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'rgba(0,0,0,0.6)',
+                  color: '#fff',
+                  padding: '8px 16px',
+                  borderRadius: 20,
+                  fontSize: 14,
+                  fontWeight: 500
+                }}>
+                  {currentPhotoIndex + 1} / {allPhotos.length}
+                </div>
+
+                {/* Thumbnail strip onderaan */}
+                {allPhotos.length > 1 && (
+                  <div 
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      position: 'absolute',
+                      bottom: 20,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      gap: 8,
+                      padding: 8,
+                      background: 'rgba(0,0,0,0.6)',
+                      borderRadius: 12,
+                      maxWidth: '90%',
+                      overflowX: 'auto'
+                    }}
+                  >
+                    {allPhotos.map((photo, index) => (
+                      <img
+                        key={index}
+                        src={photo}
+                        alt={`Thumbnail ${index + 1}`}
+                        onClick={() => setCurrentPhotoIndex(index)}
+                        style={{
+                          width: 60,
+                          height: 60,
+                          objectFit: 'cover',
+                          borderRadius: 6,
+                          cursor: 'pointer',
+                          opacity: currentPhotoIndex === index ? 1 : 0.5,
+                          border: currentPhotoIndex === index ? '2px solid #fff' : '2px solid transparent',
+                          transition: 'all 0.2s ease'
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       )}
       
@@ -1752,6 +2108,173 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quitclaim Modal */}
+      {viewingQuitclaimFor && viewingQuitclaimFor.contract_pdf && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 20
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: 12,
+            width: '95%',
+            maxWidth: 1200,
+            height: '95vh',
+            overflow: 'hidden',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Header */}
+            <div style={{
+              padding: '16px 20px',
+              borderBottom: '2px solid #E5DDD5',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: '#fff',
+              flexShrink: 0
+            }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 20, color: '#1F2B4A' }}>
+                  📄 Quitclaim - {viewingQuitclaimFor.first_name} {viewingQuitclaimFor.last_name}
+                </h2>
+              </div>
+              <button
+                onClick={() => setViewingQuitclaimFor(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 28,
+                  cursor: 'pointer',
+                  color: '#6B7280',
+                  padding: '4px 8px'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* PDF/Document Viewer - volledig gevuld */}
+            <div style={{ 
+              flex: 1, 
+              overflow: 'auto', 
+              background: '#525659',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {viewingQuitclaimFor.contract_pdf.startsWith('data:application/pdf') ? (
+                <iframe
+                  src={viewingQuitclaimFor.contract_pdf}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none'
+                  }}
+                  title={`Quitclaim ${viewingQuitclaimFor.first_name} ${viewingQuitclaimFor.last_name}`}
+                />
+              ) : (
+                <img
+                  src={viewingQuitclaimFor.contract_pdf}
+                  alt={`Quitclaim ${viewingQuitclaimFor.first_name} ${viewingQuitclaimFor.last_name}`}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain'
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Footer met knoppen */}
+            <div style={{
+              padding: '16px 20px',
+              borderTop: '2px solid #E5DDD5',
+              display: 'flex',
+              gap: 12,
+              justifyContent: 'flex-end',
+              background: '#fff'
+            }}>
+              <button
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = viewingQuitclaimFor.contract_pdf!;
+                  link.download = `${viewingQuitclaimFor.first_name}_${viewingQuitclaimFor.last_name}_quitclaim.pdf`;
+                  link.click();
+                }}
+                style={{
+                  background: '#1F2B4A',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontFamily: 'inherit'
+                }}
+              >
+                📥 Download PDF
+              </button>
+              <button
+                onClick={async () => {
+                  if (window.confirm(`Weet je zeker dat je de quitclaim van ${viewingQuitclaimFor.first_name} ${viewingQuitclaimFor.last_name} wilt verwijderen?`)) {
+                    const { error } = await supabase
+                      .from('models')
+                      .update({ contract_pdf: null })
+                      .eq('id', viewingQuitclaimFor.id);
+
+                    if (error) {
+                      console.error('Error deleting quitclaim:', error);
+                      alert('❌ Kon quitclaim niet verwijderen.');
+                      return;
+                    }
+
+                    // Update local state
+                    setModels(prevModels =>
+                      prevModels.map(m =>
+                        m.id === viewingQuitclaimFor.id ? { ...m, contract_pdf: null } : m
+                      )
+                    );
+                    setViewingQuitclaimFor(null);
+                    alert('✅ Quitclaim succesvol verwijderd!');
+                  }
+                }}
+                style={{
+                  background: '#ef4444',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontFamily: 'inherit'
+                }}
+              >
+                🗑️ Verwijderen
+              </button>
             </div>
           </div>
         </div>

@@ -8,16 +8,15 @@ import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
 import logoDudok from '@/components/logo_klanten/dudok_logo.png';
 
 export default function RegisterModel() {
-  // Automatisch '/' toevoegen bij geboortedatum invoer
   const handleBirthdateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
-    // Voeg automatisch '/' toe na dag en maand
     value = value.replace(/[^0-9]/g, '');
     if (value.length > 2) value = value.slice(0,2) + '/' + value.slice(2);
     if (value.length > 5) value = value.slice(0,5) + '/' + value.slice(5);
     if (value.length > 10) value = value.slice(0,10);
     setFormData({ ...formData, birthdate: value });
   };
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -35,18 +34,38 @@ export default function RegisterModel() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [extraPhotoFiles, setExtraPhotoFiles] = useState<File[]>([]);
+  const [extraPhotoPreviews, setExtraPhotoPreviews] = useState<string[]>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setPhotoFile(file);
-      // Maak preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleExtraFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    
+    Array.from(files).forEach(file => {
+      setExtraPhotoFiles(prev => [...prev, file]);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setExtraPhotoPreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveExtraPhoto = (index: number) => {
+    setExtraPhotoFiles(prev => prev.filter((_, i) => i !== index));
+    setExtraPhotoPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: any) => {
@@ -61,8 +80,8 @@ export default function RegisterModel() {
 
     try {
       let photoUrl = '';
+      let extraPhotoUrls: string[] = [];
 
-      // Upload foto als er een is geselecteerd
       if (photoFile) {
         const fileExt = photoFile.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -77,7 +96,6 @@ export default function RegisterModel() {
           throw new Error('Foto upload mislukt: ' + uploadError.message);
         }
 
-        // Haal publieke URL op
         const { data: urlData } = supabase.storage
           .from('model-photos')
           .getPublicUrl(filePath);
@@ -85,16 +103,38 @@ export default function RegisterModel() {
         photoUrl = urlData.publicUrl;
       }
 
+      if (extraPhotoFiles.length > 0) {
+        for (const file of extraPhotoFiles) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const filePath = `model-photos/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('model-photos')
+            .upload(filePath, file);
+
+          if (uploadError) {
+            console.error('Extra photo upload error:', uploadError);
+            continue;
+          }
+
+          const { data: urlData } = supabase.storage
+            .from('model-photos')
+            .getPublicUrl(filePath);
+
+          extraPhotoUrls.push(urlData.publicUrl);
+        }
+      }
+
       const instagramHandle = formData.instagram.startsWith('@') 
         ? formData.instagram 
         : `@${formData.instagram}`;
 
-      // Converteer geboortedatum van dd/mm/yyyy naar yyyy-mm-dd
       let birthdateFormatted = null;
       if (formData.birthdate) {
         const parts = formData.birthdate.split('/');
         if (parts.length === 3) {
-          birthdateFormatted = `${parts[2]}-${parts[1]}-${parts[0]}`; // yyyy-mm-dd
+          birthdateFormatted = `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
       }
 
@@ -107,14 +147,14 @@ export default function RegisterModel() {
         email: formData.email,
         phone: formData.phone,
         city: formData.city,
-        photo_url: photoUrl || null
+        photo_url: photoUrl || null,
+        extra_photos: extraPhotoUrls.length > 0 ? extraPhotoUrls : null
       }]);
 
       if (error) throw error;
       
-      // Send welcome email via Supabase Edge Function
       try {
-        const { data: functionData, error: functionError } = await supabase.functions.invoke('send-welcome-email', {
+        const { error: functionError } = await supabase.functions.invoke('send-welcome-email', {
           body: {
             email: formData.email,
             firstName: formData.first_name,
@@ -124,13 +164,9 @@ export default function RegisterModel() {
 
         if (functionError) {
           console.error('Email send error:', functionError);
-          // Don't fail the registration if email fails
-        } else {
-          console.log('Welcome email sent successfully:', functionData);
         }
       } catch (emailError) {
         console.error('Email error:', emailError);
-        // Don't fail the registration if email fails
       }
       
       setSubmitted(true);
@@ -143,82 +179,44 @@ export default function RegisterModel() {
   };
 
   const handleFileUpload = () => {
-    // Trigger file input click
     document.getElementById('photo-upload-input')?.click();
   };
 
   if (submitted) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        background: '#E5DDD5', 
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        padding: 20
-      }}>
-        <div style={{ textAlign: 'center', maxWidth: 500 }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+      <div className="register-page success-page">
+        <div className="success-container">
+          <div className="logo-center">
             <MiesLogo size={120} />
           </div>
-          <h1 style={{ fontSize: 42, marginBottom: 16, color: '#1F2B4A', fontWeight: 700 }}>Topper!</h1>
-          <p style={{ fontSize: 20, color: '#1F2B4A', fontWeight: 500 }}>
+          <h1 className="success-title">Topper!</h1>
+          <p className="success-text">
             Je bent officieel een Rotterdams Model. Niet lullen maar poseren!! 📸🤳
           </p>
+          <button onClick={() => { window.location.href = '/'; }} className="primary-btn">
+            Meld je aan voor open shoots
+          </button>
         </div>
+        <style>{styles}</style>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: '#E5DDD5',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    }}>
-      
-      {/* Banner bovenaan met scrollende logos */}
-      <div style={{ 
-        background: '#fff',
-        padding: '12px 0',
-        overflow: 'hidden',
-        position: 'relative',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-        minHeight: '60px'
-      }}>
-        {/* Scrollende logos - volledige breedte */}
-        <div style={{ 
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          <div className="logo-scroll" style={{
-            display: 'flex',
-            gap: 60,
-            alignItems: 'center',
-            paddingRight: '60px'
-          }}>
-            {/* Eerste set logos */}
+    <div className="register-page">
+      <div className="logo-banner">
+        <div className="logo-banner-inner">
+          <div className="logo-scroll">
             <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
             <img src={logoKoekela} alt="Koekela" className="logo-small" />
             <img src={logoJordys} alt="Jordys" className="logo-normal" />
             <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
             <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-            
-            {/* Duplicaat voor seamless loop */}
             <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
             <img src={logoKoekela} alt="Koekela" className="logo-small" />
             <img src={logoJordys} alt="Jordys" className="logo-normal" />
             <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
             <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-
-            {/* Extra duplicaat voor grotere schermen */}
             <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
             <img src={logoKoekela} alt="Koekela" className="logo-small" />
             <img src={logoJordys} alt="Jordys" className="logo-normal" />
@@ -228,284 +226,126 @@ export default function RegisterModel() {
         </div>
       </div>
 
-      {/* Hamburger menu knop links onder de banner */}
-      <div style={{ position: 'relative', zIndex: 20 }}>
-        <button
-          onClick={() => {
-            window.location.href = '/open-shoots';
-          }}
-          title="Meld je aan voor openstaande shoots"
-          style={{
-            position: 'absolute',
-            top: '10px',
-            left: '20px',
-            width: '40px',
-            height: '40px',
-            background: 'transparent',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '5px',
-            padding: 0
-          }}
-          onMouseEnter={(e) => {
-            const lines = e.currentTarget.querySelectorAll('div');
-            lines.forEach(line => (line as HTMLElement).style.background = '#D1D5DB');
-          }}
-          onMouseLeave={(e) => {
-            const lines = e.currentTarget.querySelectorAll('div');
-            lines.forEach(line => (line as HTMLElement).style.background = '#fff');
-          }}
-        >
-          <div style={{ width: '24px', height: '2px', background: '#fff', borderRadius: '2px', transition: 'all 0.3s ease' }}></div>
-          <div style={{ width: '24px', height: '2px', background: '#fff', borderRadius: '2px', transition: 'all 0.3s ease' }}></div>
-          <div style={{ width: '24px', height: '2px', background: '#fff', borderRadius: '2px', transition: 'all 0.3s ease' }}></div>
-        </button>
-      </div>
-
-      {/* Rest van de pagina */}
-      <div style={{ padding: '60px 20px' }}>
-      {/* Header centraal */}
-      <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-          <MiesLogo size={110} />
-        </div>
-        <h1 style={{ fontSize: 42, fontWeight: 700, margin: 0, color: '#1F2B4A', marginBottom: 8 }}>
-          Registreer hier als MIES MEDIA Model
-        </h1>
-        <p style={{ fontSize: 16, color: '#6B7280', margin: 0 }}>
-          Vul je gegevens in om je aan te melden als model
-        </p>
-      </div>
-
-      <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        <form onSubmit={handleSubmit} style={{ background: '#fff', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                Voornaam *
-              </label>
-              <input required value={formData.first_name} onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                Achternaam *
-              </label>
-              <input required value={formData.last_name} onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-              />
-            </div>
+      <div className="content-section">
+        <div className="header-section">
+          <div className="logo-center">
+            <MiesLogo size={110} />
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                Geslacht *
-              </label>
-              <select required value={formData.gender} onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                style={{ width: '100%', minWidth: '100%', maxWidth: '100%', padding: '12px 16px', background: '#E5DDD5', color: formData.gender ? '#1F2B4A' : '#9CA3AF', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', boxSizing: 'border-box' }}
-              >
-                <option value="">Selecteer geslacht</option>
-                <option value="man">Man</option>
-                <option value="vrouw">Vrouw</option>
-                <option value="anders">Anders</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                Geboortedatum *
-              </label>
-              <input required type="text" placeholder="dd/mm/jjjj" value={formData.birthdate || ''} onChange={handleBirthdateInput}
-                maxLength={10}
-                style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                Instagram *
-              </label>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <span style={{ 
-                  position: 'absolute', 
-                  left: 16, 
-                  color: '#1F2B4A', 
-                  fontSize: 15, 
-                  fontWeight: 500,
-                  pointerEvents: 'none'
-                }}>
-                  @
-                </span>
-                <input 
-                  required 
-                  placeholder="username" 
-                  value={formData.instagram} 
-                  onChange={(e) => setFormData({...formData, instagram: e.target.value})}
-                  style={{ 
-                    width: '100%', 
-                    padding: '12px 16px 12px 36px', 
-                    background: '#E5DDD5', 
-                    color: '#1F2B4A', 
-                    border: 'none', 
-                    borderRadius: 8, 
-                    fontSize: 15, 
-                    fontFamily: 'inherit',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                E-mailadres *
-              </label>
-              <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
-                style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                Telefoonnummer *
-              </label>
-              <input required type="tel" placeholder="06 12345678" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                Woonplaats *
-              </label>
-              <input required type="text" placeholder="Rotterdam" value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})}
-                style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-              />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: 32 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-              Foto {photoFile && '✅'}
-            </label>
-            <input
-              id="photo-upload-input"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-            />
-            {photoPreview && (
-              <div style={{ marginBottom: 12, textAlign: 'center' }}>
-                <img 
-                  src={photoPreview} 
-                  alt="Preview" 
-                  style={{ 
-                    maxWidth: '200px', 
-                    maxHeight: '200px', 
-                    borderRadius: 8,
-                    objectFit: 'cover'
-                  }} 
-                />
-              </div>
-            )}
-            <button type="button" onClick={handleFileUpload}
-              style={{ width: '100%', padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxSizing: 'border-box' }}
-            >
-              <span>📤</span> {photoFile ? 'Wijzig foto' : 'Upload foto'}
+          <div className="button-wrapper">
+            <button onClick={() => { window.location.href = '/'; }} className="primary-btn">
+              Meld je aan voor open shoots
             </button>
           </div>
+          <h1 className="main-title">Registreer hier als MIES MEDIA Model</h1>
+          <p className="subtitle">Vul je gegevens in om je aan te melden als model</p>
+        </div>
 
-          <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                style={{ 
-                  marginTop: 4,
-                  width: 18,
-                  height: 18,
-                  cursor: 'pointer'
-                }}
-              />
-              <span style={{ fontSize: 14, color: '#1F2B4A', lineHeight: 1.5 }}>
-                Ik geef MIES MEDIA toestemming om mijn gegevens te verwerken en op te slaan.
-              </span>
-            </label>
-          </div>
+        <div className="form-wrapper">
+          <form onSubmit={handleSubmit} className="register-form">
+            <div className="form-row">
+              <div className="form-field">
+                <label>Voornaam *</label>
+                <input required value={formData.first_name} onChange={(e) => setFormData({...formData, first_name: e.target.value})} />
+              </div>
+              <div className="form-field">
+                <label>Achternaam *</label>
+                <input required value={formData.last_name} onChange={(e) => setFormData({...formData, last_name: e.target.value})} />
+              </div>
+            </div>
 
-          <button type="submit" disabled={loading || !agreedToTerms}
-            style={{ 
-              width: '100%', 
-              padding: '16px', 
-              background: (loading || !agreedToTerms) ? '#9CA3AF' : '#2B3E72', 
-              color: '#fff', 
-              fontSize: 16, 
-              fontWeight: 600, 
-              border: 'none', 
-              borderRadius: 8, 
-              cursor: (loading || !agreedToTerms) ? 'not-allowed' : 'pointer', 
-              opacity: (loading || !agreedToTerms) ? 0.6 : 1, 
-              fontFamily: 'inherit' 
-            }}
-          >
-            {loading ? 'Bezig met verzenden...' : 'Aanmelden'}
-          </button>
-        </form>
+            <div className="form-row">
+              <div className="form-field">
+                <label>Geslacht *</label>
+                <select required value={formData.gender} onChange={(e) => setFormData({...formData, gender: e.target.value})} className={formData.gender ? '' : 'placeholder'}>
+                  <option value="">Selecteer geslacht</option>
+                  <option value="man">Man</option>
+                  <option value="vrouw">Vrouw</option>
+                  <option value="anders">Anders</option>
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Geboortedatum *</label>
+                <input required type="text" placeholder="dd/mm/jjjj" value={formData.birthdate || ''} onChange={handleBirthdateInput} maxLength={10} />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label>Instagram *</label>
+                <div className="input-with-prefix">
+                  <span className="prefix">@</span>
+                  <input required placeholder="username" value={formData.instagram} onChange={(e) => setFormData({...formData, instagram: e.target.value})} />
+                </div>
+              </div>
+              <div className="form-field">
+                <label>E-mailadres *</label>
+                <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label>Telefoonnummer *</label>
+                <input required type="tel" placeholder="06 12345678" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+              </div>
+              <div className="form-field">
+                <label>Woonplaats *</label>
+                <input required type="text" placeholder="Rotterdam" value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})} />
+              </div>
+            </div>
+
+            <div className="form-field">
+              <label>Hoofdfoto {photoFile && '✅'}</label>
+              <input id="photo-upload-input" type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+              {photoPreview && (
+                <div className="photo-preview-container">
+                  <img src={photoPreview} alt="Preview" className="photo-preview" />
+                </div>
+              )}
+              <button type="button" onClick={handleFileUpload} className="upload-btn">
+                <span>📤</span> {photoFile ? 'Wijzig hoofdfoto' : 'Upload hoofdfoto'}
+              </button>
+            </div>
+
+            <div className="form-field">
+              <label>Extra foto's ({extraPhotoPreviews.length}) - optioneel</label>
+              {extraPhotoPreviews.length > 0 && (
+                <div className="extra-photos-grid">
+                  {extraPhotoPreviews.map((preview, index) => (
+                    <div key={index} className="extra-photo-item">
+                      <img src={preview} alt={`Extra foto ${index + 1}`} />
+                      <button type="button" onClick={() => handleRemoveExtraPhoto(index)} className="remove-btn">×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <input id="extra-photos-input" type="file" accept="image/*" multiple onChange={handleExtraFilesChange} style={{ display: 'none' }} />
+              <button type="button" onClick={() => document.getElementById('extra-photos-input')?.click()} className="upload-btn dashed">
+                <span>📷</span> Extra foto's toevoegen
+              </button>
+            </div>
+
+            <div className="form-field">
+              <label className="checkbox-label">
+                <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} />
+                <span>Ik geef MIES MEDIA toestemming om mijn gegevens te verwerken en op te slaan.</span>
+              </label>
+            </div>
+
+            <button type="submit" disabled={loading || !agreedToTerms} className={`submit-btn ${(loading || !agreedToTerms) ? 'disabled' : ''}`}>
+              {loading ? 'Bezig met verzenden...' : 'Aanmelden'}
+            </button>
+          </form>
+        </div>
       </div>
-      </div>
 
-      <style>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(calc(-100% / 3));
-          }
-        }
-        
-        .logo-scroll {
-          animation: scroll 30s linear infinite;
-          will-change: transform;
-        }
-
-        .logo-scroll img {
-          width: auto;
-          object-fit: contain;
-          filter: grayscale(100%);
-        }
-
-        .logo-small {
-          height: 25px;
-        }
-
-        .logo-normal {
-          height: 40px;
-        }
-
-        .logo-large {
-          height: 50px;
-        }
-
-        .logo-xlarge {
-          height: 60px;
-        }
-      `}</style>
+      <style>{styles}</style>
     </div>
   );
 }
+
+const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#1F2B4A;font-weight:700}.success-text{font-size:20px;color:#1F2B4A;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;gap:60px;align-items:center;padding-right:60px;animation:scroll 30s linear infinite;will-change:transform}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(calc(-100% / 3))}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#1F2B4A;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#9CA3AF}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#1F2B4A;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #6B7280}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:4px;cursor:pointer;flex-shrink:0}.checkbox-label span{font-size:14px;color:#1F2B4A;line-height:1.5}.submit-btn{width:100%;padding:16px;background:#2B3E72;color:#fff;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-scroll{gap:30px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}}`;
+
+export default RegisterModel;
+
+const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#1F2B4A;font-weight:700}.success-text{font-size:20px;color:#1F2B4A;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;gap:60px;align-items:center;padding-right:60px;animation:scroll 30s linear infinite;will-change:transform}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(calc(-100% / 3))}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#1F2B4A;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#9CA3AF}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#1F2B4A;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #6B7280}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:4px;cursor:pointer;flex-shrink:0}.checkbox-label span{font-size:14px;color:#1F2B4A;line-height:1.5}.submit-btn{width:100%;padding:16px;background:#2B3E72;color:#fff;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-scroll{gap:30px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}}`;

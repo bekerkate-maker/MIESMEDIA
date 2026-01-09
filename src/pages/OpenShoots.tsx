@@ -167,10 +167,42 @@ export default function OpenShoots() {
             fontSize: 16, 
             color: '#6B7280', 
             maxWidth: 600, 
-            margin: '0 auto' 
+            margin: '0 auto 16px' 
           }}>
             Bekijk alle beschikbare shoots en meld je aan voor jouw volgende opdracht
           </p>
+          
+          {/* Registreer als model knop */}
+          <div style={{ marginTop: 24 }}>
+            <button
+              onClick={() => window.location.href = '/register-model'}
+              style={{
+                padding: '12px 24px',
+                background: '#2B3E72',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                fontFamily: 'inherit',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#1F2B4A';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#2B3E72';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+              }}
+            >
+              Registreer als nieuw model
+            </button>
+          </div>
         </div>
 
         {/* Aanmeldformulier */}
@@ -227,7 +259,7 @@ export default function OpenShoots() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => window.location.href = '/'}
+                    onClick={() => window.location.href = '/register-model'}
                     style={{
                       padding: '16px',
                       background: '#E5DDD5',

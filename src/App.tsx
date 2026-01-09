@@ -47,10 +47,10 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Publieke routes */}
-        <Route path="/" element={<RegisterModel />} />
+        <Route path="/" element={<OpenShoots />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register-model" element={<RegisterModel />} />
         <Route path="/register-employee" element={<RegisterEmployee />} />
-        <Route path="/open-shoots" element={<OpenShoots />} />
         
         {/* Beveiligde routes */}
         <Route 

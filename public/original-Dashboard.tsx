@@ -1,4 +1,47 @@
-// Origineel bestand: `Dashboard (1).tsx`
+// supabase/functions/send-registration-email/index.ts
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+
+serve(async (req) => {
+  try {
+    const { modelName, shootName, email, phone, instagram } = await req.json()
+
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${RESEND_API_KEY}`
+      },
+      body: JSON.stringify({
+        from: 'Mies Media <onboarding@resend.dev>',
+        to: ['bekerkate@gmail.com'],
+        subject: `🎬 Nieuwe aanmelding: ${modelName} voor ${shootName}`,
+        html: `
+          <h2>Nieuwe Shoot Aanmelding!</h2>
+          <p><strong>Model:</strong> ${modelName}</p>
+          <p><strong>Shoot:</strong> ${shootName}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Telefoon:</strong> ${phone}</p>
+          ${instagram ? `<p><strong>Instagram:</strong> @${instagram}</p>` : ''}
+          <p>Bekijk de aanmelding in je dashboard!</p>
+        `
+      })
+    })
+
+    const data = await res.json()
+    return new Response(JSON.stringify(data), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 200
+    })
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+})// Origineel bestand: `Dashboard (1).tsx`
 // Plaatsing in /public zodat je de bron in de browser kunt bekijken zonder dat
 // Vite probeert te compileren of te linken naar ontbrekende dependencies.
 
