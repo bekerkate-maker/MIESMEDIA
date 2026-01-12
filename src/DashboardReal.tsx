@@ -23,6 +23,16 @@ type Model = {
 
 export default function Dashboard() {
   // Functie om leeftijd te berekenen uit geboortedatum
+  // Functie om een datum als Nederlandse string te tonen
+  function formatDateNL(dateString?: string, long: boolean = false): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // fallback als het geen geldige datum is
+    if (long) {
+      return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    return date.toLocaleDateString('nl-NL'); // korte notatie: dd-mm-jjjj
+  }
   function calculateAge(birthdate?: string): number | null {
     if (!birthdate) return null;
     const today = new Date();
@@ -480,18 +490,20 @@ export default function Dashboard() {
     <div style={{ minHeight: '100vh', background: '#E5DDD5', paddingBottom: 40, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       <header style={{ background: '#fff', padding: '16px 20px', borderBottom: '1px solid #d0c8c0' }}>
         <div className="header-container" style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <MiesLogo size={70} />
             <p className="motivational-quote desktop-quote" style={{ 
               color: '#2B3E72', 
               margin: 0,
-              fontSize: 14,
+              fontSize: 11,
               fontStyle: 'italic',
               fontWeight: 500,
               transition: 'opacity 0.5s ease-in-out',
               flex: 1,
               textAlign: 'center',
-              padding: '0 16px'
+              padding: '0 8px',
+              lineHeight: 1.4,
+              minWidth: 0
             }}>
               {motivationalQuotes[quoteIndex]}
             </p>
@@ -544,18 +556,7 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-          <p className="motivational-quote mobile-quote" style={{ 
-            color: '#2B3E72', 
-            margin: '12px 0 0 0',
-            fontSize: 13,
-            fontStyle: 'italic',
-            fontWeight: 500,
-            transition: 'opacity 0.5s ease-in-out',
-            textAlign: 'center',
-            display: 'none'
-          }}>
-            {motivationalQuotes[quoteIndex]}
-          </p>
+          {/* mobile-quote verwijderd, alles via desktop-quote */}
         </div>
       </header>
 
@@ -578,8 +579,8 @@ export default function Dashboard() {
               onClick={() => setShowFilters(!showFilters)}
               style={{ 
                 padding: '12px 16px', 
-                background: showFilters ? '#2B3E72' : '#E5DDD5', 
-                color: showFilters ? '#fff' : '#1F2B4A',
+                background: '#E5DDD5', 
+                color: '#1F2B4A',
                 border: 'none', 
                 borderRadius: 8, 
                 fontSize: 14, 
@@ -591,7 +592,7 @@ export default function Dashboard() {
                 fontFamily: 'inherit'
               }}
             >
-              🔍 Filters {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && <span style={{ background: '#EF4444', color: '#fff', borderRadius: '50%', width: 18, height: 18, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>!</span>}
+              🔍 {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && <span style={{ background: '#EF4444', color: '#fff', borderRadius: '50%', width: 18, height: 18, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>!</span>}
             </button>
           </div>
 
@@ -640,53 +641,62 @@ export default function Dashboard() {
           {/* Mobiel filters - uitklapbaar */}
           <div className="filters-mobile" style={{ display: 'none' }}>
             {showFilters && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, paddingTop: 12, borderTop: '1px solid #E5DDD5' }}>
-                <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}
-                  style={{ padding: '10px 12px', background: '#E5DDD5', color: genderFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer' }}
-                >
-                  <option value="all">Geslacht</option>
-                  <option value="man">Man</option>
-                  <option value="vrouw">Vrouw</option>
-                  <option value="anders">Anders</option>
-                </select>
-
-                <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}
-                  style={{ padding: '10px 12px', background: '#E5DDD5', color: cityFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer' }}
-                >
-                  <option value="all">Locatie</option>
-                  {Array.from(new Set(models.map(m => m.city))).sort().map(city => (
-                    <option key={city} value={city}>{city}</option>
-                  ))}
-                </select>
-
-                <input
-                  type="number"
-                  placeholder="Min leeftijd"
-                  min="0"
-                  max="100"
-                  value={minAge === 0 ? '' : minAge}
-                  onChange={(e) => setMinAge(e.target.value === '' ? 0 : parseInt(e.target.value))}
-                  style={{ padding: '10px 12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 13, color: '#1F2B4A', fontFamily: 'inherit' }}
-                />
-                <input
-                  type="number"
-                  placeholder="Max leeftijd"
-                  min="0"
-                  max="100"
-                  value={maxAge === 100 ? '' : maxAge}
-                  onChange={(e) => setMaxAge(e.target.value === '' ? 100 : parseInt(e.target.value))}
-                  style={{ padding: '10px 12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 13, color: '#1F2B4A', fontFamily: 'inherit' }}
-                />
-
-                {/* Reset filters knop */}
-                {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && (
-                  <button 
-                    onClick={() => { setGenderFilter('all'); setCityFilter('all'); setMinAge(0); setMaxAge(100); }}
-                    style={{ gridColumn: '1 / -1', padding: '10px', background: '#EF4444', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+              <div style={{ marginTop: 12 }}>
+                {/* Geslacht en Locatie op één rij */}
+                <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+                  <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}
+                    style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', color: genderFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 6, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer' }}
                   >
-                    ✕ Filters resetten
-                  </button>
-                )}
+                    <option value="all">Geslacht</option>
+                    <option value="man">Man</option>
+                    <option value="vrouw">Vrouw</option>
+                    <option value="anders">Anders</option>
+                  </select>
+
+                  <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}
+                    style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', color: cityFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 6, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer' }}
+                  >
+                    <option value="all">Locatie</option>
+                    {Array.from(new Set(models.map(m => m.city))).sort().map(city => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Leeftijd op één rij - uitgelijnd met bovenstaande velden */}
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ flex: 1, display: 'flex', gap: 4, alignItems: 'center' }}>
+                    <input
+                      type="number"
+                      placeholder="Min leeftijd"
+                      min="0"
+                      max="100"
+                      value={minAge === 0 ? '' : minAge}
+                      onChange={(e) => setMinAge(e.target.value === '' ? 0 : parseInt(e.target.value))}
+                      style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', border: 'none', borderRadius: 6, fontSize: 12, color: '#1F2B4A', fontFamily: 'inherit' }}
+                    />
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', gap: 4, alignItems: 'center' }}>
+                    <input
+                      type="number"
+                      placeholder="Max leeftijd"
+                      min="0"
+                      max="100"
+                      value={maxAge === 100 ? '' : maxAge}
+                      onChange={(e) => setMaxAge(e.target.value === '' ? 100 : parseInt(e.target.value))}
+                      style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', border: 'none', borderRadius: 6, fontSize: 12, color: '#1F2B4A', fontFamily: 'inherit' }}
+                    />
+                    {/* Reset knop alleen als filters actief zijn */}
+                    {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && (
+                      <button 
+                        onClick={() => { setGenderFilter('all'); setCityFilter('all'); setMinAge(0); setMaxAge(100); }}
+                        style={{ padding: '8px 10px', background: '#EF4444', color: '#fff', border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -838,7 +848,7 @@ export default function Dashboard() {
 
                 <div style={{ marginBottom: 10 }}>
                   <p style={{ color: '#6B7280', margin: 0, fontSize: 13, marginBottom: 10 }}>
-                    {model.gender} • {model.birthdate ? `${calculateAge(model.birthdate)} jaar` : 'Leeftijd onbekend'}
+                    {model.gender} • {model.birthdate ? `${calculateAge(model.birthdate)} jaar • ${formatDateNL(model.birthdate, true)}` : 'Leeftijd onbekend'}
                   </p>
                 </div>
 
@@ -1140,132 +1150,10 @@ export default function Dashboard() {
                           borderRadius: 8
                         }}
                       />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveExtraPhoto(index)}
-                        style={{
-                          position: 'absolute',
-                          top: 4,
-                          right: 4,
-                          width: 24,
-                          height: 24,
-                          borderRadius: '50%',
-                          background: 'rgba(239, 68, 68, 0.9)',
-                          color: '#fff',
-                          border: 'none',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 14,
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        ×
-                      </button>
                     </div>
                   ))}
                 </div>
               )}
-              
-              {/* Upload button voor extra foto's */}
-              <label style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                padding: '12px 16px',
-                background: '#E5DDD5',
-                border: '2px dashed #6B7280',
-                borderRadius: 8,
-                cursor: 'pointer',
-                fontSize: 14,
-                color: '#1F2B4A',
-                fontWeight: 500
-              }}>
-                <span>📷</span> Extra foto's toevoegen
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleExtraPhotoUpload}
-                  style={{ display: 'none' }}
-                />
-              </label>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
-                  Voornaam
-                </label>
-                <input
-                  type="text"
-                  value={editFormData.first_name}
-                  onChange={(e: any) => setEditFormData({ ...editFormData, first_name: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    background: '#E5DDD5',
-                    color: '#1F2B4A',
-                    border: 'none',
-                    borderRadius: 8,
-                    fontSize: 15,
-                    fontFamily: 'inherit',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
-                  Achternaam
-                </label>
-                <input
-                  type="text"
-                  value={editFormData.last_name}
-                  onChange={(e: any) => setEditFormData({ ...editFormData, last_name: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    background: '#E5DDD5',
-                    color: '#1F2B4A',
-                    border: 'none',
-                    borderRadius: 8,
-                    fontSize: 15,
-                    fontFamily: 'inherit',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
-                  Geslacht
-                </label>
-                <select
-                  value={editFormData.gender}
-                  onChange={(e: any) => setEditFormData({ ...editFormData, gender: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    background: '#E5DDD5',
-                    color: '#1F2B4A',
-                    border: 'none',
-                    borderRadius: 8,
-                    fontSize: 15,
-                    fontFamily: 'inherit',
-                    boxSizing: 'border-box',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <option value="man">Man</option>
-                  <option value="vrouw">Vrouw</option>
-                  <option value="anders">Anders</option>
-                </select>
-              </div>
 
               <div>
                 <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
@@ -1288,7 +1176,7 @@ export default function Dashboard() {
                   }}
                 />
                 <div style={{ fontSize: 13, color: '#6B7280', marginTop: 4 }}>
-                  Leeftijd: {editFormData.birthdate ? calculateAge(editFormData.birthdate) : 'Onbekend'} jaar
+                  Leeftijd: {editFormData.birthdate ? `${calculateAge(editFormData.birthdate)} jaar • ${formatDateNL(editFormData.birthdate, true)}` : 'Onbekend'}
                 </div>
               </div>
             </div>
@@ -1797,27 +1685,31 @@ export default function Dashboard() {
           grid-template-columns: repeat(4, 1fr);
         }
 
-        /* Desktop quote visible, mobile quote hidden */
+        /* Desktop quote altijd zichtbaar */
         .desktop-quote {
           display: block;
         }
-        .mobile-quote {
-          display: none;
-        }
 
-        /* 3 kolommen op medium schermen */
-        @media (max-width: 1400px) {
+        /* 3 kolommen op kleinere desktop/grote tablet */
+        @media (max-width: 1100px) {
           .models-grid {
             grid-template-columns: repeat(3, 1fr);
           }
         }
 
-        /* 2 kolommen op kleinere schermen */
-        @media (max-width: 1024px) {
+        /* 2 kolommen op tablets */
+        @media (max-width: 850px) {
           .models-grid {
             grid-template-columns: repeat(2, 1fr);
           }
+          /* Kleinere quote tekst op tablets */
+          .desktop-quote {
+            font-size: 10px !important;
+            padding: 0 4px !important;
+          }
         }
+
+
 
         /* 2 kolommen op mobiel */
         @media (max-width: 640px) {
@@ -1825,7 +1717,6 @@ export default function Dashboard() {
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
           }
-          
           /* Filters: hide desktop, show mobile toggle */
           .filters-desktop {
             display: none !important;
@@ -1839,15 +1730,19 @@ export default function Dashboard() {
           .search-row {
             margin-bottom: 0;
           }
-          
-          /* Quote: hide desktop, show mobile */
+          /* Quote: altijd tonen tussen logo en knoppen */
           .desktop-quote {
-            display: none !important;
-          }
-          .mobile-quote {
             display: block !important;
+            font-size: 9px !important;
+            padding: 0 2px !important;
+            max-width: 100vw;
+            white-space: normal;
+            word-break: break-word;
           }
-          
+          /* Header-top flex-wrap zodat alles past */
+          .header-top {
+            flex-wrap: wrap;
+          }
           /* Header buttons smaller */
           .header-btn {
             padding: 6px 10px !important;
@@ -1859,22 +1754,18 @@ export default function Dashboard() {
           .btn-text {
             display: none;
           }
-          
           /* Model cards op mobiel */
           .models-grid > div {
             border-radius: 8px !important;
           }
-          
           /* Foto minder langwerpig - vierkanter */
           .model-photo {
             height: 140px !important;
           }
-          
           /* Model info compacter */
           .model-info {
             padding: 8px !important;
           }
-          
           /* Naam in foto kleiner */
           .model-name-overlay {
             padding: 3px 6px !important;
@@ -1884,20 +1775,17 @@ export default function Dashboard() {
           .model-name-text {
             font-size: 10px !important;
           }
-          
           /* Info tekst kleiner */
           .model-info p {
             font-size: 9px !important;
             margin-bottom: 3px !important;
             line-height: 1.3 !important;
           }
-          
           /* Actie knoppen kleiner */
           .model-action-btn {
             padding: 3px 5px !important;
             font-size: 12px !important;
           }
-          
           /* Contact/QuitClaim knoppen */
           .model-bottom-btns {
             gap: 4px !important;
@@ -1911,15 +1799,22 @@ export default function Dashboard() {
             flex: 1 1 45% !important;
             min-width: 0 !important;
           }
-          
           /* Main padding kleiner */
           main {
-            padding: 12px !important;
+            padding: 16px !important;
           }
-          
+          /* Filter box compacter */
+          main > div:nth-child(2) {
+            padding: 16px !important;
+            margin-bottom: 16px !important;
+          }
+          /* Database titel met marge */
+          main > div:first-child {
+            margin-bottom: 16px !important;
+          }
           /* Titel kleiner */
           main h1 {
-            font-size: 24px !important;
+            font-size: 28px !important;
           }
         }
 
@@ -2249,13 +2144,7 @@ export default function Dashboard() {
                             👤 {note.employee_name}
                           </div>
                           <div style={{ fontSize: 12, color: '#9CA3AF' }}>
-                            {new Date(note.created_at).toLocaleDateString('nl-NL', {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                            {formatDateNL(note.created_at, true)}
                           </div>
                         </div>
 

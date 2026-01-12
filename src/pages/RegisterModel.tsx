@@ -154,11 +154,12 @@ export default function RegisterModel() {
       if (error) throw error;
       
       try {
-        const { error: functionError } = await supabase.functions.invoke('send-welcome-email', {
+        const { error: functionError } = await supabase.functions.invoke('send-shoot-registration-email', {
           body: {
+            modelName: `${formData.first_name} ${formData.last_name}`,
             email: formData.email,
-            firstName: formData.first_name,
-            lastName: formData.last_name
+            phone: formData.phone,
+            instagram: formData.instagram
           }
         });
 

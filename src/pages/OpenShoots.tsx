@@ -1,3 +1,13 @@
+  // Functie om een datum als Nederlandse string te tonen
+  function formatDateNL(dateString?: string, long: boolean = false): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // fallback als het geen geldige datum is
+    if (long) {
+      return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    return date.toLocaleDateString('nl-NL'); // korte notatie: dd-mm-jjjj
+  }
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
@@ -533,7 +543,7 @@ export default function OpenShoots() {
                   alignItems: 'center',
                   gap: 8
                 }}>
-                  <span>📅</span> {shoot.shoot_date || shoot.date}
+                  <span>📅</span> {formatDateNL(shoot.shoot_date || shoot.date)}
                 </div>
                 <div style={{ 
                   fontSize: 14, 

@@ -1,3 +1,13 @@
+  // Functie om een datum als Nederlandse string te tonen
+  function formatDateNL(dateString?: string, long: boolean = false): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // fallback als het geen geldige datum is
+    if (long) {
+      return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    return date.toLocaleDateString('nl-NL'); // korte notatie: dd-mm-jjjj
+  }
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +30,9 @@ export default function ManageShoots() {
     description: '',
     spots: '',
     clientWebsite: '',
+    clientInstagram: '',
+    bannerPhoto: null as File | null,
+    bannerPhotoUrl: '',
     compensationType: 'bedrag',
     compensationAmount: ''
   });
@@ -90,12 +103,26 @@ export default function ManageShoots() {
     e.preventDefault();
     
     try {
+      let bannerPhotoUrl = '';
+      if (newShoot.bannerPhoto) {
+        const fileExt = newShoot.bannerPhoto.name.split('.').pop();
+        const fileName = `shoot-banner-${Date.now()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('shoot-banners')
+          .upload(fileName, newShoot.bannerPhoto, { upsert: true });
+        if (uploadError) throw uploadError;
+        const { data: publicUrlData } = supabase.storage.from('shoot-banners').getPublicUrl(fileName);
+        bannerPhotoUrl = publicUrlData?.publicUrl || '';
+      }
+
+      // status altijd 'open' bij toevoegen/bewerken
       const shootData = {
         client_name: newShoot.client,
         description: newShoot.title + '\n\n' + newShoot.description,
         shoot_date: newShoot.date,
         location: newShoot.location,
         client_website: newShoot.clientWebsite,
+        banner_photo_url: bannerPhotoUrl,
         compensation_type: newShoot.compensationType,
         compensation_amount: newShoot.compensationType === 'bedrag' || newShoot.compensationType === 'cadeaubon' 
           ? parseFloat(newShoot.compensationAmount) || null
@@ -104,10 +131,10 @@ export default function ManageShoots() {
       };
 
       if (editingShoot !== null) {
-        // Update bestaande shoot
+        // Update bestaande shoot, forceer status 'open'
         const { error } = await supabase
           .from('shoots')
-          .update(shootData)
+          .update({ ...shootData, status: 'open' })
           .eq('id', editingShoot);
 
         if (error) throw error;
@@ -117,7 +144,7 @@ export default function ManageShoots() {
         // Nieuwe shoot toevoegen
         const { error } = await supabase
           .from('shoots')
-          .insert([shootData]);
+          .insert([{ ...shootData, status: 'open' }]);
 
         if (error) throw error;
         alert('✅ Nieuwe shoot toegevoegd!');
@@ -135,6 +162,9 @@ export default function ManageShoots() {
         description: '',
         spots: '',
         clientWebsite: '',
+        clientInstagram: '',
+        bannerPhoto: null,
+        bannerPhotoUrl: '',
         compensationType: 'bedrag',
         compensationAmount: ''
       });
@@ -148,15 +178,18 @@ export default function ManageShoots() {
   const handleEditShoot = (shoot: any) => {
     setEditingShoot(shoot.id);
     setNewShoot({
-      client: shoot.client_name || shoot.client || '',
-      title: shoot.description?.split('\n\n')[0] || shoot.title || '',
-      date: shoot.shoot_date || shoot.date || '',
-      location: shoot.location || '',
-      description: shoot.description?.split('\n\n').slice(1).join('\n\n') || '',
-      spots: shoot.spots?.toString() || '',
-      clientWebsite: shoot.client_website || shoot.clientWebsite || '',
-      compensationType: shoot.compensation_type || 'bedrag',
-      compensationAmount: shoot.compensation_amount?.toString() || ''
+    client: shoot.client_name || shoot.client || '',
+    title: shoot.description?.split('\n\n')[0] || shoot.title || '',
+    date: shoot.shoot_date || shoot.date || '',
+    location: shoot.location || '',
+    description: shoot.description?.split('\n\n').slice(1).join('\n\n') || '',
+    spots: shoot.spots?.toString() || '',
+    clientWebsite: shoot.client_website || shoot.clientWebsite || '',
+    clientInstagram: shoot.client_instagram || shoot.clientInstagram || '',
+    bannerPhoto: null,
+    bannerPhotoUrl: shoot.banner_photo_url || '',
+    compensationType: shoot.compensation_type || 'bedrag',
+    compensationAmount: shoot.compensation_amount?.toString() || ''
     });
     setShowAddForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -166,15 +199,18 @@ export default function ManageShoots() {
     setEditingShoot(null);
     setShowAddForm(false);
     setNewShoot({
-      client: '',
-      title: '',
-      date: '',
-      location: '',
-      description: '',
-      spots: '',
-      clientWebsite: '',
-      compensationType: 'bedrag',
-      compensationAmount: ''
+    client: '',
+    title: '',
+    date: '',
+    location: '',
+    description: '',
+    spots: '',
+    clientWebsite: '',
+    clientInstagram: '',
+    bannerPhoto: null,
+    bannerPhotoUrl: '',
+    compensationType: 'bedrag',
+    compensationAmount: ''
     });
   };
 
@@ -203,54 +239,21 @@ export default function ManageShoots() {
       background: '#E5DDD5',
       fontFamily: 'system-ui, -apple-system, sans-serif'
     }}>
-      
       {/* Banner bovenaan met scrollende logos */}
-      <div style={{ 
-        background: '#fff',
-        padding: '12px 0',
-        overflow: 'hidden',
-        position: 'relative',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-        minHeight: '60px'
-      }}>
+      <div style={{ padding: '12px 0', position: 'relative', minHeight: '60px' }}>
         {/* Scrollende logos - volledige breedte */}
-        <div style={{ 
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          <div className="logo-scroll" style={{
-            display: 'flex',
-            gap: 60,
-            alignItems: 'center',
-            paddingRight: '60px'
-          }}>
-            {/* Eerste set logos */}
-            <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-            <img src={logoKoekela} alt="Koekela" className="logo-small" />
-            <img src={logoJordys} alt="Jordys" className="logo-normal" />
-            <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-            <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-            
-            {/* Duplicaat voor seamless loop */}
-            <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-            <img src={logoKoekela} alt="Koekela" className="logo-small" />
-            <img src={logoJordys} alt="Jordys" className="logo-normal" />
-            <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-            <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-
-            {/* Extra duplicaat voor grotere schermen */}
-            <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-            <img src={logoKoekela} alt="Koekela" className="logo-small" />
-            <img src={logoJordys} alt="Jordys" className="logo-normal" />
-            <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-            <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-          </div>
+        <div className="logo-scroll" style={{ gap: 60, paddingRight: '60px', display: 'flex', alignItems: 'center' }}>
+          <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
+          <img src={logoKoekela} alt="Koekela" className="logo-small" />
+          <img src={logoJordys} alt="Jordys" className="logo-normal" />
+          <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
+          <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
+          {/* Extra duplicaat voor grotere schermen */}
+          <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
+          <img src={logoKoekela} alt="Koekela" className="logo-small" />
+          <img src={logoJordys} alt="Jordys" className="logo-normal" />
+          <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
+          <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
         </div>
       </div>
 
@@ -267,7 +270,7 @@ export default function ManageShoots() {
             color: '#1F2B4A', 
             marginBottom: 12 
           }}>
-            Shoots Beheren
+            Shoots beheren
           </h1>
           <p style={{ 
             fontSize: 16, 
@@ -308,7 +311,7 @@ export default function ManageShoots() {
               e.currentTarget.style.background = '#2B3E72';
             }}
           >
-            {showAddForm ? '❌ Annuleren' : '➕ Nieuwe Shoot Toevoegen'}
+            {showAddForm ? '❌ Annuleren' : '➕ Nieuwe shoot toevoegen'}
           </button>
         </div>
 
@@ -328,10 +331,29 @@ export default function ManageShoots() {
               color: '#1F2B4A',
               marginBottom: 24
             }}>
-              {editingShoot ? 'Shoot Bewerken' : 'Nieuwe Shoot'}
+              {editingShoot ? 'Shoot bewerken' : 'Nieuwe shoot'}
             </h2>
             <form onSubmit={handleAddShoot}>
               <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                  Bannerfoto (optioneel)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    setNewShoot(s => ({ ...s, bannerPhoto: file }));
+                  }}
+                  style={{ marginBottom: 8 }}
+                />
+                {newShoot.bannerPhoto && (
+                  <img
+                    src={URL.createObjectURL(newShoot.bannerPhoto)}
+                    alt="Preview banner"
+                    style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}
+                  />
+                )}
                 <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
                   Klant *
                 </label>
@@ -347,17 +369,26 @@ export default function ManageShoots() {
 
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
-                  Website Klant
+                  Website klant / instagram klant
                 </label>
-                <input
-                  type="url"
-                  placeholder="https://lacazuela.nl"
-                  value={newShoot.clientWebsite}
-                  onChange={(e) => setNewShoot({...newShoot, clientWebsite: e.target.value})}
-                  style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-                />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="url"
+                    placeholder="https://lacazuela.nl"
+                    value={newShoot.clientWebsite}
+                    onChange={(e) => setNewShoot({...newShoot, clientWebsite: e.target.value})}
+                    style={{ flex: 1, padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="@instagram"
+                    value={newShoot.clientInstagram}
+                    onChange={(e) => setNewShoot({...newShoot, clientInstagram: e.target.value})}
+                    style={{ flex: 1, padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                  />
+                </div>
                 <small style={{ fontSize: 12, color: '#6B7280', marginTop: 4, display: 'block' }}>
-                  Optioneel - Modellen kunnen naar de website van de klant gaan
+                  Optioneel - Modellen kunnen naar de website of Instagram van de klant gaan
                 </small>
               </div>
 
@@ -368,7 +399,7 @@ export default function ManageShoots() {
                 <input
                   required
                   type="text"
-                  placeholder="Bijv. Zomer Campagne Fotoshoot"
+                  placeholder="Bijv. zomer campagne fotoshoot"
                   value={newShoot.title}
                   onChange={(e) => setNewShoot({...newShoot, title: e.target.value})}
                   style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
@@ -413,7 +444,7 @@ export default function ManageShoots() {
                 <input
                   required
                   type="text"
-                  placeholder="Rotterdam Centrum"
+                  placeholder="Rotterdam centrum"
                   value={newShoot.location}
                   onChange={(e) => setNewShoot({...newShoot, location: e.target.value})}
                   style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
@@ -436,7 +467,7 @@ export default function ManageShoots() {
 
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
-                  Soort Vergoeding *
+                  Soort vergoeding *
                 </label>
                 <select
                   required
@@ -491,7 +522,7 @@ export default function ManageShoots() {
                   e.currentTarget.style.background = '#2B3E72';
                 }}
               >
-                {editingShoot ? 'Shoot Bijwerken' : 'Shoot Toevoegen'}
+                {editingShoot ? 'Shoot bijwerken' : 'Shoot toevoegen'}
               </button>
             </form>
           </div>
@@ -509,7 +540,7 @@ export default function ManageShoots() {
             marginBottom: 24,
             textAlign: 'center'
           }}>
-            Alle Shoots ({shoots.length})
+            Alle shoots ({shoots.length})
           </h2>
 
           <div style={{
@@ -520,14 +551,22 @@ export default function ManageShoots() {
               <div key={shoot.id} style={{
                 background: '#fff',
                 borderRadius: 12,
-                padding: 24,
+                padding: 0,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 display: 'grid',
                 gridTemplateColumns: '1fr auto',
                 gap: 24,
-                alignItems: 'start'
+                alignItems: 'start',
+                overflow: 'hidden'
               }}>
-                <div>
+                {shoot.banner_photo_url && (
+                  <img
+                    src={shoot.banner_photo_url}
+                    alt="Banner shoot"
+                    style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }}
+                  />
+                )}
+                <div style={{ padding: 24 }}>
                   <div style={{ 
                     fontSize: 12, 
                     fontWeight: 600, 
@@ -554,7 +593,7 @@ export default function ManageShoots() {
                       alignItems: 'center',
                       gap: 8
                     }}>
-                      <span>📅</span> {shoot.shoot_date || shoot.date}
+                      <span>📅</span> {formatDateNL(shoot.shoot_date || shoot.date)}
                     </div>
                     <div style={{ 
                       fontSize: 14, 
@@ -787,13 +826,7 @@ export default function ManageShoots() {
                                   fontSize: 11, 
                                   color: '#9CA3AF' 
                                 }}>
-                                  Aangemeld op: {new Date(reg.created_at).toLocaleDateString('nl-NL', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
+                                  Aangemeld op: {formatDateNL(reg.created_at, true)}
                                 </div>
                               </div>
                             ))}
