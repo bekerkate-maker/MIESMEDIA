@@ -1,0 +1,1 @@
+ALTER TABLE shoots ADD COLUMN IF NOT EXISTS banner_photo_url TEXT;

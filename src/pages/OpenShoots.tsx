@@ -1,13 +1,13 @@
-  // Functie om een datum als Nederlandse string te tonen
-  function formatDateNL(dateString?: string, long: boolean = false): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString; // fallback als het geen geldige datum is
-    if (long) {
-      return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
-    }
-    return date.toLocaleDateString('nl-NL'); // korte notatie: dd-mm-jjjj
+// Functie om een datum als Nederlandse string te tonen
+function formatDateNL(dateString?: string, long: boolean = false): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString; // fallback als het geen geldige datum is
+  if (long) {
+    return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
   }
+  return date.toLocaleDateString('nl-NL'); // korte notatie: dd-mm-jjjj
+}
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
@@ -25,6 +25,7 @@ export default function OpenShoots() {
   const [loginError, setLoginError] = useState('');
   const [message, setMessage] = useState('');
   const [openShoots, setOpenShoots] = useState<any[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Haal shoots op uit database
   useEffect(() => {
@@ -74,10 +75,10 @@ export default function OpenShoots() {
 
   const handleSubmitRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const fullName = `${loggedInModel.first_name} ${loggedInModel.last_name}`;
-      
+
       const { error } = await supabase
         .from('shoot_registrations')
         .insert([{
@@ -114,14 +115,14 @@ export default function OpenShoots() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
+    <div style={{
+      minHeight: '100vh',
       background: '#E5DDD5',
       fontFamily: 'system-ui, -apple-system, sans-serif'
     }}>
-      
+
       {/* Banner bovenaan met scrollende logos */}
-      <div style={{ 
+      <div style={{
         background: '#fff',
         padding: '12px 0',
         overflow: 'hidden',
@@ -129,7 +130,7 @@ export default function OpenShoots() {
         boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
         minHeight: '60px'
       }}>
-        <div style={{ 
+        <div style={{
           position: 'absolute',
           top: 0,
           left: 0,
@@ -165,23 +166,23 @@ export default function OpenShoots() {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
             <MiesLogo size={110} />
           </div>
-          <h1 style={{ 
-            fontSize: 32, 
-            fontWeight: 700, 
-            color: '#1F2B4A', 
-            marginBottom: 12 
+          <h1 style={{
+            fontSize: 32,
+            fontWeight: 700,
+            color: '#1F2B4A',
+            marginBottom: 12
           }}>
-            Openstaande Shoots
+            Openstaande shoots
           </h1>
-          <p style={{ 
-            fontSize: 16, 
-            color: '#6B7280', 
-            maxWidth: 600, 
-            margin: '0 auto 16px' 
+          <p style={{
+            fontSize: 16,
+            color: '#6B7280',
+            maxWidth: 600,
+            margin: '0 auto 16px'
           }}>
             Bekijk alle beschikbare shoots en meld je aan voor jouw volgende opdracht
           </p>
-          
+
           {/* Registreer als model knop */}
           <div style={{ marginTop: 24 }}>
             <button
@@ -227,9 +228,9 @@ export default function OpenShoots() {
             border: '2px solid #2B3E72'
           }}>
             <div style={{ marginBottom: 24 }}>
-              <h2 style={{ 
-                fontSize: 24, 
-                fontWeight: 600, 
+              <h2 style={{
+                fontSize: 24,
+                fontWeight: 600,
                 color: '#1F2B4A',
                 marginBottom: 8
               }}>
@@ -313,7 +314,7 @@ export default function OpenShoots() {
                 <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 20, textAlign: 'center' }}>
                   Log in met je geregistreerde gegevens
                 </p>
-                
+
                 {loginError && (
                   <div style={{
                     padding: '12px',
@@ -336,7 +337,7 @@ export default function OpenShoots() {
                     type="email"
                     placeholder="jouw@email.nl"
                     value={loginData.email}
-                    onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                     style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
                   />
                 </div>
@@ -349,7 +350,7 @@ export default function OpenShoots() {
                     required
                     type="date"
                     value={loginData.birthdate}
-                    onChange={(e) => setLoginData({...loginData, birthdate: e.target.value})}
+                    onChange={(e) => setLoginData({ ...loginData, birthdate: e.target.value })}
                     style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
                   />
                 </div>
@@ -418,7 +419,7 @@ export default function OpenShoots() {
                   <span>✓</span>
                   <span>Ingelogd als <strong>{loggedInModel.first_name} {loggedInModel.last_name}</strong></span>
                 </div>
-                
+
                 <div style={{ marginBottom: 20, padding: 16, background: '#F9FAFB', borderRadius: 8 }}>
                   <p style={{ fontSize: 14, color: '#4B5563', marginBottom: 12 }}>
                     <strong>Je gegevens:</strong>
@@ -480,7 +481,7 @@ export default function OpenShoots() {
                     onMouseEnter={(e) => e.currentTarget.style.background = '#1F2B4A'}
                     onMouseLeave={(e) => e.currentTarget.style.background = '#2B3E72'}
                   >
-                    ✓ Bevestig Aanmelding
+                    ✓ Bevestig aanmelding
                   </button>
                 </div>
               </form>
@@ -489,8 +490,8 @@ export default function OpenShoots() {
         )}
 
         {/* Shoots Grid */}
-        <div style={{ 
-          maxWidth: 1000, 
+        <div style={{
+          maxWidth: 1000,
           margin: '0 auto',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
@@ -500,148 +501,299 @@ export default function OpenShoots() {
             <div key={shoot.id} style={{
               background: '#fff',
               borderRadius: 12,
-              padding: 24,
+              padding: 0,
               boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
               transition: 'all 0.3s ease',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              overflow: 'hidden',
+              height: '100%'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-            }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+              }}
             >
-              <div style={{ flex: '1' }}>
-              <div style={{ 
-                fontSize: 12, 
-                fontWeight: 600, 
-                color: '#2B3E72',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                marginBottom: 8
-              }}>
-                {shoot.client_name || shoot.client}
-              </div>
-              <h3 style={{ 
-                fontSize: 20, 
-                fontWeight: 600, 
-                color: '#1F2B4A',
-                marginBottom: 12
-              }}>
-                {shoot.description?.split('\n\n')[0] || shoot.title}
-              </h3>
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ 
-                  fontSize: 14, 
-                  color: '#6B7280',
-                  marginBottom: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8
-                }}>
-                  <span>📅</span> {formatDateNL(shoot.shoot_date || shoot.date)}
+              {shoot.banner_photo_url && (
+                <div
+                  style={{
+                    width: '100%',
+                    height: 160,
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                  onClick={() => setPreviewImage(shoot.banner_photo_url)}
+                  title="Klik voor voorbeeld"
+                >
+                  <img
+                    src={shoot.banner_photo_url}
+                    alt="Banner shoot"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                  />
                 </div>
-                <div style={{ 
-                  fontSize: 14, 
-                  color: '#6B7280',
+              )}
+              {!shoot.banner_photo_url && (
+                <div style={{
+                  width: '100%',
+                  height: 160,
+                  background: 'linear-gradient(135deg, #E5DDD5 0%, #D1C7BB 100%)',
+                  flexShrink: 0
+                }} />
+              )}
+              <div style={{ flex: '1', padding: '20px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: '#2B3E72',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
                   marginBottom: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8
+                  height: 18,
+                  flexShrink: 0
                 }}>
-                  <span>📍</span> {shoot.location}
+                  {shoot.client_name || shoot.client}
                 </div>
-                <div style={{ 
-                  fontSize: 14, 
-                  color: '#6B7280',
-                  marginBottom: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8
+                <h3 style={{
+                  fontSize: 20,
+                  fontWeight: 600,
+                  color: '#1F2B4A',
+                  marginBottom: 10,
+                  height: 50,
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  flexShrink: 0
                 }}>
-                  <span>👥</span> {shoot.spots || 'Onbeperkt'} plekken beschikbaar
-                </div>
-                {shoot.compensation_type && (
-                  <div style={{ 
+                  {shoot.description?.split('\n\n')[0] || shoot.title}
+                </h3>
+                <div style={{ marginBottom: 12, flexShrink: 0 }}>
+                  <div style={{
+                    fontSize: 14,
+                    color: '#6B7280',
+                    marginBottom: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    height: 22
+                  }}>
+                    <span>📅</span> {formatDateNL(shoot.shoot_date || shoot.date)}
+                    {shoot.start_time && shoot.end_time && (
+                      <span style={{ marginLeft: 8 }}>
+                        🕒 {shoot.start_time.substring(0, 5)} - {shoot.end_time.substring(0, 5)}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{
+                    fontSize: 14,
+                    color: '#6B7280',
+                    marginBottom: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    height: 22
+                  }}>
+                    <span>📍</span> {shoot.location}
+                  </div>
+                  <div style={{
+                    fontSize: 14,
+                    color: '#6B7280',
+                    marginBottom: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    height: 22
+                  }}>
+                    <span>👥</span> {shoot.spots || 'Onbeperkt'} plekken beschikbaar
+                  </div>
+                  <div style={{
                     fontSize: 14,
                     fontWeight: 500,
                     color: '#2B3E72',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8
+                    gap: 8,
+                    height: 22,
+                    minHeight: 22
                   }}>
                     {shoot.compensation_type === 'bedrag' && `💰 Vergoeding: €${shoot.compensation_amount}`}
                     {shoot.compensation_type === 'eten' && '🍽️ Eten wordt betaald'}
                     {shoot.compensation_type === 'cadeaubon' && `🎁 Cadeaubon: €${shoot.compensation_amount}`}
                     {shoot.compensation_type === 'geen' && '❌ Geen vergoeding'}
+                    {!shoot.compensation_type && '\u00A0'}
                   </div>
-                )}
-              </div>
-              <p style={{ 
-                fontSize: 14, 
-                color: '#4B5563',
-                lineHeight: 1.6,
-                marginBottom: 16
-              }}>
-                {shoot.description?.split('\n\n').slice(1).join('\n\n') || shoot.description}
-              </p>
-              {(shoot.client_website || shoot.clientWebsite) && (
-                <a
-                  href={shoot.client_website || shoot.clientWebsite}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                </div>
+                <p style={{
+                  fontSize: 14,
+                  color: '#4B5563',
+                  lineHeight: 1.5,
+                  marginBottom: 12,
+                  height: 66,
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 4,
+                  WebkitBoxOrient: 'vertical',
+                  flexShrink: 0
+                }}>
+                  {shoot.description?.split('\n\n').slice(1).join('\n\n') || shoot.description}
+                </p>
+                <div style={{ minHeight: 54, marginBottom: 12, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {shoot.moodboard_link && (
+                    <a
+                      href={shoot.moodboard_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-block',
+                        fontSize: 13,
+                        color: '#2B3E72',
+                        textDecoration: 'none',
+                        fontWeight: 600
+                      }}
+                    >
+                      🎨 Bekijk moodboard →
+                    </a>
+                  )}
+                  {(shoot.client_website || shoot.clientWebsite) && (
+                    <a
+                      href={shoot.client_website || shoot.clientWebsite}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-block',
+                        fontSize: 13,
+                        color: '#2B3E72',
+                        textDecoration: 'none',
+                        fontWeight: 500
+                      }}
+                    >
+                      🌐 Bezoek website van {shoot.client_name || shoot.client}
+                    </a>
+                  )}
+                  {(shoot.client_instagram || shoot.clientInstagram) && (
+                    <a
+                      href={`https://instagram.com/${(shoot.client_instagram || shoot.clientInstagram).replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-block',
+                        fontSize: 13,
+                        color: '#2B3E72',
+                        textDecoration: 'none',
+                        fontWeight: 500
+                      }}
+                    >
+                      📷 @{(shoot.client_instagram || shoot.clientInstagram).replace('@', '')}
+                    </a>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    setSelectedShoot(shoot.id);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                   style={{
-                    display: 'inline-block',
-                    fontSize: 13,
-                    color: '#2B3E72',
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                    marginBottom: 16
+                    width: '100%',
+                    padding: '12px',
+                    background: '#2B3E72',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontFamily: 'inherit',
+                    marginTop: 'auto',
+                    flexShrink: 0
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#1F2B4A';
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#2B3E72';
+                    e.currentTarget.style.transform = 'scale(1)';
                   }}
                 >
-                  🌐 Bezoek website van {shoot.client_name || shoot.client}
-                </a>
-              )}
+                  ✨ Meld je aan!
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  setSelectedShoot(shoot.id);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  background: '#2B3E72',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  fontFamily: 'inherit',
-                  marginTop: 'auto',
-                  flexShrink: 0
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#1F2B4A';
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#2B3E72';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                ✨ Meld je aan!
-              </button>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: 24,
+            cursor: 'pointer'
+          }}
+          onClick={() => setPreviewImage(null)}
+        >
+          <div style={{ position: 'relative', maxWidth: '90%', maxHeight: '90%' }}>
+            <img
+              src={previewImage}
+              alt="Preview"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '90vh',
+                borderRadius: 8,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                display: 'block'
+              }}
+            />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewImage(null);
+              }}
+              style={{
+                position: 'absolute',
+                top: -15,
+                right: -15,
+                width: 30,
+                height: 30,
+                borderRadius: '50%',
+                background: '#fff',
+                color: '#1F2B4A',
+                border: 'none',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
 
       <style>{`
         @keyframes scroll {

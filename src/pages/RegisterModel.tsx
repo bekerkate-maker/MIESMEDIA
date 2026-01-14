@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
 import logoCasu from '@/components/logo_klanten/logo_casu.png';
@@ -8,12 +8,13 @@ import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
 import logoDudok from '@/components/logo_klanten/dudok_logo.png';
 
 export default function RegisterModel() {
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const handleBirthdateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
     value = value.replace(/[^0-9]/g, '');
-    if (value.length > 2) value = value.slice(0,2) + '/' + value.slice(2);
-    if (value.length > 5) value = value.slice(0,5) + '/' + value.slice(5);
-    if (value.length > 10) value = value.slice(0,10);
+    if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
+    if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5);
+    if (value.length > 10) value = value.slice(0, 10);
     setFormData({ ...formData, birthdate: value });
   };
 
@@ -36,6 +37,30 @@ export default function RegisterModel() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [extraPhotoFiles, setExtraPhotoFiles] = useState<File[]>([]);
   const [extraPhotoPreviews, setExtraPhotoPreviews] = useState<string[]>([]);
+  const [termsUrl, setTermsUrl] = useState<string | null>(null);
+
+  // Fetch terms and conditions document
+  useEffect(() => {
+    const fetchTerms = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('terms_and_conditions')
+          .select('document_url')
+          .eq('is_active', true)
+          .order('uploaded_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (!error && data) {
+          setTermsUrl(data.document_url);
+        }
+      } catch (err) {
+        console.error('Error fetching terms:', err);
+      }
+    };
+
+    fetchTerms();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -52,7 +77,7 @@ export default function RegisterModel() {
   const handleExtraFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    
+
     Array.from(files).forEach(file => {
       setExtraPhotoFiles(prev => [...prev, file]);
       const reader = new FileReader();
@@ -70,12 +95,12 @@ export default function RegisterModel() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    
+
     if (!agreedToTerms) {
       alert('⚠️ Je moet akkoord gaan met de voorwaarden om je aan te melden.');
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -126,8 +151,8 @@ export default function RegisterModel() {
         }
       }
 
-      const instagramHandle = formData.instagram.startsWith('@') 
-        ? formData.instagram 
+      const instagramHandle = formData.instagram.startsWith('@')
+        ? formData.instagram
         : `@${formData.instagram}`;
 
       let birthdateFormatted = null;
@@ -152,7 +177,7 @@ export default function RegisterModel() {
       }]);
 
       if (error) throw error;
-      
+
       try {
         const { error: functionError } = await supabase.functions.invoke('send-shoot-registration-email', {
           body: {
@@ -169,7 +194,7 @@ export default function RegisterModel() {
       } catch (emailError) {
         console.error('Email error:', emailError);
       }
-      
+
       setSubmitted(true);
     } catch (error: any) {
       console.error('Error submitting form:', error);
@@ -195,7 +220,7 @@ export default function RegisterModel() {
             Je bent officieel een Rotterdams Model. Niet lullen maar poseren!! 📸🤳
           </p>
           <button onClick={() => { window.location.href = '/'; }} className="primary-btn">
-            Meld je aan voor open shoots
+            Meld je aan voor openstaande shoots
           </button>
         </div>
         <style>{styles}</style>
@@ -234,7 +259,7 @@ export default function RegisterModel() {
           </div>
           <div className="button-wrapper">
             <button onClick={() => { window.location.href = '/'; }} className="primary-btn">
-              Meld je aan voor open shoots
+              Meld je aan voor openstaande shoots
             </button>
           </div>
           <h1 className="main-title">Registreer hier als MIES MEDIA Model</h1>
@@ -246,18 +271,18 @@ export default function RegisterModel() {
             <div className="form-row">
               <div className="form-field">
                 <label>Voornaam *</label>
-                <input required value={formData.first_name} onChange={(e) => setFormData({...formData, first_name: e.target.value})} />
+                <input required value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
               </div>
               <div className="form-field">
                 <label>Achternaam *</label>
-                <input required value={formData.last_name} onChange={(e) => setFormData({...formData, last_name: e.target.value})} />
+                <input required value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-field">
                 <label>Geslacht *</label>
-                <select required value={formData.gender} onChange={(e) => setFormData({...formData, gender: e.target.value})} className={formData.gender ? '' : 'placeholder'}>
+                <select required value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} className={formData.gender ? '' : 'placeholder'}>
                   <option value="">Selecteer geslacht</option>
                   <option value="man">Man</option>
                   <option value="vrouw">Vrouw</option>
@@ -275,23 +300,23 @@ export default function RegisterModel() {
                 <label>Instagram *</label>
                 <div className="input-with-prefix">
                   <span className="prefix">@</span>
-                  <input required placeholder="username" value={formData.instagram} onChange={(e) => setFormData({...formData, instagram: e.target.value})} />
+                  <input required placeholder="username" value={formData.instagram} onChange={(e) => setFormData({ ...formData, instagram: e.target.value })} />
                 </div>
               </div>
               <div className="form-field">
                 <label>E-mailadres *</label>
-                <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                <input required type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-field">
                 <label>Telefoonnummer *</label>
-                <input required type="tel" placeholder="06 12345678" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                <input required type="tel" placeholder="06 12345678" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
               </div>
               <div className="form-field">
                 <label>Woonplaats *</label>
-                <input required type="text" placeholder="Rotterdam" value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})} />
+                <input required type="text" placeholder="Rotterdam" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
               </div>
             </div>
 
@@ -329,9 +354,85 @@ export default function RegisterModel() {
             <div className="form-field">
               <label className="checkbox-label">
                 <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} />
-                <span>Ik geef MIES MEDIA toestemming om mijn gegevens te verwerken en op te slaan.</span>
+                <span>
+                  Ik ga akkoord met de voorwaarden.
+                  {termsUrl && (
+                    <>
+                      {' '}
+                      <button
+                        type="button"
+                        style={{ color: '#2B3E72', textDecoration: 'underline', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: 8 }}
+                        onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }}
+                      >
+                        Bekijk voorwaarden
+                      </button>
+                    </>
+                  )}
+                </span>
               </label>
             </div>
+
+            {/* Modal voor voorwaarden */}
+            {showTermsModal && termsUrl && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                background: 'rgba(0,0,0,0.7)',
+                zIndex: 9999,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+                onClick={() => setShowTermsModal(false)}
+              >
+                <div style={{
+                  background: '#fff',
+                  borderRadius: 12,
+                  maxWidth: 700,
+                  width: '90vw',
+                  maxHeight: '80vh',
+                  overflow: 'auto',
+                  position: 'relative',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                  padding: 32
+                }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => setShowTermsModal(false)}
+                    style={{
+                      position: 'absolute',
+                      top: 12,
+                      right: 12,
+                      background: '#eee',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: 32,
+                      height: 32,
+                      fontSize: 20,
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      color: '#1F2B4A',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    }}
+                    aria-label="Sluit"
+                  >
+                    ×
+                  </button>
+                  <iframe
+                    src={termsUrl}
+                    title="Algemene voorwaarden"
+                    style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }}
+                  />
+                </div>
+              </div>
+            )}
 
             <button type="submit" disabled={loading || !agreedToTerms} className={`submit-btn ${(loading || !agreedToTerms) ? 'disabled' : ''}`}>
               {loading ? 'Bezig met verzenden...' : 'Aanmelden'}

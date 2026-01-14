@@ -22,6 +22,9 @@ type Model = {
 };
 
 export default function Dashboard() {
+  // Voorwaarden upload preview state
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [selectedTermsFile, setSelectedTermsFile] = useState<File | null>(null);
   // Functie om leeftijd te berekenen uit geboortedatum
   // Functie om een datum als Nederlandse string te tonen
   function formatDateNL(dateString?: string, long: boolean = false): string {
@@ -64,7 +67,7 @@ export default function Dashboard() {
   const [imageZoom, setImageZoom] = useState(1);
   const [highlightedModelId, setHighlightedModelId] = useState<string | null>(null);
   const modelRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  
+
   // Notitie systeem state
   const [viewingNotesFor, setViewingNotesFor] = useState<Model | null>(null);
   const [modelNotes, setModelNotes] = useState<any[]>([]);
@@ -76,14 +79,17 @@ export default function Dashboard() {
     compensation_amount: ''
   });
   const [currentEmployeeName, setCurrentEmployeeName] = useState<string>('Medewerker');
-  
+
   // Quitclaim modal state
   const [viewingQuitclaimFor, setViewingQuitclaimFor] = useState<Model | null>(null);
-  
+
   // Foto gallery state
   const [viewingPhotosFor, setViewingPhotosFor] = useState<Model | null>(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [editExtraPhotos, setEditExtraPhotos] = useState<string[]>([]);
+
+  // Terms upload state
+  const [showTermsUpload, setShowTermsUpload] = useState(false);
 
   const motivationalQuotes = [
     "Vandaag gaan we knallen. Niet lullen maar vullen… die agenda!",
@@ -98,12 +104,12 @@ export default function Dashboard() {
   useEffect(() => {
     fetchModels();
     fetchEmployees();
-    
+
     // Rotate quotes every 15 seconds
     const quoteInterval = setInterval(() => {
       setQuoteIndex((prevIndex) => (prevIndex + 1) % motivationalQuotes.length);
     }, 15000);
-    
+
     return () => {
       clearInterval(quoteInterval);
     };
@@ -119,16 +125,16 @@ export default function Dashboard() {
     const modelId = searchParams.get('model');
     if (modelId && models.length > 0) {
       setHighlightedModelId(modelId);
-      
+
       // Wacht tot de DOM is gerenderd en scroll naar model
       setTimeout(() => {
         const modelElement = modelRefs.current[modelId];
         if (modelElement) {
-          modelElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
+          modelElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
           });
-          
+
           // Verwijder highlight na 5 seconden
           setTimeout(() => {
             setHighlightedModelId(null);
@@ -165,11 +171,11 @@ export default function Dashboard() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      
+
       // Zet de namen van de employees in de state
       const employeeNames = (data || []).map(emp => emp.name || emp.email);
       setLoggedInEmployees(employeeNames);
-      
+
       // Zet de eerste medewerker als current employee naam voor notities
       if (employeeNames.length > 0) {
         setCurrentEmployeeName(employeeNames[0]);
@@ -221,7 +227,50 @@ export default function Dashboard() {
   };
 
   const handleManageShoots = () => {
-    window.location.href = '/manage-shoots';
+    navigate('/manage-shoots');
+  };
+
+  const handleTermsUpload = async (file: File) => {
+    try {
+      // Upload to Supabase storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `terms-${Date.now()}.${fileExt}`;
+      const filePath = `terms/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('terms')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('terms')
+        .getPublicUrl(filePath);
+
+      // Deactivate old terms
+      await supabase
+        .from('terms_and_conditions')
+        .update({ is_active: false })
+        .eq('is_active', true);
+
+      // Insert new terms
+      const { error: insertError } = await supabase
+        .from('terms_and_conditions')
+        .insert([{
+          document_url: urlData.publicUrl,
+          uploaded_by: currentEmployeeName,
+          is_active: true
+        }]);
+
+      if (insertError) throw insertError;
+
+      alert('✅ Voorwaarden succesvol geüpload!');
+      setShowTermsUpload(false);
+    } catch (error) {
+      console.error('Error uploading terms:', error);
+      alert('❌ Fout bij uploaden: ' + (error as Error).message);
+    }
   };
 
   // Notitie functies
@@ -267,7 +316,7 @@ export default function Dashboard() {
 
       // Refresh notes
       await fetchNotesForModel(viewingNotesFor.id);
-      
+
       // Reset form en sluit het
       setShowAddNoteForm(false);
       setNewNote({
@@ -348,7 +397,7 @@ export default function Dashboard() {
         ...editFormData,
         extra_photos: editExtraPhotos.length > 0 ? editExtraPhotos : null
       };
-      
+
       const { error } = await supabase
         .from('models')
         .update(updateData)
@@ -369,7 +418,7 @@ export default function Dashboard() {
 
   const handleFileUpload = (file: File) => {
     if (!editFormData) return;
-    
+
     // Convert file to data URL for preview
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -411,7 +460,7 @@ export default function Dashboard() {
   const handleExtraPhotoUpload = (e: any) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
+
     Array.from(files).forEach((file: any) => {
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
@@ -429,11 +478,11 @@ export default function Dashboard() {
 
   const handleDeleteFromModal = async () => {
     if (!editingModel) return;
-    
+
     const confirmed = window.confirm(
       `Weet je zeker dat je ${editingModel.first_name} ${editingModel.last_name} wil verwijderen uit de database?`
     );
-    
+
     if (confirmed) {
       try {
         const { error } = await supabase
@@ -458,7 +507,7 @@ export default function Dashboard() {
     const confirmed = window.confirm(
       `Weet je zeker dat je ${model.first_name} ${model.last_name} wil verwijderen uit de database?`
     );
-    
+
     if (confirmed) {
       try {
         const { error } = await supabase
@@ -492,8 +541,8 @@ export default function Dashboard() {
         <div className="header-container" style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <MiesLogo size={70} />
-            <p className="motivational-quote desktop-quote" style={{ 
-              color: '#2B3E72', 
+            <p className="motivational-quote desktop-quote" style={{
+              color: '#2B3E72',
               margin: 0,
               fontSize: 11,
               fontStyle: 'italic',
@@ -508,10 +557,30 @@ export default function Dashboard() {
               {motivationalQuotes[quoteIndex]}
             </p>
             <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
-              <button 
+              <button
+                onClick={() => setShowTermsUpload(true)}
+                title="Upload voorwaarden document"
+                style={{
+                  padding: '10px 12px',
+                  background: 'transparent',
+                  color: '#6B7280',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  opacity: 0.6,
+                  transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+              >
+                📄
+              </button>
+              <button
                 onClick={handleManageShoots}
                 className="header-btn shoots-btn"
-                style={{ 
+                style={{
                   background: 'transparent',
                   color: '#1F2B4A',
                   border: '2px solid #E5DDD5',
@@ -537,13 +606,13 @@ export default function Dashboard() {
               >
                 📸 <span className="btn-text">Shoots Beheren</span>
               </button>
-              <button 
+              <button
                 onClick={handleLogout}
                 className="header-btn logout-btn"
-                style={{ 
-                  padding: '10px 20px', 
-                  background: '#E5DDD5', 
-                  color: '#1F2B4A', 
+                style={{
+                  padding: '10px 20px',
+                  background: '#E5DDD5',
+                  color: '#1F2B4A',
                   border: 'none',
                   borderRadius: 8,
                   fontSize: 14,
@@ -574,16 +643,16 @@ export default function Dashboard() {
               onChange={(e: any) => setSearchTerm(e.target.value)}
               style={{ flex: 1, padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit' }}
             />
-            <button 
+            <button
               className="filter-toggle-btn"
               onClick={() => setShowFilters(!showFilters)}
-              style={{ 
-                padding: '12px 16px', 
-                background: '#E5DDD5', 
+              style={{
+                padding: '12px 16px',
+                background: '#E5DDD5',
                 color: '#1F2B4A',
-                border: 'none', 
-                borderRadius: 8, 
-                fontSize: 14, 
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 14,
                 fontWeight: 600,
                 cursor: 'pointer',
                 display: 'none',
@@ -688,7 +757,7 @@ export default function Dashboard() {
                     />
                     {/* Reset knop alleen als filters actief zijn */}
                     {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && (
-                      <button 
+                      <button
                         onClick={() => { setGenderFilter('all'); setCityFilter('all'); setMinAge(0); setMaxAge(100); }}
                         style={{ padding: '8px 10px', background: '#EF4444', color: '#fff', border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}
                       >
@@ -704,25 +773,25 @@ export default function Dashboard() {
 
         <div className="models-grid">
           {filteredModels.map((model) => (
-            <div 
-              key={model.id} 
+            <div
+              key={model.id}
               ref={(el) => { modelRefs.current[model.id] = el; }}
-              style={{ 
-                background: '#fff', 
-                borderRadius: 10, 
-                overflow: 'hidden', 
-                boxShadow: highlightedModelId === model.id 
-                  ? '0 0 0 4px #2B3E72, 0 4px 12px rgba(43, 62, 114, 0.3)' 
-                  : '0 1px 4px rgba(0,0,0,0.1)', 
-                position: 'relative', 
-                display: 'flex', 
-                flexDirection: 'column', 
+              style={{
+                background: '#fff',
+                borderRadius: 10,
+                overflow: 'hidden',
+                boxShadow: highlightedModelId === model.id
+                  ? '0 0 0 4px #2B3E72, 0 4px 12px rgba(43, 62, 114, 0.3)'
+                  : '0 1px 4px rgba(0,0,0,0.1)',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
                 transition: 'all 0.3s ease',
                 transform: highlightedModelId === model.id ? 'scale(1.02)' : 'scale(1)'
               }}
             >
               {/* Foto bovenaan */}
-              <div 
+              <div
                 className="model-photo"
                 onClick={() => {
                   if (model.photo_url) {
@@ -730,8 +799,8 @@ export default function Dashboard() {
                     setCurrentPhotoIndex(0);
                   }
                 }}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   height: 380,
                   background: '#E5DDD5',
                   display: 'flex',
@@ -747,8 +816,8 @@ export default function Dashboard() {
               >
                 {model.photo_url ? (
                   <>
-                    <img 
-                      src={model.photo_url} 
+                    <img
+                      src={model.photo_url}
                       alt={`${model.first_name} ${model.last_name}`}
                       style={{
                         width: '100%',
@@ -787,13 +856,13 @@ export default function Dashboard() {
                 ) : (
                   `${model.first_name.charAt(0)}${model.last_name.charAt(0)}`
                 )}
-                
+
                 {/* Naam linksboven in foto */}
-                <div className="model-name-overlay" style={{ 
-                  position: 'absolute', 
-                  top: 10, 
-                  left: 10, 
-                  background: 'rgba(0, 0, 0, 0.3)', 
+                <div className="model-name-overlay" style={{
+                  position: 'absolute',
+                  top: 10,
+                  left: 10,
+                  background: 'rgba(0, 0, 0, 0.3)',
                   padding: '6px 12px',
                   borderRadius: 6,
                   backdropFilter: 'blur(8px)',
@@ -848,7 +917,7 @@ export default function Dashboard() {
 
                 <div style={{ marginBottom: 10 }}>
                   <p style={{ color: '#6B7280', margin: 0, fontSize: 13, marginBottom: 10 }}>
-                    {model.gender} • {model.birthdate ? `${calculateAge(model.birthdate)} jaar • ${formatDateNL(model.birthdate, true)}` : 'Leeftijd onbekend'}
+                    {model.gender} • {model.birthdate ? `${calculateAge(model.birthdate)} jaar` : 'Leeftijd onbekend'}
                   </p>
                 </div>
 
@@ -867,10 +936,10 @@ export default function Dashboard() {
                 {model.instagram && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
                     <Instagram style={{ height: 13, width: 13, color: '#6B7280' }} />
-                    <a 
-                      href={`https://instagram.com/${(model.instagram || '').replace("@", "")}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                    <a
+                      href={`https://instagram.com/${(model.instagram || '').replace("@", "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{ color: '#2B3E72', textDecoration: 'none', fontSize: 12, fontWeight: 500 }}
                     >
                       {model.instagram}
@@ -879,10 +948,10 @@ export default function Dashboard() {
                 )}
 
                 <div className="model-bottom-btns" style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                  <button 
-                    onClick={() => handleContactModel(model)} 
-                    style={{ 
-                      background: '#2B3E72', 
+                  <button
+                    onClick={() => handleContactModel(model)}
+                    style={{
+                      background: '#2B3E72',
                       color: '#fff',
                       border: 'none',
                       padding: '10px 12px',
@@ -904,8 +973,8 @@ export default function Dashboard() {
 
                   {!model.contract_pdf ? (
                     <label
-                      style={{ 
-                        background: '#E5DDD5', 
+                      style={{
+                        background: '#E5DDD5',
                         color: '#1F2B4A',
                         border: 'none',
                         padding: '10px 12px',
@@ -934,24 +1003,24 @@ export default function Dashboard() {
                             reader.onloadend = async () => {
                               const base64 = reader.result as string;
                               const updatedModel = { ...model, contract_pdf: base64 };
-                              
+
                               // Update in database
                               const { error } = await supabase
                                 .from('models')
                                 .update({ contract_pdf: base64 })
                                 .eq('id', model.id);
-                              
+
                               if (error) {
                                 console.error('Error updating contract:', error);
                                 alert('❌ Kon contract niet opslaan in database.');
                                 return;
                               }
-                              
+
                               // Update local state direct
-                              setModels(prevModels => 
+                              setModels(prevModels =>
                                 prevModels.map(m => m.id === model.id ? updatedModel : m)
                               );
-                              
+
                               alert('✅ Contract succesvol geüpload!');
                             };
                             reader.readAsDataURL(file);
@@ -1005,11 +1074,11 @@ export default function Dashboard() {
           {loggedInEmployees.length > 0 ? (
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {loggedInEmployees.map((employee, index) => (
-                <div 
-                  key={index} 
-                  style={{ 
-                    background: '#E5DDD5', 
-                    padding: '10px 18px', 
+                <div
+                  key={index}
+                  style={{
+                    background: '#E5DDD5',
+                    padding: '10px 18px',
                     borderRadius: 8,
                     fontSize: 15,
                     color: '#1F2B4A',
@@ -1019,10 +1088,10 @@ export default function Dashboard() {
                     gap: 10
                   }}
                 >
-                  <span style={{ 
-                    background: '#4ade80', 
-                    width: 10, 
-                    height: 10, 
+                  <span style={{
+                    background: '#4ade80',
+                    width: 10,
+                    height: 10,
                     borderRadius: '50%',
                     display: 'inline-block'
                   }} />
@@ -1088,16 +1157,16 @@ export default function Dashboard() {
               >
                 {editFormData.photo_url ? (
                   <div>
-                    <img 
-                      src={editFormData.photo_url} 
-                      alt="Preview" 
-                      style={{ 
-                        width: 120, 
-                        height: 120, 
-                        borderRadius: '50%', 
+                    <img
+                      src={editFormData.photo_url}
+                      alt="Preview"
+                      style={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: '50%',
                         objectFit: 'cover',
                         margin: '0 auto 12px'
-                      }} 
+                      }}
                     />
                     <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
                       Klik of sleep een nieuwe foto om te vervangen
@@ -1129,19 +1198,19 @@ export default function Dashboard() {
               <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
                 Extra foto's ({editExtraPhotos.length})
               </label>
-              
+
               {/* Grid van extra foto's */}
               {editExtraPhotos.length > 0 && (
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(4, 1fr)', 
-                  gap: 12, 
-                  marginBottom: 12 
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: 12,
+                  marginBottom: 12
                 }}>
                   {editExtraPhotos.map((photo, index) => (
                     <div key={index} style={{ position: 'relative' }}>
-                      <img 
-                        src={photo} 
+                      <img
+                        src={photo}
                         alt={`Extra foto ${index + 1}`}
                         style={{
                           width: '100%',
@@ -1289,7 +1358,7 @@ export default function Dashboard() {
               >
                 Model Verwijderen
               </button>
-              
+
               <div style={{ display: 'flex', gap: 12 }}>
                 <button
                   onClick={handleCancelEdit}
@@ -1331,7 +1400,7 @@ export default function Dashboard() {
 
       {/* Lightbox voor foto's */}
       {lightboxImage && (
-        <div 
+        <div
           onClick={() => {
             setLightboxImage(null);
             setImageZoom(1);
@@ -1372,7 +1441,7 @@ export default function Dashboard() {
           }}>
             ×
           </div>
-          
+
           <div style={{
             position: 'absolute',
             bottom: 20,
@@ -1424,7 +1493,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <img 
+          <img
             src={lightboxImage}
             alt="Model foto"
             onClick={(e) => e.stopPropagation()}
@@ -1448,7 +1517,7 @@ export default function Dashboard() {
 
       {/* Foto Gallery Modal */}
       {viewingPhotosFor && (
-        <div 
+        <div
           onClick={() => {
             setViewingPhotosFor(null);
             setCurrentPhotoIndex(0);
@@ -1517,7 +1586,7 @@ export default function Dashboard() {
               viewingPhotosFor.photo_url,
               ...(viewingPhotosFor.extra_photos || [])
             ].filter(Boolean) as string[];
-            
+
             return (
               <>
                 {/* Navigatie pijlen */}
@@ -1526,7 +1595,7 @@ export default function Dashboard() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setCurrentPhotoIndex(prev => 
+                        setCurrentPhotoIndex(prev =>
                           prev === 0 ? allPhotos.length - 1 : prev - 1
                         );
                       }}
@@ -1554,7 +1623,7 @@ export default function Dashboard() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setCurrentPhotoIndex(prev => 
+                        setCurrentPhotoIndex(prev =>
                           prev === allPhotos.length - 1 ? 0 : prev + 1
                         );
                       }}
@@ -1583,7 +1652,7 @@ export default function Dashboard() {
                 )}
 
                 {/* Huidige foto */}
-                <img 
+                <img
                   src={allPhotos[currentPhotoIndex]}
                   alt={`Foto ${currentPhotoIndex + 1}`}
                   onClick={(e) => e.stopPropagation()}
@@ -1621,7 +1690,7 @@ export default function Dashboard() {
 
                 {/* Thumbnail strip onderaan */}
                 {allPhotos.length > 1 && (
-                  <div 
+                  <div
                     onClick={(e) => e.stopPropagation()}
                     style={{
                       position: 'absolute',
@@ -1662,7 +1731,7 @@ export default function Dashboard() {
           })()}
         </div>
       )}
-      
+
       <style>{`
         /* Desktop filters visible by default */
         .filters-desktop {
@@ -2251,9 +2320,9 @@ export default function Dashboard() {
             </div>
 
             {/* PDF/Document Viewer - volledig gevuld */}
-            <div style={{ 
-              flex: 1, 
-              overflow: 'auto', 
+            <div style={{
+              flex: 1,
+              overflow: 'auto',
               background: '#525659',
               display: 'flex',
               alignItems: 'center',
@@ -2356,6 +2425,140 @@ export default function Dashboard() {
               >
                 🗑️ Verwijderen
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Terms Upload Modal */}
+      {showTermsUpload && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 20
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: 12,
+            padding: 32,
+            maxWidth: 500,
+            width: '100%',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }}>
+            <h2 style={{ margin: 0, marginBottom: 24, fontSize: 24, fontWeight: 700, color: '#1F2B4A' }}>
+              Upload Voorwaarden
+            </h2>
+            <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 20 }}>
+              Upload een <span style={{ textDecoration: 'underline', fontWeight: 600 }}>PDF</span> document met de algemene voorwaarden die modellen moeten accepteren bij registratie.
+            </p>
+
+            <div style={{ width: '100%', boxSizing: 'border-box', marginBottom: 20 }}>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.type !== 'application/pdf') {
+                      alert('Alleen PDF bestanden zijn toegestaan');
+                      return;
+                    }
+                    const fileURL = URL.createObjectURL(file);
+                    setPdfPreviewUrl(fileURL);
+                    setSelectedTermsFile(file);
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: '12px',
+                  border: '2px dashed #6B7280',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  margin: 0
+                }}
+              />
+            </div>
+
+            {/* PDF preview */}
+            {pdfPreviewUrl && (
+              <div style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                border: '2px solid #2B3E72',
+                borderRadius: 8,
+                marginBottom: 20,
+                padding: 8,
+                background: '#F9FAFB',
+                textAlign: 'center',
+                maxHeight: 400,
+                overflow: 'auto',
+              }}>
+                <iframe
+                  src={pdfPreviewUrl}
+                  title="Voorwaarden preview"
+                  style={{ width: '100%', height: 350, border: 'none', background: '#fff', boxSizing: 'border-box' }}
+                />
+                <div style={{ fontSize: 13, color: '#2B3E72', marginTop: 8, fontWeight: 600 }}>
+                  Voorbeeld van je PDF
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => {
+                  setShowTermsUpload(false);
+                  setPdfPreviewUrl(null);
+                  setSelectedTermsFile(null);
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: '#E5DDD5',
+                  color: '#1F2B4A',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit'
+                }}
+              >
+                Annuleren
+              </button>
+              {selectedTermsFile && (
+                <button
+                  onClick={() => {
+                    handleTermsUpload(selectedTermsFile);
+                    setPdfPreviewUrl(null);
+                    setSelectedTermsFile(null);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    background: '#2B3E72',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit'
+                  }}
+                >
+                  Uploaden
+                </button>
+              )}
             </div>
           </div>
         </div>
