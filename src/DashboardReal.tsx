@@ -22,6 +22,33 @@ type Model = {
 };
 
 export default function Dashboard() {
+  // Terms document state
+  const [activeTerms, setActiveTerms] = useState<{ document_url: string, id: number } | null>(null);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showTermsMenu, setShowTermsMenu] = useState(false);
+
+  // Fetch active terms document (nu als losse functie)
+  const fetchActiveTerms = async () => {
+    const { data, error } = await supabase
+      .from('terms_and_conditions')
+      .select('id, document_url')
+      .eq('is_active', true)
+      .order('uploaded_at', { ascending: false })
+      .limit(1)
+      .single();
+    console.log('fetchActiveTerms result:', { data, error });
+    if (!error && data) {
+      setActiveTerms(data);
+    } else {
+      setActiveTerms(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchActiveTerms();
+  }, []); // Only run on mount
+
   // Voorwaarden upload preview state
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [selectedTermsFile, setSelectedTermsFile] = useState<File | null>(null);
@@ -264,6 +291,9 @@ export default function Dashboard() {
         }]);
 
       if (insertError) throw insertError;
+
+      // Na upload direct opnieuw ophalen
+      await fetchActiveTerms();
 
       alert('✅ Voorwaarden succesvol geüpload!');
       setShowTermsUpload(false);
@@ -527,6 +557,28 @@ export default function Dashboard() {
     }
   };
 
+  // Verwijder voorwaarden document uit storage en database
+  const handleDeleteTerms = async () => {
+    if (!activeTerms) return;
+    setShowTermsModal(false);
+    try {
+      // Verwijder uit storage
+      const url = activeTerms.document_url;
+      const pathMatch = url.match(/\/terms\/(.+)$/);
+      if (pathMatch && pathMatch[1]) {
+        const filePath = `terms/${pathMatch[1]}`;
+        await supabase.storage.from('terms').remove([filePath]);
+      }
+      // Verwijder alle actieve voorwaarden uit database
+      await supabase.from('terms_and_conditions').delete().eq('is_active', true);
+      setActiveTerms(null);
+      alert('✅ Algemene voorwaarden verwijderd!');
+      await fetchActiveTerms();
+    } catch (err) {
+      alert('❌ Fout bij verwijderen van voorwaarden.');
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -557,26 +609,33 @@ export default function Dashboard() {
               {motivationalQuotes[quoteIndex]}
             </p>
             <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
-              <button
-                onClick={() => setShowTermsUpload(true)}
-                title="Upload voorwaarden document"
-                style={{
-                  padding: '10px 12px',
-                  background: 'transparent',
-                  color: '#6B7280',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: 8,
-                  fontSize: 12,
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  opacity: 0.6,
-                  transition: 'opacity 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
-              >
-                📄
-              </button>
+              {/* 📄-icoon in header */}
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <button
+                  onClick={() => {
+                    if (activeTerms) {
+                      setShowTermsModal(true);
+                    } else {
+                      setShowTermsUpload(true);
+                    }
+                  }}
+                  title="Algemene voorwaarden opties"
+                  style={{
+                    padding: '10px 12px',
+                    background: 'transparent',
+                    color: '#6B7280',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: 8,
+                    fontSize: 18,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    opacity: 0.6,
+                    transition: 'opacity 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                >📄</button>
+              </div>
               <button
                 onClick={handleManageShoots}
                 className="header-btn shoots-btn"
@@ -630,6 +689,29 @@ export default function Dashboard() {
       </header>
 
       <main style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
+
+
+        {/* Terms PDF Modal */}
+        {showTermsModal && activeTerms && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+          }} onClick={() => setShowTermsModal(false)}>
+            <div style={{ background: '#fff', borderRadius: 12, maxWidth: 700, width: '90vw', maxHeight: '80vh', overflow: 'auto', position: 'relative', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }} onClick={e => e.stopPropagation()}>
+              <iframe src={activeTerms.document_url} title="Algemene voorwaarden" style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }} />
+              <div style={{ display: 'flex', gap: 12, marginTop: 16, justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setShowTermsModal(false)}
+                  style={{ padding: '10px 24px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                >Annuleren</button>
+                <button
+                  onClick={handleDeleteTerms}
+                  style={{ padding: '10px 24px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                >Verwijder algemene voorwaarden</button>
+              </div>
+            </div>
+          </div>
+        )}
         <div style={{ marginBottom: 32 }}>
           <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#1F2B4A' }}>Modellendatabase</h1>
         </div>
@@ -1879,6 +1961,7 @@ export default function Dashboard() {
           }
           /* Database titel met marge */
           main > div:first-child {
+           
             margin-bottom: 16px !important;
           }
           /* Titel kleiner */
@@ -1898,6 +1981,7 @@ export default function Dashboard() {
           right: 0,
           bottom: 0,
           background: 'rgba(0,0,0,0.5)',
+         
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

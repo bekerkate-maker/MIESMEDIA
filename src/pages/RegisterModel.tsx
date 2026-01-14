@@ -7,6 +7,8 @@ import logoJordys from '@/components/logo_klanten/JORDYS_LOGO.png';
 import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
 import logoDudok from '@/components/logo_klanten/dudok_logo.png';
 
+import PDFViewer from '@/components/PDFViewer';
+
 export default function RegisterModel() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const handleBirthdateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -356,20 +358,17 @@ export default function RegisterModel() {
                 <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} />
                 <span>
                   Ik ga akkoord met de voorwaarden.
-                  {termsUrl && (
-                    <>
-                      {' '}
-                      <button
-                        type="button"
-                        style={{ color: '#2B3E72', textDecoration: 'underline', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: 8 }}
-                        onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }}
-                      >
-                        Bekijk voorwaarden
-                      </button>
-                    </>
-                  )}
                 </span>
               </label>
+              {termsUrl && (
+                <button
+                  type="button"
+                  style={{ color: '#2B3E72', fontWeight: 600, fontStyle: 'italic', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 8, display: 'block' }}
+                  onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }}
+                >
+                  Bekijk voorwaarden
+                </button>
+              )}
             </div>
 
             {/* Modal voor voorwaarden */}
@@ -425,11 +424,8 @@ export default function RegisterModel() {
                   >
                     ×
                   </button>
-                  <iframe
-                    src={termsUrl}
-                    title="Algemene voorwaarden"
-                    style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }}
-                  />
+                  {/* PDF zonder zwarte balk met PDFViewer */}
+                  <PDFViewer url={termsUrl} />
                 </div>
               </div>
             )}
