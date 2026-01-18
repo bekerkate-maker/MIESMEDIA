@@ -68,7 +68,7 @@ export default function ManageShoots() {
       const { data, error } = await supabase
         .from('shoots')
         .select('*')
-        .order('shoot_date', { ascending: true });
+        .order('shoot_date', { ascending: false });
       if (error) throw error;
       setShoots(data || []);
     } catch (error) {
@@ -772,10 +772,20 @@ export default function ManageShoots() {
                         color: '#2B3E72',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
-                        marginBottom: 8
+                        marginBottom: 2
                       }}>
                         {shoot.client_name || shoot.client}
                       </div>
+                      {(() => {
+                        const endDate = shoot.shoot_date ? new Date(shoot.shoot_date) : null;
+                        const now = new Date();
+                        if (endDate && endDate < now) {
+                          return (
+                            <div style={{ fontSize: 12, color: '#DC2626', fontWeight: 700, marginBottom: 8 }}>verlopen shoot</div>
+                          );
+                        }
+                        return null;
+                      })()}
                       <h3 style={{
                         fontSize: 20,
                         fontWeight: 600,

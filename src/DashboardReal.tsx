@@ -999,7 +999,12 @@ export default function Dashboard() {
 
                 <div style={{ marginBottom: 10 }}>
                   <p style={{ color: '#6B7280', margin: 0, fontSize: 13, marginBottom: 10 }}>
-                    {model.gender} • {model.birthdate ? `${calculateAge(model.birthdate)} jaar` : 'Leeftijd onbekend'}
+                    {(() => {
+                      if (model.gender === 'man' || model.gender === 'male') return 'Man';
+                      if (model.gender === 'vrouw' || model.gender === 'female') return 'Vrouw';
+                      if (model.gender === 'anders' || model.gender === 'other') return 'Anders';
+                      return model.gender;
+                    })()} • {model.birthdate ? `${calculateAge(model.birthdate)} jaar` : 'Leeftijd onbekend'}
                   </p>
                 </div>
 
@@ -1022,7 +1027,22 @@ export default function Dashboard() {
                       href={`https://instagram.com/${(model.instagram || '').replace("@", "")}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#2B3E72', textDecoration: 'none', fontSize: 12, fontWeight: 500 }}
+                      style={{
+                        color: '#2B3E72',
+                        textDecoration: 'none',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'color 0.2s, text-decoration 0.2s'
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.textDecoration = 'underline';
+                        e.currentTarget.style.color = '#2563eb';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.textDecoration = 'none';
+                        e.currentTarget.style.color = '#2B3E72';
+                      }}
                     >
                       {model.instagram}
                     </a>
