@@ -43,6 +43,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 }
 
 export default function App() {
+  // ...existing code...
+  const Account = React.lazy(() => import('./pages/Account'));
   return (
     <BrowserRouter>
       <Routes>
@@ -51,7 +53,13 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register-model" element={<RegisterModel />} />
         <Route path="/register-employee" element={<RegisterEmployee />} />
-        
+        <Route path="/account" element={
+          <ProtectedRoute>
+            <React.Suspense fallback={<div>Laden...</div>}>
+              <Account />
+            </React.Suspense>
+          </ProtectedRoute>
+        } />
         {/* Beveiligde routes */}
         <Route 
           path="/dashboard" 
@@ -59,7 +67,7 @@ export default function App() {
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
-          } 
+          }
         />
         <Route 
           path="/manage-shoots" 
@@ -67,7 +75,7 @@ export default function App() {
             <ProtectedRoute>
               <ManageShoots />
             </ProtectedRoute>
-          } 
+          }
         />
       </Routes>
     </BrowserRouter>

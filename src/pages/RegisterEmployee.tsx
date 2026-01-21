@@ -58,8 +58,8 @@ export default function RegisterEmployee() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
+    <div style={{
+      minHeight: '100vh',
       background: '#E5DDD5',
       display: 'flex',
       alignItems: 'center',
@@ -76,7 +76,7 @@ export default function RegisterEmployee() {
             Collega registratie
           </h1>
           <p style={{ fontSize: 16, color: '#6B7280', margin: 0 }}>
-            Maak een account aan om de modellendatabase te beheren
+            Maak een account aan om The Unposed Collective te beheren
           </p>
         </div>
 
@@ -91,11 +91,11 @@ export default function RegisterEmployee() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Voor- en achternaam"
-              style={{ 
-                width: '100%', 
-                padding: '14px 16px', 
-                background: '#E5DDD5', 
-                color: '#1F2B4A', 
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                background: '#E5DDD5',
+                color: '#1F2B4A',
                 border: 'none',
                 borderRadius: 8,
                 fontSize: 15,
@@ -115,11 +115,11 @@ export default function RegisterEmployee() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="naam@miesmedia.nl"
-              style={{ 
-                width: '100%', 
-                padding: '14px 16px', 
-                background: '#E5DDD5', 
-                color: '#1F2B4A', 
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                background: '#E5DDD5',
+                color: '#1F2B4A',
                 border: 'none',
                 borderRadius: 8,
                 fontSize: 15,
@@ -140,11 +140,11 @@ export default function RegisterEmployee() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Minimaal 6 tekens"
               minLength={6}
-              style={{ 
-                width: '100%', 
-                padding: '14px 16px', 
-                background: '#E5DDD5', 
-                color: '#1F2B4A', 
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                background: '#E5DDD5',
+                color: '#1F2B4A',
                 border: 'none',
                 borderRadius: 8,
                 fontSize: 15,
@@ -157,10 +157,10 @@ export default function RegisterEmployee() {
           <button
             type="submit"
             disabled={loading}
-            style={{ 
-              width: '100%', 
-              padding: '16px', 
-              background: '#2B3E72', 
+            style={{
+              width: '100%',
+              padding: '16px',
+              background: '#2B3E72',
               color: '#fff',
               fontSize: 16,
               fontWeight: 600,

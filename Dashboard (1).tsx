@@ -125,7 +125,7 @@ export default function Dashboard() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Modellendatabase</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">The Unposed Collective</h1>
           <p className="text-muted-foreground">Beheer en zoek modellen</p>
         </div>
 
@@ -170,8 +170,8 @@ export default function Dashboard() {
             <Card key={model.id} className="hover:shadow-lg transition-shadow overflow-hidden">
               {model.photo_url && (
                 <div className="w-full" style={{ height: '500px' }}>
-                  <img 
-                    src={model.photo_url} 
+                  <img
+                    src={model.photo_url}
                     alt={`${model.first_name} ${model.last_name}`}
                     className="w-full h-full object-cover"
                   />

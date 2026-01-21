@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+// import { supabase } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
 import logoCasu from '@/components/logo_klanten/logo_casu.png';
@@ -18,9 +19,11 @@ function formatDateNL(dateString?: string, long: boolean = false): string {
 }
 
 const OpenShoots: React.FC = () => {
+
   const [shoots, setShoots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     const fetchShoots = async () => {
@@ -44,6 +47,9 @@ const OpenShoots: React.FC = () => {
       setLoading(false);
     };
     fetchShoots();
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {
@@ -55,8 +61,8 @@ const OpenShoots: React.FC = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: '#E5DDD5', fontFamily: 'system-ui, -apple-system, sans-serif', display: 'flex', flexDirection: 'column' }}>
-      {/* Banner bovenaan met scrollende logos */}
-      <div>
+      {/* Banner helemaal bovenaan, tegen de rand */}
+      <div style={{ margin: 0, padding: 0, position: 'relative', top: 0, left: 0, right: 0, zIndex: 20 }}>
         <div className="logo-banner">
           <div className="logo-banner-inner">
             <div className="logo-scroll">
@@ -80,12 +86,35 @@ const OpenShoots: React.FC = () => {
         </div>
         <style>{`.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;gap:60px;align-items:center;padding-right:60px;animation:scroll 30s linear infinite;will-change:transform}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(calc(-100% / 3))}}@media(max-width:768px){.logo-banner{min-height:45px}.logo-scroll{gap:30px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}}`}</style>
       </div>
+      {/* Account icon direct onder de banner */}
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', padding: '12px 0 0 0' }}>
+        <button
+          onClick={() => window.location.href = session ? '/account' : '/login'}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            width: 44,
+            height: 44,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            marginRight: 24,
+          }}
+          aria-label={session ? 'Account wijzigen' : 'Inloggen'}
+        >
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
+          </svg>
+        </button>
+      </div>
       {/* Hoofdcontent */}
       <div className="content-section">
         <div className="header-section">
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 0, marginTop: 0 }}>
             <MiesLogo size={110} />
-            <div className="button-wrapper" style={{ marginTop: 12 }}>
+            <div className="button-wrapper" style={{ marginTop: 6, display: 'flex', gap: 12 }}>
               <button onClick={() => window.location.href = '/register-model'} className="primary-btn">
                 Registreer als nieuw model
               </button>
@@ -111,15 +140,15 @@ const OpenShoots: React.FC = () => {
                 <h3 className="shoot-title">{shoot.title}</h3>
                 <div style={{ marginBottom: 12 }}>
                   <div style={{ fontSize: 14, color: '#6B7280', display: 'grid', gridTemplateColumns: '32px 1fr', rowGap: '2px' }}>
-                    <span key="date-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📅</span>
+                    <span key="date-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
                     <span key="date" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{formatDateNL(shoot.shoot_date || shoot.date)}</span>
-                    <span key="time-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🕒</span>
+                    <span key="time-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
                     <span key="time" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{(() => {
                       if (shoot.start_time && shoot.end_time) {
-                        return `${shoot.start_time.substring(0,5)} - ${shoot.end_time.substring(0,5)}`;
+                        return `${shoot.start_time.substring(0, 5)} - ${shoot.end_time.substring(0, 5)}`;
                       }
                       if (shoot.start_time) {
-                        return shoot.start_time.substring(0,5);
+                        return shoot.start_time.substring(0, 5);
                       }
                       if (shoot.shoot_time && shoot.shoot_time.trim() !== '') {
                         return shoot.shoot_time;
@@ -128,25 +157,21 @@ const OpenShoots: React.FC = () => {
                     })()}</span>
                     {shoot.location && (
                       <>
-                        <span key="loc-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📍</span>
+                        <span key="loc-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
                         <span key="loc" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{shoot.location}</span>
                       </>
                     )}
-                    <span key="comp-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(() => {
-                      if (shoot.compensation_type === 'bedrag') return '💰';
-                      if (shoot.compensation_type === 'eten') return '🍽️';
-                      if (shoot.compensation_type === 'cadeaubon') return '🎁';
-                      if (shoot.compensation_type === 'geen') return '❌';
-                      return '';
-                    })()}</span>
+                    <span key="comp-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
                     <span key="comp" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{(() => {
+                      if (shoot.compensation_type === 'financiële vergoeding') return `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
+                      if (shoot.compensation_type === 'cadeaubon') return `Cadeaubon t.w.v. €${shoot.compensation_amount}${shoot.compensation_business_name ? ` bij ${shoot.compensation_business_name}` : ''}`;
+                      if (shoot.compensation_type === 'geen') return `Geen vergoeding`;
+                      // Fallback voor oude data
                       if (shoot.compensation_type === 'bedrag') return `€${shoot.compensation_amount}`;
                       if (shoot.compensation_type === 'eten') return `Eten betaald`;
-                      if (shoot.compensation_type === 'cadeaubon') return `Cadeaubon${shoot.compensation_amount ? ` €${shoot.compensation_amount}` : ''}`;
-                      if (shoot.compensation_type === 'geen') return `Geen vergoeding`;
                       return 'Geen vergoeding ingevuld';
                     })()}</span>
-                    <span key="spots-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👥</span>
+                    <span key="spots-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
                     <span key="spots" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{typeof shoot.spots !== 'undefined' ? `${shoot.spots} plekken beschikbaar` : 'Aantal plekken onbekend'}</span>
                   </div>
                 </div>
@@ -182,7 +207,7 @@ const OpenShoots: React.FC = () => {
                         marginBottom: 6
                       }}
                     >
-                      🖼️ Bekijk moodboard →
+                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> Bekijk moodboard →
                     </a>
                   )}
                   {shoot.client_website && (
@@ -199,7 +224,7 @@ const OpenShoots: React.FC = () => {
                         marginBottom: 6
                       }}
                     >
-                      🌐 Bezoek website van {shoot.client_name || shoot.client}
+                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> Bezoek website van {shoot.client_name || shoot.client}
                     </a>
                   )}
                   {shoot.client_instagram && (
@@ -224,7 +249,7 @@ const OpenShoots: React.FC = () => {
                         e.currentTarget.style.color = '#2563EB';
                       }}
                     >
-                      📷 @{shoot.client_instagram}
+                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> @{shoot.client_instagram}
                     </a>
                   )}
                 </div>
@@ -234,14 +259,14 @@ const OpenShoots: React.FC = () => {
                     style={{ width: '100%', marginTop: 8 }}
                     onClick={() => window.location.href = `/register-model?shoot_id=${shoot.id}`}
                   >
-                    ✨ Meld je aan!
+                    Meld je aan!
                   </button>
                 </div>
               </div>
             </div>
           ))}
-  </div>
-  {shoots.length === 0 && (
+        </div>
+        {shoots.length === 0 && (
           <div style={{ textAlign: 'center', padding: 60, color: '#9CA3AF' }}>
             <p style={{ fontSize: 18 }}>Geen shoots gevonden</p>
           </div>

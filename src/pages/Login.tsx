@@ -20,7 +20,7 @@ export default function Login() {
       });
 
       if (error) throw error;
-      
+
       // Forceer navigatie naar dashboard
       window.location.href = '/dashboard';
     } catch (error: any) {
@@ -32,8 +32,8 @@ export default function Login() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
+    <div style={{
+      minHeight: '100vh',
       background: '#E5DDD5',
       display: 'flex',
       alignItems: 'center',
@@ -50,7 +50,7 @@ export default function Login() {
             Welkom terug
           </h1>
           <p style={{ fontSize: 16, color: '#6B7280', margin: 0 }}>
-            Log in om de modellendatabase te bekijken
+            Log in met je accountgegevens
           </p>
         </div>
 
@@ -64,11 +64,11 @@ export default function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{ 
-                width: '100%', 
-                padding: '14px 16px', 
-                background: '#E5DDD5', 
-                color: '#1F2B4A', 
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                background: '#E5DDD5',
+                color: '#1F2B4A',
                 border: 'none',
                 borderRadius: 8,
                 fontSize: 15,
@@ -87,11 +87,11 @@ export default function Login() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={{ 
-                width: '100%', 
-                padding: '14px 16px', 
-                background: '#E5DDD5', 
-                color: '#1F2B4A', 
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                background: '#E5DDD5',
+                color: '#1F2B4A',
                 border: 'none',
                 borderRadius: 8,
                 fontSize: 15,
@@ -104,10 +104,10 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            style={{ 
-              width: '100%', 
-              padding: '16px', 
-              background: '#2B3E72', 
+            style={{
+              width: '100%',
+              padding: '16px',
+              background: '#2B3E72',
               color: '#fff',
               fontSize: 16,
               fontWeight: 600,

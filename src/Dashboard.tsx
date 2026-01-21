@@ -3,8 +3,8 @@ import React from 'react'
 // # HopIcon 
 export default function Dashboard() {
   return (
-    <main style={{fontFamily: 'system-ui, Arial', padding: 24}}>
-      <h1>Mies Media — Lokale dev</h1>
+    <main style={{ fontFamily: 'system-ui, Arial', padding: 24 }}>
+      <h1>The Unposed Collective — Lokale dev</h1>
       <p>
         Dit is een lichte placeholder-versie van je dashboard zodat de dev-server zonder
         extra dependencies kan draaien. Je originele `Dashboard (1).tsx` staat in

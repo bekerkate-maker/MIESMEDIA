@@ -88,7 +88,7 @@ export default function Dashboard() {
   const [editingModel, setEditingModel] = useState<Model | null>(null);
   const [editFormData, setEditFormData] = useState<Model | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [quoteIndex, setQuoteIndex] = useState(0);
+
   const [loggedInEmployees, setLoggedInEmployees] = useState<string[]>([]);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [imageZoom, setImageZoom] = useState(1);
@@ -118,28 +118,13 @@ export default function Dashboard() {
   // Terms upload state
   const [showTermsUpload, setShowTermsUpload] = useState(false);
 
-  const motivationalQuotes = [
-    "Vandaag gaan we knallen. Niet lullen maar vullen… die agenda!",
-    "Je bent een topper. Zelfs de Erasmusbrug zou voor je buigen — als 'ie niet van staal was.",
-    "Kom op joh, jij kunt dit. Als Rotterdam kan bouwen in een dag, kan jij deze to-do list ook fixen.",
-    "Hou op met twijfelen. Je bent net als de Markthal: iedereen kijkt naar je en je ziet er geweldig uit.",
-    "Vandaag straal je harder dan de lichten op de Coolsingel. Hup, gaan met die banaan!",
-    "Als het niet lukt, doe je gewoon Rotterdams: even mopperen, en dan gáán.",
-    "Jij bent de Euromast van het team: altijd boven de rest, zonder opscheppen."
-  ];
+
 
   useEffect(() => {
     fetchModels();
     fetchEmployees();
 
-    // Rotate quotes every 15 seconds
-    const quoteInterval = setInterval(() => {
-      setQuoteIndex((prevIndex) => (prevIndex + 1) % motivationalQuotes.length);
-    }, 15000);
 
-    return () => {
-      clearInterval(quoteInterval);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -356,10 +341,10 @@ export default function Dashboard() {
         compensation_amount: ''
       });
 
-      alert('✅ Notitie toegevoegd!');
+      alert('Notitie toegevoegd!');
     } catch (error) {
       console.error('Error adding note:', error);
-      alert('❌ Fout bij toevoegen notitie');
+      alert('Fout bij toevoegen notitie');
     }
   };
 
@@ -381,10 +366,10 @@ export default function Dashboard() {
         await fetchNotesForModel(viewingNotesFor.id);
       }
 
-      alert('✅ Notitie verwijderd!');
+      alert('Notitie verwijderd!');
     } catch (error) {
       console.error('Error deleting note:', error);
-      alert('❌ Fout bij verwijderen notitie');
+      alert('Fout bij verwijderen notitie');
     }
   };
 
@@ -401,9 +386,9 @@ export default function Dashboard() {
   };
 
   const handleContactModel = (model: Model) => {
-    const subject = encodeURIComponent("Opdracht Mies Media");
+    const subject = encodeURIComponent("Opdracht The Unposed Collective");
     const body = encodeURIComponent(
-      `Beste ${model.first_name},\n\nWij zouden je graag willen vragen voor een opdracht.\n\nMet vriendelijke groet,\nMies Media`
+      `Beste ${model.first_name},\n\nWij zouden je graag willen vragen voor een opdracht.\n\nMet vriendelijke groet,\nThe Unposed Collective`
     );
     window.location.href = `mailto:${model.email}?subject=${subject}&body=${body}`;
   };
@@ -439,7 +424,7 @@ export default function Dashboard() {
       setEditingModel(null);
       setEditFormData(null);
       setEditExtraPhotos([]);
-      alert('✅ Model succesvol bijgewerkt!');
+      alert('✅ Talent succesvol bijgewerkt!');
     } catch (error) {
       console.error('Error updating model:', error);
       alert('❌ Er is iets fout gegaan bij het bijwerken.');
@@ -510,7 +495,7 @@ export default function Dashboard() {
     if (!editingModel) return;
 
     const confirmed = window.confirm(
-      `Weet je zeker dat je ${editingModel.first_name} ${editingModel.last_name} wil verwijderen uit de database?`
+      `Weet je zeker dat je ${editingModel.first_name} ${editingModel.last_name} wil verwijderen?`
     );
 
     if (confirmed) {
@@ -525,7 +510,7 @@ export default function Dashboard() {
         fetchModels();
         setEditingModel(null);
         setEditFormData(null);
-        alert('✅ Model succesvol verwijderd!');
+        alert('✅ Talent succesvol verwijderd!');
       } catch (error) {
         console.error('Error deleting model:', error);
         alert('❌ Er is iets fout gegaan bij het verwijderen.');
@@ -535,7 +520,7 @@ export default function Dashboard() {
 
   const handleDeleteModel = async (model: Model) => {
     const confirmed = window.confirm(
-      `Weet je zeker dat je ${model.first_name} ${model.last_name} wil verwijderen uit de database?`
+      `Weet je zeker dat je ${model.first_name} ${model.last_name} wil verwijderen?`
     );
 
     if (confirmed) {
@@ -549,7 +534,7 @@ export default function Dashboard() {
 
         // Refresh the models list
         fetchModels();
-        alert('✅ Model succesvol verwijderd!');
+        alert('✅ Talent succesvol verwijderd!');
       } catch (error) {
         console.error('Error deleting model:', error);
         alert('❌ Er is iets fout gegaan bij het verwijderen.');
@@ -591,23 +576,9 @@ export default function Dashboard() {
     <div style={{ minHeight: '100vh', background: '#E5DDD5', paddingBottom: 40, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       <header style={{ background: '#fff', padding: '16px 20px', borderBottom: '1px solid #d0c8c0' }}>
         <div className="header-container" style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <MiesLogo size={70} />
-            <p className="motivational-quote desktop-quote" style={{
-              color: '#2B3E72',
-              margin: 0,
-              fontSize: 11,
-              fontStyle: 'italic',
-              fontWeight: 500,
-              transition: 'opacity 0.5s ease-in-out',
-              flex: 1,
-              textAlign: 'center',
-              padding: '0 8px',
-              lineHeight: 1.4,
-              minWidth: 0
-            }}>
-              {motivationalQuotes[quoteIndex]}
-            </p>
+
             <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
               {/* 📄-icoon in header */}
               <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -713,7 +684,7 @@ export default function Dashboard() {
           </div>
         )}
         <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#1F2B4A' }}>Modellendatabase</h1>
+          <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#1F2B4A' }}>The Unposed Collective</h1>
         </div>
 
         <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginBottom: 32, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
@@ -1233,7 +1204,7 @@ export default function Dashboard() {
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }}>
             <h2 style={{ margin: 0, marginBottom: 24, fontSize: 28, fontWeight: 700, color: '#1F2B4A' }}>
-              Model bewerken
+              Talent bewerken
             </h2>
 
             {/* Foto Upload Area */}
@@ -1458,7 +1429,7 @@ export default function Dashboard() {
                   gap: 8
                 }}
               >
-                Model Verwijderen
+                Talent Verwijderen
               </button>
 
               <div style={{ display: 'flex', gap: 12 }}>
@@ -2001,7 +1972,7 @@ export default function Dashboard() {
           right: 0,
           bottom: 0,
           background: 'rgba(0,0,0,0.5)',
-         
+
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -2031,7 +2002,7 @@ export default function Dashboard() {
             }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: 24, color: '#1F2B4A' }}>
-                  📝 Notities voor {viewingNotesFor.first_name} {viewingNotesFor.last_name}
+                  Notities voor {viewingNotesFor.first_name} {viewingNotesFor.last_name}
                 </h2>
               </div>
               <button
@@ -2075,7 +2046,7 @@ export default function Dashboard() {
                   onMouseEnter={(e) => e.currentTarget.style.background = '#1F2B4A'}
                   onMouseLeave={(e) => e.currentTarget.style.background = '#2B3E72'}
                 >
-                  <span style={{ fontSize: 20 }}>➕</span>
+
                   <span>Nieuwe notitie toevoegen</span>
                 </button>
               ) : (
@@ -2088,7 +2059,7 @@ export default function Dashboard() {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <h3 style={{ margin: 0, fontSize: 18, color: '#1F2B4A' }}>
-                      ➕ Nieuwe notitie toevoegen
+                      Nieuwe notitie toevoegen
                     </h3>
                     <button
                       onClick={() => setShowAddNoteForm(false)}
@@ -2172,15 +2143,14 @@ export default function Dashboard() {
                         }}
                       >
                         <option value="">-- Selecteer --</option>
-                        <option value="bedrag">💰 Bedrag</option>
-                        <option value="eten">🍽️ Eten betaald</option>
-                        <option value="cadeaubon">🎁 Cadeaubon</option>
-                        <option value="geen">❌ Geen</option>
+                        <option value="financiële vergoeding">Financiële vergoeding</option>
+                        <option value="cadeaubon">Cadeaubon</option>
+                        <option value="geen">Geen</option>
                       </select>
                     </div>
                   </div>
 
-                  {(newNote.compensation_type === 'bedrag' || newNote.compensation_type === 'cadeaubon') && (
+                  {(newNote.compensation_type === 'financiële vergoeding' || newNote.compensation_type === 'cadeaubon') && (
                     <div style={{ marginBottom: 16 }}>
                       <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
                         Bedrag (€)
@@ -2260,7 +2230,7 @@ export default function Dashboard() {
               {/* Bestaande notities */}
               <div>
                 <h3 style={{ margin: '0 0 16px 0', fontSize: 18, color: '#1F2B4A' }}>
-                  📋 Eerder toegevoegde notities ({modelNotes.length})
+                  Eerder toegevoegde notities ({modelNotes.length})
                 </h3>
 
                 {modelNotes.length === 0 ? (
@@ -2314,7 +2284,7 @@ export default function Dashboard() {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, paddingRight: 40 }}>
                           <div style={{ fontSize: 12, color: '#6B7280' }}>
-                            👤 {note.employee_name}
+                            {note.employee_name}
                           </div>
                           <div style={{ fontSize: 12, color: '#9CA3AF' }}>
                             {formatDateNL(note.created_at, true)}
@@ -2328,7 +2298,7 @@ export default function Dashboard() {
                             color: '#2B3E72',
                             marginBottom: 8
                           }}>
-                            🎬 {note.shoot_name}
+                            {note.shoot_name}
                           </div>
                         )}
 
@@ -2351,10 +2321,10 @@ export default function Dashboard() {
                             borderRadius: 4,
                             display: 'inline-block'
                           }}>
-                            {note.compensation_type === 'bedrag' && `💰 €${note.compensation_amount}`}
-                            {note.compensation_type === 'eten' && '🍽️ Eten betaald'}
-                            {note.compensation_type === 'cadeaubon' && `🎁 Cadeaubon €${note.compensation_amount}`}
-                            {note.compensation_type === 'geen' && '❌ Geen vergoeding'}
+                            {note.compensation_type === 'bedrag' && `€${note.compensation_amount}`}
+                            {note.compensation_type === 'eten' && 'Eten betaald'}
+                            {note.compensation_type === 'cadeaubon' && `Cadeaubon €${note.compensation_amount}`}
+                            {note.compensation_type === 'geen' && 'Geen vergoeding'}
                           </div>
                         )}
                       </div>

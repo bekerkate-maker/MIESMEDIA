@@ -33,6 +33,7 @@ export default function ManageShoots() {
     bannerPhotoUrl: string;
     compensationType: string;
     compensationAmount: string;
+    compensationBusinessName: string;
   }>({
     client: '',
     title: '',
@@ -47,8 +48,9 @@ export default function ManageShoots() {
     moodboardLink: '',
     bannerPhoto: null,
     bannerPhotoUrl: '',
-    compensationType: 'bedrag',
-    compensationAmount: ''
+    compensationType: 'financiële vergoeding',
+    compensationAmount: '',
+    compensationBusinessName: ''
   });
 
   // Functie om een datum als Nederlandse string te tonen
@@ -211,7 +213,8 @@ export default function ManageShoots() {
           moodboard_link: newShoot.moodboardLink,
           banner_photo_url: bannerPhotoUrl || newShoot.bannerPhotoUrl || '',
           compensation_type: newShoot.compensationType,
-          compensation_amount: newShoot.compensationAmount ? Number(newShoot.compensationAmount) : null
+          compensation_amount: newShoot.compensationAmount ? Number(newShoot.compensationAmount) : null,
+          compensation_business_name: newShoot.compensationBusinessName || null
         };
         const updateResult = await supabase
           .from('shoots')
@@ -236,6 +239,7 @@ export default function ManageShoots() {
           banner_photo_url: bannerPhotoUrl,
           compensation_type: newShoot.compensationType,
           compensation_amount: newShoot.compensationAmount ? Number(newShoot.compensationAmount) : null,
+          compensation_business_name: newShoot.compensationBusinessName || null,
           status: 'open'
         };
         const insertResult = await supabase
@@ -260,8 +264,9 @@ export default function ManageShoots() {
         moodboardLink: '',
         bannerPhoto: null,
         bannerPhotoUrl: '',
-        compensationType: 'bedrag',
-        compensationAmount: ''
+        compensationType: 'financiële vergoeding',
+        compensationAmount: '',
+        compensationBusinessName: ''
       });
       await fetchShoots();
     } catch (error) {
@@ -301,8 +306,9 @@ export default function ManageShoots() {
       moodboardLink: shoot.moodboard_link || '',
       bannerPhoto: null,
       bannerPhotoUrl: shoot.banner_photo_url || '',
-      compensationType: shoot.compensation_type || 'bedrag',
-      compensationAmount: shoot.compensation_amount !== undefined && shoot.compensation_amount !== null ? shoot.compensation_amount.toString() : ''
+      compensationType: shoot.compensation_type || 'financiële vergoeding',
+      compensationAmount: shoot.compensation_amount !== undefined && shoot.compensation_amount !== null ? shoot.compensation_amount.toString() : '',
+      compensationBusinessName: shoot.compensation_business_name || ''
     });
     setShowAddForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -325,8 +331,9 @@ export default function ManageShoots() {
       moodboardLink: '',
       bannerPhoto: null,
       bannerPhotoUrl: '',
-      compensationType: 'bedrag',
-      compensationAmount: ''
+      compensationType: 'financiële vergoeding',
+      compensationAmount: '',
+      compensationBusinessName: ''
     });
   };
 
@@ -382,6 +389,9 @@ export default function ManageShoots() {
             </div>
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
               <h1 style={{ fontSize: 32, fontWeight: 700, color: '#1F2B4A', margin: 0 }}>Shoots beheren</h1>
+              <p style={{ fontSize: 16, color: '#6B7280', marginTop: 8, marginBottom: 0 }}>
+                Maak nieuwe shoots aan en beheer lopende shoots.
+              </p>
               <button
                 style={{
                   marginTop: 18,
@@ -401,7 +411,7 @@ export default function ManageShoots() {
                 onMouseEnter={e => (e.currentTarget.style.background = '#1F2B4A')}
                 onMouseLeave={e => (e.currentTarget.style.background = '#2B3E72')}
               >
-                + Nieuwe shoot toevoegen
+                + Nieuwe shoot aanmaken
               </button>
             </div>
 
@@ -622,17 +632,57 @@ export default function ManageShoots() {
                     <select
                       required
                       value={newShoot.compensationType}
-                      onChange={(e) => setNewShoot({ ...newShoot, compensationType: e.target.value, compensationAmount: e.target.value === 'eten' || e.target.value === 'geen' ? '' : newShoot.compensationAmount })}
+                      onChange={(e) => {
+                        const newType = e.target.value;
+                        setNewShoot(s => ({
+                          ...s,
+                          compensationType: newType,
+                          compensationAmount: newType === 'geen' ? '' : s.compensationAmount,
+                          compensationBusinessName: newType === 'cadeaubon' ? s.compensationBusinessName : ''
+                        }));
+                      }}
                       style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box', cursor: 'pointer' }}
                     >
-                      <option value="bedrag">💰 Bedrag</option>
-                      <option value="eten">🍽️ Eten wordt betaald</option>
-                      <option value="cadeaubon">🎁 Cadeaubon</option>
-                      <option value="geen">❌ Geen vergoeding</option>
+                      <option value="financiële vergoeding">Financiële vergoeding t.w.v.</option>
+                      <option value="cadeaubon">Cadeaubon</option>
+                      <option value="geen">Geen vergoeding</option>
                     </select>
                   </div>
 
-                  {(newShoot.compensationType === 'bedrag' || newShoot.compensationType === 'cadeaubon') && (
+                  {newShoot.compensationType === 'cadeaubon' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                          Waarde v/d bon (€) *
+                        </label>
+                        <input
+                          required
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Bijv. 50.00"
+                          value={newShoot.compensationAmount}
+                          onChange={(e) => setNewShoot({ ...newShoot, compensationAmount: e.target.value })}
+                          style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                          Naam van de zaak *
+                        </label>
+                        <input
+                          required
+                          type="text"
+                          placeholder="Bijv. Koekela"
+                          value={newShoot.compensationBusinessName}
+                          onChange={(e) => setNewShoot({ ...newShoot, compensationBusinessName: e.target.value })}
+                          style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {newShoot.compensationType === 'financiële vergoeding' && (
                     <div style={{ marginBottom: 24 }}>
                       <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
                         Bedrag (€) *
@@ -779,12 +829,15 @@ export default function ManageShoots() {
                       {(() => {
                         const endDate = shoot.shoot_date ? new Date(shoot.shoot_date) : null;
                         const now = new Date();
+                        let statusLabel = '';
                         if (endDate && endDate < now) {
-                          return (
-                            <div style={{ fontSize: 12, color: '#DC2626', fontWeight: 700, marginBottom: 8 }}>verlopen shoot</div>
-                          );
+                          statusLabel = 'verlopen';
+                        } else {
+                          statusLabel = 'open';
                         }
-                        return null;
+                        return (
+                          <div style={{ fontSize: 12, color: statusLabel === 'verlopen' ? '#DC2626' : '#10B981', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase' }}>{statusLabel}</div>
+                        );
                       })()}
                       <h3 style={{
                         fontSize: 20,
@@ -794,7 +847,7 @@ export default function ManageShoots() {
                       }}>
                         {shoot.description?.split('\n\n')[0] || shoot.title}
                       </h3>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
                         <div style={{
                           fontSize: 14,
                           color: '#6B7280',
@@ -802,12 +855,27 @@ export default function ManageShoots() {
                           alignItems: 'center',
                           gap: 8
                         }}>
-                          <span>📅</span> {formatDateNL(shoot.shoot_date || shoot.date)}
-                          {shoot.start_time && shoot.end_time && (
-                            <span style={{ marginLeft: 8 }}>
-                              🕒 {shoot.start_time.substring(0, 5)} - {shoot.end_time.substring(0, 5)}
-                            </span>
-                          )}
+                          <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {formatDateNL(shoot.shoot_date || shoot.date)}
+                        </div>
+                        {shoot.start_time && shoot.end_time && (
+                          <div style={{
+                            fontSize: 14,
+                            color: '#6B7280',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8
+                          }}>
+                            <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {shoot.start_time.substring(0, 5)} - {shoot.end_time.substring(0, 5)}
+                          </div>
+                        )}
+                        <div style={{
+                          fontSize: 14,
+                          color: '#6B7280',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8
+                        }}>
+                          <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {shoot.location}
                         </div>
                         <div style={{
                           fontSize: 14,
@@ -816,26 +884,7 @@ export default function ManageShoots() {
                           alignItems: 'center',
                           gap: 8
                         }}>
-                          <span>📍</span> {shoot.location}
-                        </div>
-                        <div style={{
-                          fontSize: 14,
-                          color: '#6B7280',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8
-                        }}>
-                          <span>👥</span> {shoot.spots} plekken
-                        </div>
-                        <div style={{
-                          fontSize: 14,
-                          fontWeight: 600,
-                          color: '#10B981',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8
-                        }}>
-                          <span>✓</span> {shoot.status}
+                          <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {shoot.spots} plekken
                         </div>
                         {shoot.compensation_type && (
                           <div style={{
@@ -846,10 +895,11 @@ export default function ManageShoots() {
                             alignItems: 'center',
                             gap: 8
                           }}>
-                            {shoot.compensation_type === 'bedrag' && `💰 €${shoot.compensation_amount}`}
-                            {shoot.compensation_type === 'eten' && '🍽️ Eten betaald'}
-                            {shoot.compensation_type === 'cadeaubon' && `🎁 Cadeaubon €${shoot.compensation_amount}`}
-                            {shoot.compensation_type === 'geen' && '❌ Geen vergoeding'}
+                            <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span>
+                            {shoot.compensation_type === 'bedrag' && `€${shoot.compensation_amount}`}
+                            {shoot.compensation_type === 'eten' && 'Eten betaald'}
+                            {shoot.compensation_type === 'cadeaubon' && `Cadeaubon €${shoot.compensation_amount}`}
+                            {shoot.compensation_type === 'geen' && 'Geen vergoeding'}
                           </div>
                         )}
                       </div>
@@ -889,7 +939,9 @@ export default function ManageShoots() {
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
-                            display: 'inline-block',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
                             fontSize: 13,
                             color: '#2B3E72',
                             textDecoration: 'none',
@@ -897,7 +949,7 @@ export default function ManageShoots() {
                             marginBottom: 16
                           }}
                         >
-                          🌐 {shoot.clientWebsite || shoot.client_website}
+                          <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {shoot.clientWebsite || shoot.client_website}
                         </a>
                       ) : (
                         <div style={{ height: 21, marginBottom: 16 }}></div> /* Spacer to keep alignment */
@@ -941,13 +993,14 @@ export default function ManageShoots() {
                         <div style={{ display: 'flex', gap: 12 }}>
                           <button
                             onClick={() => handleEditShoot(shoot)}
+                            title="Bewerken"
                             style={{
-                              padding: '8px 16px',
+                              padding: '8px 12px',
                               background: '#E5DDD5',
                               color: '#1F2B4A',
                               border: 'none',
                               borderRadius: 8,
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: 600,
                               cursor: 'pointer',
                               transition: 'all 0.3s ease',
@@ -961,17 +1014,18 @@ export default function ManageShoots() {
                               e.currentTarget.style.background = '#E5DDD5';
                             }}
                           >
-                            ✏️ Bewerken
+                            ✏️
                           </button>
                           <button
                             onClick={() => handleDeleteShoot(shoot.id)}
+                            title="Verwijderen"
                             style={{
-                              padding: '8px 16px',
+                              padding: '8px 12px',
                               background: '#FEE2E2',
                               color: '#DC2626',
                               border: 'none',
                               borderRadius: 8,
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: 600,
                               cursor: 'pointer',
                               transition: 'all 0.3s ease',
@@ -985,7 +1039,7 @@ export default function ManageShoots() {
                               e.currentTarget.style.background = '#FEE2E2';
                             }}
                           >
-                            🗑️ Verwijderen
+                            🗑️
                           </button>
                         </div>
                       </div>

@@ -219,7 +219,7 @@ export default function RegisterModel() {
           </div>
           <h1 className="success-title">Topper!</h1>
           <p className="success-text">
-            Je bent officieel een Rotterdams Model. Niet lullen maar poseren!! 📸🤳
+            Je bent officieel een Rotterdams Talent. Niet lullen maar poseren!! 📸🤳
           </p>
           <button onClick={() => { window.location.href = '/'; }} className="primary-btn">
             Meld je aan voor openstaande shoots
@@ -264,7 +264,7 @@ export default function RegisterModel() {
               Meld je aan voor openstaande shoots
             </button>
           </div>
-          <h1 className="main-title">Registreer hier als MIES MEDIA Model</h1>
+          <h1 className="main-title">Registreer hier als The Unposed Collective Talent</h1>
           <p className="subtitle">Vul je gegevens in om je aan te melden als model</p>
         </div>
 
