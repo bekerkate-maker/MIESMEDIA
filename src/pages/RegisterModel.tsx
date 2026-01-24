@@ -27,6 +27,7 @@ export default function RegisterModel() {
     age: '',
     instagram: '',
     email: '',
+    password: '',
     phone: '',
     city: '',
     photo_url: '',
@@ -109,9 +110,31 @@ export default function RegisterModel() {
       let photoUrl = '';
       let extraPhotoUrls: string[] = [];
 
+      // 1. Sign up user via Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+          }
+        }
+      });
+
+      if (authError) {
+        throw new Error('Registratie mislukt: ' + authError.message);
+      }
+
+      if (!authData.user) {
+        throw new Error('Registratie mislukt: Kon geen gebruiker aanmaken.');
+      }
+
+      const userId = authData.user.id; // Use this ID for the model record
+
       if (photoFile) {
         const fileExt = photoFile.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const fileName = `${userId}-${Date.now()}.${fileExt}`;
         const filePath = `model-photos/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -133,7 +156,7 @@ export default function RegisterModel() {
       if (extraPhotoFiles.length > 0) {
         for (const file of extraPhotoFiles) {
           const fileExt = file.name.split('.').pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const fileName = `${userId}-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
           const filePath = `model-photos/${fileName}`;
 
           const { error: uploadError } = await supabase.storage
@@ -166,6 +189,7 @@ export default function RegisterModel() {
       }
 
       const { error } = await supabase.from('models').insert([{
+        id: userId, // Explicitly link to auth user
         first_name: formData.first_name,
         last_name: formData.last_name,
         gender: formData.gender,
@@ -178,7 +202,11 @@ export default function RegisterModel() {
         extra_photos: extraPhotoUrls.length > 0 ? extraPhotoUrls : null
       }]);
 
-      if (error) throw error;
+      if (error) {
+        // If model insert fails, we should maybe clean up the auth user? 
+        // For now just throw error.
+        throw new Error('Profiel opslaan mislukt: ' + error.message);
+      }
 
       try {
         const { error: functionError } = await supabase.functions.invoke('send-shoot-registration-email', {
@@ -264,8 +292,8 @@ export default function RegisterModel() {
               Meld je aan voor openstaande shoots
             </button>
           </div>
-          <h1 className="main-title">Registreer hier als The Unposed Collective Talent</h1>
-          <p className="subtitle">Vul je gegevens in om je aan te melden als model</p>
+          <h1 className="main-title">Registreer hier als Unposed Collective talent</h1>
+          <p className="subtitle">Vul je gegevens in en word onderdeel van The Unposed Collective.</p>
         </div>
 
         <div className="form-wrapper">
@@ -311,6 +339,9 @@ export default function RegisterModel() {
               </div>
             </div>
 
+
+
+
             <div className="form-row">
               <div className="form-field">
                 <label>Telefoonnummer *</label>
@@ -322,17 +353,30 @@ export default function RegisterModel() {
               </div>
             </div>
 
-            <div className="form-field">
-              <label>Hoofdfoto {photoFile && '✅'}</label>
-              <input id="photo-upload-input" type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
-              {photoPreview && (
-                <div className="photo-preview-container">
-                  <img src={photoPreview} alt="Preview" className="photo-preview" />
-                </div>
-              )}
-              <button type="button" onClick={handleFileUpload} className="upload-btn">
-                <span>📤</span> {photoFile ? 'Wijzig hoofdfoto' : 'Upload hoofdfoto'}
-              </button>
+            <div className="form-row">
+              <div className="form-field">
+                <label>Wachtwoord *</label>
+                <input
+                  required
+                  type="password"
+                  placeholder="Kies een veilig wachtwoord"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  minLength={6}
+                />
+              </div>
+              <div className="form-field">
+                <label>Hoofdfoto {photoFile && '✅'}</label>
+                <input id="photo-upload-input" type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+                {photoPreview && (
+                  <div className="photo-preview-container">
+                    <img src={photoPreview} alt="Preview" className="photo-preview" />
+                  </div>
+                )}
+                <button type="button" onClick={handleFileUpload} className="upload-btn">
+                  {photoFile ? 'Wijzig hoofdfoto' : 'Upload hoofdfoto'}
+                </button>
+              </div>
             </div>
 
             <div className="form-field">
@@ -349,7 +393,7 @@ export default function RegisterModel() {
               )}
               <input id="extra-photos-input" type="file" accept="image/*" multiple onChange={handleExtraFilesChange} style={{ display: 'none' }} />
               <button type="button" onClick={() => document.getElementById('extra-photos-input')?.click()} className="upload-btn dashed">
-                <span>📷</span> Extra foto's toevoegen
+                Extra foto's toevoegen
               </button>
             </div>
 
@@ -357,18 +401,18 @@ export default function RegisterModel() {
               <label className="checkbox-label">
                 <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} />
                 <span>
-                  Ik ga akkoord met de voorwaarden.
+                  Ik ga akkoord met de privacyverklaring van Unposed en geef toestemming voor het opslaan en gebruiken van mijn gegevens voor casting- en shootdoeleinden.
+                  {termsUrl && (
+                    <button
+                      type="button"
+                      style={{ color: '#2B3E72', fontWeight: 600, fontStyle: 'italic', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: 5, display: 'inline', fontSize: 'inherit' }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTermsModal(true); }}
+                    >
+                      Bekijk privacyverklaring
+                    </button>
+                  )}
                 </span>
               </label>
-              {termsUrl && (
-                <button
-                  type="button"
-                  style={{ color: '#2B3E72', fontWeight: 600, fontStyle: 'italic', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 8, display: 'block' }}
-                  onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }}
-                >
-                  Bekijk voorwaarden
-                </button>
-              )}
             </div>
 
             {/* Modal voor voorwaarden */}
@@ -435,11 +479,11 @@ export default function RegisterModel() {
             </button>
           </form>
         </div>
-      </div>
+      </div >
 
       <style>{styles}</style>
-    </div>
+    </div >
   );
 }
 
-const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#1F2B4A;font-weight:700}.success-text{font-size:20px;color:#1F2B4A;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;gap:60px;align-items:center;padding-right:60px;animation:scroll 30s linear infinite;will-change:transform}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(calc(-100% / 3))}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#1F2B4A;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#9CA3AF}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#1F2B4A;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #6B7280}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:4px;cursor:pointer;flex-shrink:0}.checkbox-label span{font-size:14px;color:#1F2B4A;line-height:1.5}.submit-btn{width:100%;padding:16px;background:#2B3E72;color:#fff;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-scroll{gap:30px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}}`;
+const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#1F2B4A;font-weight:700}.success-text{font-size:20px;color:#1F2B4A;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;gap:60px;align-items:center;padding-right:60px;animation:scroll 30s linear infinite;will-change:transform}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(calc(-100% / 3))}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#1F2B4A;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#9CA3AF}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#1F2B4A;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #6B7280}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:10px;cursor:pointer;flex-shrink:0;accent-color:#2B3E72}.checkbox-label span{font-size:15px;color:#1F2B4A;line-height:1.6}.submit-btn{width:100%;padding:16px;background:#2B3E72;color:#fff;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-scroll{gap:30px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}}`;

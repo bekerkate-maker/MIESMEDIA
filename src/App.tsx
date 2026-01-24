@@ -7,6 +7,7 @@ import RegisterEmployee from './pages/RegisterEmployee'
 import Login from './pages/Login'
 import OpenShoots from './pages/OpenShoots'
 import ManageShoots from './pages/ManageShoots'
+import ShootRegistration from './pages/ShootRegistration'
 
 // Beveiligde route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -45,32 +46,37 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   // ...existing code...
   const Account = React.lazy(() => import('./pages/Account'));
+  const EditProfile = React.lazy(() => import('./pages/EditProfile'));
   return (
     <BrowserRouter>
       <Routes>
         {/* Publieke routes */}
         <Route path="/" element={<OpenShoots />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/shoot-registration" element={<ShootRegistration />} />
         <Route path="/register-model" element={<RegisterModel />} />
         <Route path="/register-employee" element={<RegisterEmployee />} />
         <Route path="/account" element={
-          <ProtectedRoute>
-            <React.Suspense fallback={<div>Laden...</div>}>
-              <Account />
-            </React.Suspense>
-          </ProtectedRoute>
+          <React.Suspense fallback={<div>Laden...</div>}>
+            <Account />
+          </React.Suspense>
+        } />
+        <Route path="/edit-profile" element={
+          <React.Suspense fallback={<div>Laden...</div>}>
+            <EditProfile />
+          </React.Suspense>
         } />
         {/* Beveiligde routes */}
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
         />
-        <Route 
-          path="/manage-shoots" 
+        <Route
+          path="/manage-shoots"
           element={
             <ProtectedRoute>
               <ManageShoots />

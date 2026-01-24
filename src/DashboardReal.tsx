@@ -576,37 +576,11 @@ export default function Dashboard() {
     <div style={{ minHeight: '100vh', background: '#E5DDD5', paddingBottom: 40, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       <header style={{ background: '#fff', padding: '16px 20px', borderBottom: '1px solid #d0c8c0' }}>
         <div className="header-container" style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
             <MiesLogo size={70} />
 
-            <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
-              {/* 📄-icoon in header */}
-              <div style={{ position: 'relative', display: 'inline-block' }}>
-                <button
-                  onClick={() => {
-                    if (activeTerms) {
-                      setShowTermsModal(true);
-                    } else {
-                      setShowTermsUpload(true);
-                    }
-                  }}
-                  title="Algemene voorwaarden opties"
-                  style={{
-                    padding: '10px 12px',
-                    background: 'transparent',
-                    color: '#6B7280',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: 8,
-                    fontSize: 18,
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    opacity: 0.6,
-                    transition: 'opacity 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
-                >📄</button>
-              </div>
+            <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0, marginLeft: 'auto' }}>
+
               <button
                 onClick={handleManageShoots}
                 className="header-btn shoots-btn"
@@ -634,7 +608,7 @@ export default function Dashboard() {
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                📸 <span className="btn-text">Shoots Beheren</span>
+                <span className="btn-text">Shoots Beheren</span>
               </button>
               <button
                 onClick={handleLogout}
@@ -651,7 +625,7 @@ export default function Dashboard() {
                   fontFamily: 'inherit'
                 }}
               >
-                🚪 <span className="btn-text">Uitloggen</span>
+                <span className="btn-text">Uitloggen</span>
               </button>
             </div>
           </div>
@@ -669,7 +643,7 @@ export default function Dashboard() {
             background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
           }} onClick={() => setShowTermsModal(false)}>
             <div style={{ background: '#fff', borderRadius: 12, maxWidth: 700, width: '90vw', maxHeight: '80vh', overflow: 'auto', position: 'relative', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }} onClick={e => e.stopPropagation()}>
-              <iframe src={activeTerms.document_url} title="Algemene voorwaarden" style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }} />
+              <iframe src={activeTerms.document_url} title="Privacyverklaring" style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }} />
               <div style={{ display: 'flex', gap: 12, marginTop: 16, justifyContent: 'flex-end' }}>
                 <button
                   onClick={() => setShowTermsModal(false)}
@@ -678,7 +652,7 @@ export default function Dashboard() {
                 <button
                   onClick={handleDeleteTerms}
                   style={{ padding: '10px 24px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                >Verwijder algemene voorwaarden</button>
+                >Verwijder privacyverklaring</button>
               </div>
             </div>
           </div>
@@ -1063,7 +1037,6 @@ export default function Dashboard() {
                         flex: 1
                       }}
                     >
-                      <span>📄</span>
                       <span>QuitClaim</span>
                       <input
                         type="file"
@@ -1123,7 +1096,6 @@ export default function Dashboard() {
                         flex: 1
                       }}
                     >
-                      <span>✅</span>
                       <span>Bekijk Quitclaim</span>
                     </button>
                   )}
@@ -1140,10 +1112,37 @@ export default function Dashboard() {
         )}
 
         {/* Aangemelde collega's sectie onderaan */}
-        <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginTop: 40, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <h3 style={{ margin: 0, marginBottom: 16, fontSize: 18, fontWeight: 600, color: '#1F2B4A' }}>
-            Geregistreerde collega's
-          </h3>
+        <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginTop: 40, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#1F2B4A' }}>
+              Geregistreerde collega's
+            </h3>
+            <button
+              onClick={() => {
+                if (activeTerms) {
+                  setShowTermsModal(true);
+                } else {
+                  setShowTermsUpload(true);
+                }
+              }}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                padding: '6px 12px',
+                background: 'transparent',
+                color: '#9CA3AF',
+                border: '1px solid #E5E7EB',
+                borderRadius: 6,
+                fontSize: 12,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                transition: 'all 0.2s'
+              }}
+            >
+              Wijzig privacyverklaring
+            </button>
+          </div>
           {loggedInEmployees.length > 0 ? (
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {loggedInEmployees.map((employee, index) => (
@@ -2528,10 +2527,10 @@ export default function Dashboard() {
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }}>
             <h2 style={{ margin: 0, marginBottom: 24, fontSize: 24, fontWeight: 700, color: '#1F2B4A' }}>
-              Upload Voorwaarden
+              Upload privacyverklaring
             </h2>
             <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 20 }}>
-              Upload een <span style={{ textDecoration: 'underline', fontWeight: 600 }}>PDF</span> document met de algemene voorwaarden die modellen moeten accepteren bij registratie.
+              Upload een <span style={{ textDecoration: 'underline', fontWeight: 600 }}>PDF</span> document met de privacyverklaring die modellen moeten accepteren bij registratie.
             </p>
 
             <div style={{ width: '100%', boxSizing: 'border-box', marginBottom: 20 }}>

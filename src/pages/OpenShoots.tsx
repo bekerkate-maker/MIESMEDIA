@@ -7,6 +7,8 @@ import logoKoekela from '@/components/logo_klanten/logo-koekela-winkels-denieuwe
 import logoJordys from '@/components/logo_klanten/JORDYS_LOGO.png';
 import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
 import logoDudok from '@/components/logo_klanten/dudok_logo.png';
+import logoDeBeren from '@/components/logo_klanten/de_beren_logo.png';
+import logoHeineken from '@/components/logo_klanten/heineken_logo.png';
 
 function formatDateNL(dateString?: string, long: boolean = false): string {
   if (!dateString) return '';
@@ -66,30 +68,26 @@ const OpenShoots: React.FC = () => {
         <div className="logo-banner">
           <div className="logo-banner-inner">
             <div className="logo-scroll">
-              <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-              <img src={logoKoekela} alt="Koekela" className="logo-small" />
-              <img src={logoJordys} alt="Jordys" className="logo-normal" />
-              <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-              <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-              <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-              <img src={logoKoekela} alt="Koekela" className="logo-small" />
-              <img src={logoJordys} alt="Jordys" className="logo-normal" />
-              <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-              <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-              <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-              <img src={logoKoekela} alt="Koekela" className="logo-small" />
-              <img src={logoJordys} alt="Jordys" className="logo-normal" />
-              <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-              <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
+              {[...Array(4)].map((_, i) => (
+                <React.Fragment key={i}>
+                  <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
+                  <img src={logoKoekela} alt="Koekela" className="logo-small" />
+                  <img src={logoJordys} alt="Jordys" className="logo-normal" />
+                  <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
+                  <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
+                  <img src={logoDeBeren} alt="De Beren" className="logo-large" />
+                  <img src={logoHeineken} alt="Heineken" className="logo-xxlarge" />
+                </React.Fragment>
+              ))}
             </div>
           </div>
         </div>
-        <style>{`.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;gap:60px;align-items:center;padding-right:60px;animation:scroll 30s linear infinite;will-change:transform}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(calc(-100% / 3))}}@media(max-width:768px){.logo-banner{min-height:45px}.logo-scroll{gap:30px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}}`}</style>
+        <style>{`.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;gap:60px;align-items:center;animation:scroll 60s linear infinite;will-change:transform;white-space:nowrap}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%);flex-shrink:0}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}.logo-xxlarge{height:45px;transform:scale(2.2);margin:0 15px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-25%)}}@media(max-width:768px){.logo-banner{min-height:45px}.logo-scroll{gap:30px}.logo-small{height:18px}.logo-normal{height:28px}.logo-large{height:35px}.logo-xlarge{height:42px}.logo-xxlarge{height:35px;transform:scale(2.0)}}`}</style>
       </div>
       {/* Account icon direct onder de banner */}
       <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', padding: '12px 0 0 0' }}>
         <button
-          onClick={() => window.location.href = session ? '/account' : '/login'}
+          onClick={() => window.location.href = '/account'}
           style={{
             background: 'transparent',
             border: 'none',
@@ -116,12 +114,12 @@ const OpenShoots: React.FC = () => {
             <MiesLogo size={110} />
             <div className="button-wrapper" style={{ marginTop: 6, display: 'flex', gap: 12 }}>
               <button onClick={() => window.location.href = '/register-model'} className="primary-btn">
-                Registreer als nieuw model
+                Meld je aan als nieuw talent
               </button>
             </div>
           </div>
           <h1 className="main-title">Openstaande shoots</h1>
-          <p className="subtitle">Bekijk alle beschikbare shoots en meld je aan voor jouw volgende opdracht</p>
+          <p className="subtitle">Bekijk alle openstaande shoots en meld je aan</p>
         </div>
         <div className="shoots-grid">
           {shoots.map(shoot => (
@@ -254,13 +252,19 @@ const OpenShoots: React.FC = () => {
                   )}
                 </div>
                 <div style={{ marginTop: 'auto' }}>
-                  <button
-                    className="primary-btn"
-                    style={{ width: '100%', marginTop: 8 }}
-                    onClick={() => window.location.href = `/register-model?shoot_id=${shoot.id}`}
-                  >
-                    Meld je aan!
-                  </button>
+                  {(() => {
+                    const isExpired = shoot.shoot_date && new Date(shoot.shoot_date) < new Date();
+                    return (
+                      <button
+                        className={`primary-btn ${isExpired ? 'disabled' : ''}`}
+                        style={{ width: '100%', marginTop: 8 }}
+                        onClick={() => !isExpired && (window.location.href = `/shoot-registration?shoot_id=${shoot.id}`)}
+                        disabled={isExpired}
+                      >
+                        {isExpired ? 'Shoot verlopen' : 'Meld je aan!'}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -272,7 +276,7 @@ const OpenShoots: React.FC = () => {
           </div>
         )}
       </div>
-      <style>{`.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.shoots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:1200px;margin:0 auto}.shoot-card{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0 0 24px 0;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow 0.2s;min-width:0}.shoot-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13)}.shoot-banner img{width:100%;height:180px;object-fit:cover;display:block}.shoot-card-content{padding:24px;display:flex;flex-direction:column;flex:1}.shoot-client{font-size:13px;color:#2B3E72;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}.shoot-title{font-size:22px;font-weight:700;color:#1F2B4A;margin-bottom:8px}.primary-btn{margin-top:auto}.shoot-card .primary-btn{margin-top:16px}.shoot-card .primary-btn:active{background:#1F2B4A}.shoot-card .primary-btn:focus{outline:2px solid #1F2B4A}.shoot-card .primary-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:1024px){.shoots-grid{grid-template-columns:1fr 1fr}}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.shoots-grid{grid-template-columns:1fr}.shoot-card-content{padding:16px}.shoot-title{font-size:18px}.shoot-banner img{height:120px}}`}</style>
+      <style>{`.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover:not(.disabled){background:#1F2B4A;transform:translateY(-2px)}.primary-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6;transform:none !important}.primary-btn.disabled:hover{background:#9CA3AF;transform:none}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.shoots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:1200px;margin:0 auto}.shoot-card{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0 0 24px 0;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow 0.2s;min-width:0}.shoot-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13)}.shoot-banner img{width:100%;height:180px;object-fit:cover;display:block}.shoot-card-content{padding:24px;display:flex;flex-direction:column;flex:1}.shoot-client{font-size:13px;color:#2B3E72;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}.shoot-title{font-size:22px;font-weight:700;color:#1F2B4A;margin-bottom:8px}.primary-btn{margin-top:auto}.shoot-card .primary-btn{margin-top:16px}.shoot-card .primary-btn:active:not(.disabled){background:#1F2B4A}.shoot-card .primary-btn:focus:not(.disabled){outline:2px solid #1F2B4A}@media(max-width:1024px){.shoots-grid{grid-template-columns:1fr 1fr}}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.shoots-grid{grid-template-columns:1fr}.shoot-card-content{padding:16px}.shoot-title{font-size:18px}.shoot-banner img{height:120px}}`}</style>
     </div>
   );
 };

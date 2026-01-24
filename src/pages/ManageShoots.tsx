@@ -629,76 +629,63 @@ export default function ManageShoots() {
                     <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
                       Soort vergoeding *
                     </label>
-                    <select
-                      required
-                      value={newShoot.compensationType}
-                      onChange={(e) => {
-                        const newType = e.target.value;
-                        setNewShoot(s => ({
-                          ...s,
-                          compensationType: newType,
-                          compensationAmount: newType === 'geen' ? '' : s.compensationAmount,
-                          compensationBusinessName: newType === 'cadeaubon' ? s.compensationBusinessName : ''
-                        }));
-                      }}
-                      style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box', cursor: 'pointer' }}
-                    >
-                      <option value="financiële vergoeding">Financiële vergoeding t.w.v.</option>
-                      <option value="cadeaubon">Cadeaubon</option>
-                      <option value="geen">Geen vergoeding</option>
-                    </select>
-                  </div>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                      <select
+                        required
+                        value={newShoot.compensationType}
+                        onChange={(e) => {
+                          const newType = e.target.value;
+                          setNewShoot(s => ({
+                            ...s,
+                            compensationType: newType,
+                            compensationAmount: newType === 'geen' ? '' : s.compensationAmount,
+                            compensationBusinessName: newType === 'cadeaubon' ? s.compensationBusinessName : ''
+                          }));
+                        }}
+                        style={{ flex: 1, padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box', cursor: 'pointer' }}
+                      >
+                        <option value="financiële vergoeding">Financiële vergoeding t.w.v.</option>
+                        <option value="cadeaubon">Cadeaubon</option>
+                        <option value="geen">Geen vergoeding</option>
+                      </select>
 
-                  {newShoot.compensationType === 'cadeaubon' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-                      <div>
-                        <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
-                          Waarde v/d bon (€) *
-                        </label>
+                      {newShoot.compensationType === 'financiële vergoeding' && (
                         <input
                           required
                           type="number"
                           min="0"
                           step="0.01"
-                          placeholder="Bijv. 50.00"
+                          placeholder="Bedrag (€)"
                           value={newShoot.compensationAmount}
                           onChange={(e) => setNewShoot({ ...newShoot, compensationAmount: e.target.value })}
-                          style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                          style={{ width: '150px', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
                         />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
-                          Naam van de zaak *
-                        </label>
-                        <input
-                          required
-                          type="text"
-                          placeholder="Bijv. Koekela"
-                          value={newShoot.compensationBusinessName}
-                          onChange={(e) => setNewShoot({ ...newShoot, compensationBusinessName: e.target.value })}
-                          style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                      )}
 
-                  {newShoot.compensationType === 'financiële vergoeding' && (
-                    <div style={{ marginBottom: 24 }}>
-                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
-                        Bedrag (€) *
-                      </label>
-                      <input
-                        required
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="Bijv. 150.00"
-                        value={newShoot.compensationAmount}
-                        onChange={(e) => setNewShoot({ ...newShoot, compensationAmount: e.target.value })}
-                        style={{ width: '100%', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
-                      />
+                      {newShoot.compensationType === 'cadeaubon' && (
+                        <>
+                          <input
+                            required
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Bedrag (€)"
+                            value={newShoot.compensationAmount}
+                            onChange={(e) => setNewShoot({ ...newShoot, compensationAmount: e.target.value })}
+                            style={{ width: '120px', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                          />
+                          <input
+                            required
+                            type="text"
+                            placeholder="Naam zaak"
+                            value={newShoot.compensationBusinessName}
+                            onChange={(e) => setNewShoot({ ...newShoot, compensationBusinessName: e.target.value })}
+                            style={{ flex: 1, padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                          />
+                        </>
+                      )}
                     </div>
-                  )}
+                  </div>
 
                   <div style={{ display: 'flex', gap: 12 }}>
                     <button
