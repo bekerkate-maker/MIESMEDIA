@@ -222,7 +222,7 @@ const OpenShoots: React.FC = () => {
                         marginBottom: 6
                       }}
                     >
-                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> Bezoek website van {shoot.client_name || shoot.client}
+                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> Bekijk website →
                     </a>
                   )}
                   {shoot.client_instagram && (
@@ -247,7 +247,7 @@ const OpenShoots: React.FC = () => {
                         e.currentTarget.style.color = '#2563EB';
                       }}
                     >
-                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> @{shoot.client_instagram}
+                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> {shoot.client_instagram.startsWith('@') ? shoot.client_instagram : '@' + shoot.client_instagram}
                     </a>
                   )}
                 </div>

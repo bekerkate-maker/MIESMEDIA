@@ -44,7 +44,7 @@ export default function ManageShoots() {
     description: '',
     spots: '',
     clientWebsite: '',
-    clientInstagram: '',
+    clientInstagram: '@',
     moodboardLink: '',
     bannerPhoto: null,
     bannerPhotoUrl: '',
@@ -228,7 +228,7 @@ export default function ManageShoots() {
           description: `${newShoot.title}\n\n${newShoot.description}`,
           spots: Number(newShoot.spots),
           client_website: newShoot.clientWebsite,
-          client_instagram: newShoot.clientInstagram,
+          client_instagram: newShoot.clientInstagram === '@' ? '' : newShoot.clientInstagram,
           moodboard_link: newShoot.moodboardLink,
           banner_photo_url: bannerPhotoUrl || newShoot.bannerPhotoUrl || '',
           compensation_type: newShoot.compensationType,
@@ -259,7 +259,7 @@ export default function ManageShoots() {
           description: `${newShoot.title}\n\n${newShoot.description}`,
           spots: Number(newShoot.spots),
           client_website: newShoot.clientWebsite,
-          client_instagram: newShoot.clientInstagram,
+          client_instagram: newShoot.clientInstagram === '@' ? '' : newShoot.clientInstagram,
           moodboard_link: newShoot.moodboardLink,
           banner_photo_url: bannerPhotoUrl,
           compensation_type: newShoot.compensationType,
@@ -285,7 +285,7 @@ export default function ManageShoots() {
         description: '',
         spots: '',
         clientWebsite: '',
-        clientInstagram: '',
+        clientInstagram: '@',
         moodboardLink: '',
         bannerPhoto: null,
         bannerPhotoUrl: '',
@@ -333,7 +333,7 @@ export default function ManageShoots() {
       description,
       spots: shoot.spots !== undefined && shoot.spots !== null ? shoot.spots.toString() : '',
       clientWebsite: shoot.client_website || shoot.clientWebsite || '',
-      clientInstagram: shoot.client_instagram || shoot.clientInstagram || '',
+      clientInstagram: shoot.client_instagram || shoot.clientInstagram || '@',
       moodboardLink: shoot.moodboard_link || '',
       bannerPhoto: null,
       bannerPhotoUrl: shoot.banner_photo_url || '',
@@ -358,7 +358,7 @@ export default function ManageShoots() {
       description: '',
       spots: '',
       clientWebsite: '',
-      clientInstagram: '',
+      clientInstagram: '@',
       moodboardLink: '',
       bannerPhoto: null,
       bannerPhotoUrl: '',
@@ -538,7 +538,21 @@ export default function ManageShoots() {
                         type="text"
                         placeholder="@instagram"
                         value={newShoot.clientInstagram}
-                        onChange={(e) => setNewShoot({ ...newShoot, clientInstagram: e.target.value })}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Zorg ervoor dat @ altijd aan het begin staat
+                          if (!value.startsWith('@')) {
+                            setNewShoot({ ...newShoot, clientInstagram: '@' + value.replace(/^@*/, '') });
+                          } else {
+                            setNewShoot({ ...newShoot, clientInstagram: value });
+                          }
+                        }}
+                        onFocus={(e) => {
+                          // Als het veld leeg is of alleen spaties bevat, zet @ erin
+                          if (!e.target.value || e.target.value.trim() === '') {
+                            setNewShoot({ ...newShoot, clientInstagram: '@' });
+                          }
+                        }}
                         style={{ flex: 1, padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
                       />
                     </div>
@@ -969,21 +983,40 @@ export default function ManageShoots() {
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 8,
+                              display: 'inline-block',
                               fontSize: 13,
                               color: '#2B3E72',
                               textDecoration: 'none',
-                              fontWeight: 500,
+                              fontWeight: 600,
                               marginBottom: 16
                             }}
                           >
-                            {shoot.clientWebsite || shoot.client_website}
+                            Bekijk website &#8594;
                           </a>
                         ) : (
                           <div style={{ height: 21, marginBottom: 16 }}></div> /* Spacer to keep alignment */
                         )}
+
+                        {(shoot.client_instagram || shoot.clientInstagram) && (shoot.client_instagram || shoot.clientInstagram) !== '@' && (
+                          <a
+                            href={`https://instagram.com/${(shoot.client_instagram || shoot.clientInstagram).replace('@', '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-block',
+                              fontSize: 13,
+                              color: '#2B3E72',
+                              textDecoration: 'none',
+                              fontWeight: 600,
+                              marginBottom: 16
+                            }}
+                          >
+                            {(shoot.client_instagram || shoot.clientInstagram).startsWith('@')
+                              ? (shoot.client_instagram || shoot.clientInstagram)
+                              : '@' + (shoot.client_instagram || shoot.clientInstagram)}
+                          </a>
+                        )}
+
 
 
                         {/* Footer Actions Row */}
