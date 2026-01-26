@@ -203,7 +203,7 @@ const Account: React.FC = () => {
               The Unposed Collective
             </h1>
             <p style={{ fontSize: 16, color: '#6B7280', margin: 0 }}>
-              Log in met je talentgegevens
+              Log in met je accountgegevens
             </p>
           </div>
 
@@ -292,9 +292,9 @@ const Account: React.FC = () => {
               {loggingIn ? 'Even geduld...' : 'Inloggen'}
             </button>
 
-            <p style={{ textAlign: 'center', fontSize: 14, color: '#6B7280', margin: 0 }}>
-              Nog niet geregistreerd als talent? <a href="/register-model" style={{ color: '#2B3E72', textDecoration: 'underline' }}>Registreer hier als nieuw talent.</a>
-            </p>
+            <div style={{ textAlign: 'center', fontSize: 14, color: '#6B7280', margin: 0 }}>
+              Nog niet geregistreerd als talent? <a href="/register-model" style={{ color: '#2B3E72', textDecoration: 'underline' }}>Registreer hier</a>
+            </div>
           </form>
         </div>
       </div>
@@ -319,8 +319,15 @@ const Account: React.FC = () => {
   return (
     <div style={{ minHeight: '100vh', background: '#E5DDD5', fontFamily: 'system-ui, -apple-system, sans-serif', display: 'flex', flexDirection: 'column' }}>
       <ClientLogoBanner />
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', padding: '12px 0 0 0', position: 'relative', zIndex: 50 }}>
-        <div ref={menuRef} style={{ position: 'relative', marginRight: 24 }}>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', position: 'relative', zIndex: 50, boxSizing: 'border-box' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+
+          <h2 style={{ fontSize: 20, color: '#1F2B4A', margin: 0, fontWeight: 700 }}>
+            {profile?.first_name ? `Welkom ${profile.first_name}!` : 'Mijn Account'}
+          </h2>
+        </div>
+
+        <div ref={menuRef} style={{ position: 'relative' }}>
           <button
             onClick={() => setShowMenu(!showMenu)}
             style={{
@@ -419,7 +426,10 @@ const Account: React.FC = () => {
 
         {/* RECHTERKOLOM: Shoots */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          <h2 style={{ fontSize: 28, color: '#1F2B4A', margin: 0 }}>Mijn Shoots</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Title container - can add filters or other header items here later */}
+            <h2 style={{ fontSize: 28, color: '#1F2B4A', margin: 0 }}>Mijn Shoots</h2>
+          </div>
 
           {/* Aangemeld */}
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>

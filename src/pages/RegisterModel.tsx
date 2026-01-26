@@ -118,6 +118,11 @@ export default function RegisterModel() {
           data: {
             first_name: formData.first_name,
             last_name: formData.last_name,
+            gender: formData.gender,
+            birthdate: formData.birthdate,
+            instagram: formData.instagram,
+            phone: formData.phone,
+            city: formData.city
           }
         }
       });
