@@ -1,11 +1,16 @@
--- RUN DEZE CODE IN JE SUPABASE SQL EDITOR OM DE FOUTMELDING OP TE LOSSEN
+-- Enable RLS for shoots table
+ALTER TABLE shoots ENABLE ROW LEVEL SECURITY;
 
--- Optie 1: RLS uitzetten voor shoots (makkelijkste, alle bezoekers kunnen aanpassen)
-ALTER TABLE public.shoots DISABLE ROW LEVEL SECURITY;
+-- Allow everyone to view shoots (needed for models/public page)
+CREATE POLICY "Allow public read access"
+ON shoots FOR SELECT
+TO anon, authenticated
+USING (true);
 
--- Optie 2: Als je RLS aan wilt laten staan maar iedereen toegang wilt geven (alternatief)
--- CREATE POLICY "Iedereen mag alles met shoots"
--- ON public.shoots
--- FOR ALL
--- USING (true)
--- WITH CHECK (true);
+-- Allow authenticated users to insert, update, delete shoots
+-- (Assuming only admins/employees have accounts that can access the Manage page)
+CREATE POLICY "Allow authenticated full access"
+ON shoots FOR ALL
+TO authenticated
+USING (true)
+WITH CHECK (true);

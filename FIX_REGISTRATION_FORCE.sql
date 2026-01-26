@@ -1,29 +1,25 @@
--- ALLERLAATSTE POGING: SCHONE LEI
--- We verwijderen EERST alles, en zetten dan de deur open voor registratie.
+-- NOODOPLOSSING: We verwijderen de blokkade volledig.
+-- We verwijderen de foreign key constraint zodat de database niet meer zeurt of de user wel of niet bestaat.
 
--- 1. Verwijder ALLE mogelijke policies die we ooit hebben gemaakt
--- Het maakt niet uit of ze wel of niet bestaan, we proberen ze allemaal weg te gooien.
-drop policy if exists "Enable insert for users based on user_id" on models;
-drop policy if exists "Enable update for users based on user_id" on models;
-drop policy if exists "Enable read for users based on user_id" on models;
-drop policy if exists "Allow anonymous registration" on models;
-drop policy if exists "Users can insert their own profile" on models;
-drop policy if exists "Users can update own profile" on models;
-drop policy if exists "Users can view own profile" on models;
+-- 1. Verwijder de constraint die de foutmelding geeft (employees_user_id_fkey)
+ALTER TABLE employees DROP CONSTRAINT IF EXISTS employees_user_id_fkey;
 
--- 2. Maak de "Alles mag bij registratie" regel aan
--- Dit zorgt dat de registratie ALTIJD lukt, ook zonder login
-create policy "Allow anonymous registration"
-on models for insert
-to anon, authenticated
-with check ( true );
+-- 2. Zorg dat de tabel open is voor nieuwe registraties
+ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
 
--- 3. Maak de update regel aan (alleen eigen profiel)
-create policy "Enable update for users based on user_id"
-on models for update
-using ( auth.uid() = id );
+-- Oude policies weggooien
+DROP POLICY IF EXISTS "Allow insert for everyone" ON employees;
+DROP POLICY IF EXISTS "Allow authenticated full access" ON employees;
+DROP POLICY IF EXISTS "Allow public insert" ON employees;
 
--- 4. Maak de lees regel aan (alleen eigen profiel)
-create policy "Enable read for users based on user_id"
-on models for select
-using ( auth.uid() = id );
+-- Nieuwe, open policies maken
+CREATE POLICY "Allow insert for everyone"
+ON employees FOR INSERT
+TO anon, authenticated
+WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated full access"
+ON employees FOR ALL
+TO authenticated
+USING (true)
+WITH CHECK (true);

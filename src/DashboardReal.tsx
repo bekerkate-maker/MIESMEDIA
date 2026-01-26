@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showTermsMenu, setShowTermsMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // Fetch active terms document (nu als losse functie)
   const fetchActiveTerms = async () => {
@@ -117,6 +118,21 @@ export default function Dashboard() {
 
   // Terms upload state
   const [showTermsUpload, setShowTermsUpload] = useState(false);
+
+
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
 
 
@@ -500,10 +516,9 @@ export default function Dashboard() {
 
     if (confirmed) {
       try {
-        const { error } = await supabase
-          .from('models')
-          .delete()
-          .eq('id', editingModel.id);
+        const { error } = await supabase.rpc('delete_user_complete', {
+          target_user_id: editingModel.id
+        });
 
         if (error) throw error;
 
@@ -513,7 +528,7 @@ export default function Dashboard() {
         alert('✅ Talent succesvol verwijderd!');
       } catch (error) {
         console.error('Error deleting model:', error);
-        alert('❌ Er is iets fout gegaan bij het verwijderen.');
+        alert('❌ Fout bij verwijderen: ' + (error.message || JSON.stringify(error)));
       }
     }
   };
@@ -525,10 +540,9 @@ export default function Dashboard() {
 
     if (confirmed) {
       try {
-        const { error } = await supabase
-          .from('models')
-          .delete()
-          .eq('id', model.id);
+        const { error } = await supabase.rpc('delete_user_complete', {
+          target_user_id: model.id
+        });
 
         if (error) throw error;
 
@@ -537,7 +551,7 @@ export default function Dashboard() {
         alert('✅ Talent succesvol verwijderd!');
       } catch (error) {
         console.error('Error deleting model:', error);
-        alert('❌ Er is iets fout gegaan bij het verwijderen.');
+        alert('❌ Fout bij verwijderen: ' + (error.message || JSON.stringify(error)));
       }
     }
   };
@@ -574,7 +588,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#E5DDD5', paddingBottom: 40, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      <header style={{ background: '#fff', padding: '16px 20px', borderBottom: '1px solid #d0c8c0' }}>
+      <header style={{ background: 'transparent', padding: '16px 20px' }}>
         <div className="header-container" style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
             <MiesLogo size={70} />
@@ -587,7 +601,7 @@ export default function Dashboard() {
                 style={{
                   background: 'transparent',
                   color: '#1F2B4A',
-                  border: '2px solid #E5DDD5',
+                  border: '2px solid #fff',
                   fontSize: 14,
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -600,7 +614,7 @@ export default function Dashboard() {
                 }}
                 title="Beheer shoots"
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#E5DDD5';
+                  e.currentTarget.style.background = '#fff';
                   e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseLeave={(e) => {
@@ -610,23 +624,62 @@ export default function Dashboard() {
               >
                 <span className="btn-text">Shoots Beheren</span>
               </button>
-              <button
-                onClick={handleLogout}
-                className="header-btn logout-btn"
-                style={{
-                  padding: '10px 20px',
-                  background: '#E5DDD5',
-                  color: '#1F2B4A',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  fontFamily: 'inherit'
-                }}
-              >
-                <span className="btn-text">Uitloggen</span>
-              </button>
+              <div ref={userMenuRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="header-btn logout-btn"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    padding: 8,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  title="Account"
+                >
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
+                  </svg>
+                </button>
+                {showUserMenu && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: 8,
+                    background: '#fff',
+                    borderRadius: 8,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    padding: 4,
+                    zIndex: 100,
+                    whiteSpace: 'nowrap'
+                  }}>
+                    <button
+                      onClick={handleLogout}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '8px 16px',
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#1F2B4A',
+                        fontSize: 14,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        borderRadius: 4
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#F3F4F6'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      Uitloggen
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           {/* mobile-quote verwijderd, alles via desktop-quote */}
@@ -876,7 +929,7 @@ export default function Dashboard() {
                         gap: 6,
                         zIndex: 2
                       }}>
-                        📷 +{model.extra_photos.length}
+                        +{model.extra_photos.length}
                       </div>
                     )}
                   </>

@@ -235,11 +235,17 @@ export default function ManageShoots() {
           compensation_amount: newShoot.compensationAmount ? Number(newShoot.compensationAmount) : null,
           compensation_business_name: newShoot.compensationBusinessName || null
         };
+        console.log('Update Payload:', updateFields);
         const updateResult = await supabase
           .from('shoots')
           .update(updateFields)
-          .eq('id', editingShoot);
+          .eq('id', editingShoot)
+          .select();
+
         if (updateResult.error) throw updateResult.error;
+        if (!updateResult.data || updateResult.data.length === 0) {
+          throw new Error("Geen shoot bijgewerkt. Mogelijk heb je geen rechten of is de shoot niet gevonden.");
+        }
         alert('✅ Shoot bijgewerkt!');
       } else {
         // Nieuwe shoot
@@ -302,15 +308,21 @@ export default function ManageShoots() {
 
 
   const handleEditShoot = (shoot: any) => {
+    console.log('Editing shoot (RAW):', shoot);
     setEditingShoot(shoot.id);
     // Split description only if it contains two newlines, otherwise use title and description as stored
     let title = shoot.title || '';
     let description = shoot.description || '';
     if (shoot.description && shoot.description.includes('\n\n')) {
       const parts = shoot.description.split('\n\n');
-      title = parts[0];
+      if (!title) {
+        title = parts[0];
+      }
       description = parts.slice(1).join('\n\n');
     }
+    console.log('Extracted Title:', title);
+    console.log('Client Name:', shoot.client_name || shoot.client);
+
     setNewShoot({
       client: shoot.client_name || shoot.client || '',
       title,
@@ -790,18 +802,12 @@ export default function ManageShoots() {
                       background: '#fff',
                       borderRadius: 12,
                       padding: 0,
-                      boxShadow: isExpanded ? '0 12px 40px rgba(0,0,0,0.15)' : '0 2px 8px rgba(0,0,0,0.08)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 0,
                       alignItems: 'start',
-                      // overflow: 'hidden', // Removed to allow overlay breakout
-                      transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                      opacity: isFocusMode && !isExpanded ? 0.3 : 1,
-                      filter: isFocusMode && !isExpanded ? 'blur(2px) grayscale(50%)' : 'none',
-                      transform: isExpanded ? 'none' : 'scale(1)',
-                      zIndex: isExpanded ? 50 : 1,
-                      pointerEvents: isFocusMode && !isExpanded ? 'none' : 'auto',
+                      transition: 'all 0.2s ease',
                       position: 'relative'
                     }}>
                       {shoot.banner_photo_url && (
@@ -865,7 +871,7 @@ export default function ManageShoots() {
                           color: '#1F2B4A',
                           marginBottom: 12
                         }}>
-                          {shoot.description?.split('\n\n')[0] || shoot.title}
+                          {shoot.title || shoot.description?.split('\n\n')[0]}
                         </h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
                           <div style={{
@@ -909,17 +915,21 @@ export default function ManageShoots() {
                           {shoot.compensation_type && (
                             <div style={{
                               fontSize: 14,
-                              fontWeight: 500,
-                              color: '#2B3E72',
+                              color: '#6B7280',
                               display: 'flex',
                               alignItems: 'center',
                               gap: 8
                             }}>
                               <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span>
-                              {shoot.compensation_type === 'bedrag' && `€${shoot.compensation_amount}`}
-                              {shoot.compensation_type === 'eten' && 'Eten betaald'}
-                              {shoot.compensation_type === 'cadeaubon' && `Cadeaubon €${shoot.compensation_amount}`}
-                              {shoot.compensation_type === 'geen' && 'Geen vergoeding'}
+                              {(() => {
+                                if (shoot.compensation_type === 'financiële vergoeding') return `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
+                                if (shoot.compensation_type === 'cadeaubon') return `Cadeaubon t.w.v. €${shoot.compensation_amount}${shoot.compensation_business_name ? ` bij ${shoot.compensation_business_name}` : ''}`;
+                                if (shoot.compensation_type === 'geen') return `Geen vergoeding`;
+                                // Fallback voor oude data
+                                if (shoot.compensation_type === 'bedrag') return `€${shoot.compensation_amount}`;
+                                if (shoot.compensation_type === 'eten') return `Eten betaald`;
+                                return shoot.compensation_type;
+                              })()}
                             </div>
                           )}
                         </div>
@@ -933,6 +943,8 @@ export default function ManageShoots() {
                           {shoot.description?.split('\n\n').slice(1).join('\n\n') || shoot.description}
                         </p>
 
+                        <div style={{ borderTop: '1px solid #E5E7EB', margin: '20px 0' }} />
+
                         {shoot.moodboard_link && (
                           <a
                             href={shoot.moodboard_link}
@@ -944,9 +956,7 @@ export default function ManageShoots() {
                               color: '#2B3E72',
                               textDecoration: 'none',
                               fontWeight: 600,
-                              marginBottom: 12,
-                              paddingBottom: 2,
-                              borderBottom: '1px solid #2B3E72'
+                              marginBottom: 12
                             }}
                           >
                             Bekijk moodboard &#8594;
@@ -969,17 +979,16 @@ export default function ManageShoots() {
                               marginBottom: 16
                             }}
                           >
-                            <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {shoot.clientWebsite || shoot.client_website}
+                            {shoot.clientWebsite || shoot.client_website}
                           </a>
                         ) : (
                           <div style={{ height: 21, marginBottom: 16 }}></div> /* Spacer to keep alignment */
                         )}
 
+
                         {/* Footer Actions Row */}
                         <div style={{
-                          marginTop: 20,
-                          paddingTop: 20,
-                          borderTop: '1px solid #E5E7EB',
+                          marginTop: 10,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
@@ -1115,7 +1124,7 @@ export default function ManageShoots() {
                                     {shoot.client_name || shoot.client}
                                   </div>
                                   <h2 style={{ fontSize: 24, fontWeight: 700, color: '#1F2B4A', margin: 0 }}>
-                                    {shoot.description?.split('\n\n')[0] || shoot.title}
+                                    {shoot.title || shoot.description?.split('\n\n')[0]}
                                   </h2>
                                 </div>
                                 <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#6B7280', flexWrap: 'wrap' }}>

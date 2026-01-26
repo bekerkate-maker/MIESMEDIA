@@ -18,10 +18,8 @@ export default function ShootRegistration() {
 
   // Form data voor bestaand talent
   const [existingTalentData, setExistingTalentData] = useState({
-    firstName: '',
-    lastName: '',
     email: '',
-    phone: '',
+    password: '',
     motivation: ''
   });
 
@@ -45,30 +43,60 @@ export default function ShootRegistration() {
     setLoading(true);
 
     try {
-      // Zoek het model op basis van email en naam
-      const { data: models, error: searchError } = await supabase
+      // 1. Probeer in te loggen
+      const email = existingTalentData.email.trim();
+
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: existingTalentData.password,
+      });
+
+      if (authError) {
+        console.error('Login error detailed:', authError);
+        throw new Error(`Inloggen mislukt: ${authError.message}`);
+      }
+
+      if (!authData.user) {
+        throw new Error('Geen gebruiker gevonden.');
+      }
+
+      // 2. Zoek het gekoppelde model profiel (op basis van user_id)
+      let { data: models, error: searchError } = await supabase
         .from('models')
         .select('*')
-        .eq('email', existingTalentData.email)
-        .eq('first_name', existingTalentData.firstName)
-        .eq('last_name', existingTalentData.lastName);
+        .eq('user_id', authData.user.id);
+
+      if (!models || models.length === 0) {
+        // Fallback: zoek op email (uniek)
+        const result = await supabase
+          .from('models')
+          .select('*')
+          .eq('email', existingTalentData.email);
+
+        models = result.data;
+        searchError = result.error;
+      }
 
       if (searchError) throw searchError;
 
       if (!models || models.length === 0) {
-        alert('We kunnen je niet vinden in ons systeem. Registreer je eerst als nieuw talent.');
+        alert('Je bent ingelogd, maar we konden geen talent-profiel vinden dat aan dit account is gekoppeld. Neem contact op.');
         setLoading(false);
         return;
       }
 
       const model = models[0];
 
-      // Registreer voor de shoot
+      // 3. Registreer voor de shoot
       const { error: regError } = await supabase
         .from('shoot_registrations')
         .insert([{
           shoot_id: shootId ? parseInt(shootId) : null,
           model_id: model.id,
+          email: model.email,
+          phone: model.phone,
+          instagram: model.instagram,
+          name: `${model.first_name || ''} ${model.last_name || ''}`.trim() || null,
           status: 'pending',
           motivation: existingTalentData.motivation || null
         }]);
@@ -104,9 +132,9 @@ export default function ShootRegistration() {
           <div className="logo-center">
             <MiesLogo size={120} />
           </div>
-          <h1 className="success-title">Aanmelding geslaagd</h1>
+          <h1 className="success-title">Aanmelding geslaagd!</h1>
           <p className="success-text">
-            Je bent succesvol aangemeld voor deze shoot. We nemen zo snel mogelijk contact met je op.
+            We nemen zo snel mogelijk contact met je op.
           </p>
           <button onClick={() => { window.location.href = '/'; }} className="primary-btn">
             Terug naar openstaande shoots
@@ -141,141 +169,141 @@ export default function ShootRegistration() {
         </div>
       </div>
 
-      <div className="content-section">
-        <div className="header-section">
-          <div className="logo-center">
-            <MiesLogo size={110} />
-          </div>
+      <div className="main-container">
+        <div className="invite-card">
           {shoot && (
-            <div className="shoot-info">
-              <h2 className="shoot-name">{shoot.title || shoot.client_name}</h2>
-              <p className="shoot-details">
-                {shoot.shoot_date && new Date(shoot.shoot_date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
-            </div>
-          )}
-          <h1 className="main-title">Meld je aan voor deze shoot</h1>
-          <p className="subtitle">Kies hoe je je wilt aanmelden</p>
-        </div>
-
-        {!selectedOption ? (
-          <div className="options-container">
-            <div className="option-card" onClick={() => setSelectedOption('existing')}>
-              <div className="option-icon">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
-              <h3 className="option-title">Ik ben al een talent</h3>
-              <p className="option-description">Meld je snel aan met je gegevens</p>
-              <button className="option-btn">Aanmelden</button>
-            </div>
-
-            <div className="option-card" onClick={handleNewTalentClick}>
-              <div className="option-icon">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <line x1="19" y1="8" x2="19" y2="14"></line>
-                  <line x1="22" y1="11" x2="16" y2="11"></line>
-                </svg>
-              </div>
-              <h3 className="option-title">Ik ben een nieuw talent</h3>
-              <p className="option-description">Registreer je eerst in ons systeem</p>
-              <button className="option-btn">Registreren</button>
-            </div>
-          </div>
-        ) : (
-          <div className="form-wrapper">
-            <button
-              className="back-btn"
-              onClick={() => setSelectedOption(null)}
-            >
-              ← Terug naar keuzemenu
-            </button>
-
-            {selectedOption === 'existing' && (
-              <form onSubmit={handleExistingTalentSubmit} className="registration-form">
-                <h2 className="form-title">Aanmelden als bestaand talent</h2>
-                <p className="form-subtitle">Vul je gegevens in zoals je ze hebt geregistreerd</p>
-
-                <div className="form-row">
-                  <div className="form-field">
-                    <label>Voornaam *</label>
-                    <input
-                      required
-                      type="text"
-                      value={existingTalentData.firstName}
-                      onChange={(e) => setExistingTalentData({ ...existingTalentData, firstName: e.target.value })}
-                      placeholder="Bijv. Jan"
-                    />
-                  </div>
-                  <div className="form-field">
-                    <label>Achternaam *</label>
-                    <input
-                      required
-                      type="text"
-                      value={existingTalentData.lastName}
-                      onChange={(e) => setExistingTalentData({ ...existingTalentData, lastName: e.target.value })}
-                      placeholder="Bijv. Jansen"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-field">
-                    <label>E-mailadres *</label>
-                    <input
-                      required
-                      type="email"
-                      value={existingTalentData.email}
-                      onChange={(e) => setExistingTalentData({ ...existingTalentData, email: e.target.value })}
-                      placeholder="jan@voorbeeld.nl"
-                    />
-                  </div>
-                  <div className="form-field">
-                    <label>Telefoonnummer *</label>
-                    <input
-                      required
-                      type="tel"
-                      value={existingTalentData.phone}
-                      onChange={(e) => setExistingTalentData({ ...existingTalentData, phone: e.target.value })}
-                      placeholder="06 12345678"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-field">
-                  <label>Motivatie *</label>
-                  <textarea
-                    required
-                    value={existingTalentData.motivation}
-                    onChange={(e) => setExistingTalentData({ ...existingTalentData, motivation: e.target.value })}
-                    placeholder="Waarom wil je graag meedoen aan deze shoot?"
-                    rows={4}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      background: '#E5DDD5',
-                      color: '#1F2B4A',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '15px',
-                      fontFamily: 'inherit',
-                      boxSizing: 'border-box',
-                      resize: 'vertical'
-                    }}
+            <div className="card-header-split">
+              {shoot.banner_photo_url ? (
+                <div className="card-image-wrapper">
+                  <img
+                    src={shoot.banner_photo_url}
+                    alt={shoot.title}
+                    className="card-image"
                   />
                 </div>
+              ) : (
+                <div className="card-image-placeholder">
+                  <MiesLogo size={60} />
+                </div>
+              )}
 
-                <button type="submit" disabled={loading} className={`submit-btn ${loading ? 'disabled' : ''}`}>
-                  {loading ? 'Bezig met aanmelden...' : 'Aanmelden voor shoot'}
+              <div className="card-info">
+                <div className="client-badge">{shoot.client_name}</div>
+                <h1 className="shoot-title">{shoot.title}</h1>
+
+                <div className="info-grid">
+                  <div className="info-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span>{shoot.shoot_date && new Date(shoot.shoot_date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                  </div>
+                  {shoot.start_time && (
+                    <div className="info-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      <span>{shoot.start_time.slice(0, 5)} - {shoot.end_time?.slice(0, 5)} uur</span>
+                    </div>
+                  )}
+                  {shoot.location && (
+                    <div className="info-item">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                      <span>{shoot.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="card-divider"></div>
+
+          <div className="card-body">
+            {!selectedOption ? (
+              <div className="selection-view">
+                <h2 className="section-title">Aanmelden</h2>
+                <p className="section-subtitle">Kies een optie om verder te gaan</p>
+
+                <div className="options-row">
+                  <div className="compact-option" onClick={() => setSelectedOption('existing')}>
+                    <div className="compact-option-content">
+                      <h3>Ik ben al een Unposed talent</h3>
+                      <p>Heb je al een account? Meld je direct aan.</p>
+                    </div>
+                    <div className="arrow-icon">→</div>
+                  </div>
+
+                  <div className="compact-option" onClick={handleNewTalentClick}>
+                    <div className="compact-option-content">
+                      <h3>Ik ben nieuw</h3>
+                      <p>Nog geen account? Maak er gratis een aan.</p>
+                    </div>
+                    <div className="arrow-icon">→</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="form-view">
+                <button
+                  className="back-link"
+                  onClick={() => setSelectedOption(null)}
+                >
+                  ← Terug
                 </button>
-              </form>
+
+                {selectedOption === 'existing' && (
+                  <form onSubmit={handleExistingTalentSubmit} className="compact-form">
+                    <h3 className="form-heading">Inloggen</h3>
+                    <p className="section-subtitle" style={{ marginBottom: 20 }}>Log in met je account om je aan te melden.</p>
+
+                    <div className="form-group">
+                      <label>E-mailadres</label>
+                      <input
+                        required
+                        type="email"
+                        value={existingTalentData.email}
+                        onChange={(e) => setExistingTalentData({ ...existingTalentData, email: e.target.value })}
+                        placeholder="jan@example.com"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Wachtwoord</label>
+                      <input
+                        required
+                        type="password"
+                        placeholder="••••••••"
+                        value={existingTalentData.password}
+                        onChange={(e) => setExistingTalentData({ ...existingTalentData, password: e.target.value })}
+                        style={{ width: '100%' }}
+                      />
+                      <div style={{ textAlign: 'right', marginTop: 6 }}>
+                        <span style={{ fontSize: 13, color: '#6B7280', cursor: 'pointer', textDecoration: 'underline' }}>
+                          Wachtwoord vergeten?
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Motivatie</label>
+                      <textarea
+                        value={existingTalentData.motivation}
+                        onChange={(e) => setExistingTalentData({ ...existingTalentData, motivation: e.target.value })}
+                        placeholder="Korte toelichting..."
+                        rows={2}
+                      />
+                    </div>
+
+                    <button type="submit" disabled={loading} className="full-submit-btn">
+                      {loading ? 'Bezig...' : 'Inloggen & Aanmelden'}
+                    </button>
+                  </form>
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <MiesLogo size={40} />
+        </div>
       </div>
 
       <style>{styles}</style>
@@ -287,356 +315,295 @@ const styles = `
 .registration-page {
   min-height: 100vh;
   background: #E5DDD5;
-  font-family: system-ui, -apple-system, sans-serif;
-}
-
-.success-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.success-container {
-  text-align: center;
-  padding: 20px;
-  max-width: 500px;
-}
-
-.success-title {
-  font-size: 42px;
-  margin-bottom: 16px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: #1F2B4A;
-  font-weight: 700;
 }
 
-.success-text {
-  font-size: 20px;
-  color: #1F2B4A;
-  font-weight: 500;
-  margin-bottom: 32px;
-}
-
-.logo-center {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
+/* Logo Scroll Bar */
 .logo-banner {
   background: #fff;
   padding: 12px 0;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
   min-height: 60px;
+  z-index: 10;
 }
 
 .logo-banner-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
+  position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center;
 }
 
 .logo-scroll {
-  display: flex;
-  gap: 60px;
-  align-items: center;
-  /* padding-right verwijderd omdat we nu naadloos loopen met duplicate content */
-  animation: scroll 60s linear infinite; /* Langzamer omdat de strip langer is */
-  will-change: transform;
-  white-space: nowrap; /* Voorkom wrapping */
+  display: flex; gap: 60px; align-items: center;
+  animation: scroll 60s linear infinite; will-change: transform; white-space: nowrap;
 }
 
 .logo-scroll img {
-  width: auto;
-  object-fit: contain;
-  filter: grayscale(100%);
-  flex-shrink: 0; /* Voorkom dat images krimpen */
+  width: auto; height: 30px; object-fit: contain; filter: grayscale(100%);
+  opacity: 1; transition: opacity 0.3s;
 }
-
-.logo-small { height: 25px; }
-.logo-normal { height: 40px; }
-.logo-large { height: 50px; }
-.logo-xlarge { height: 60px; }
+.logo-scroll img:hover { opacity: 1; }
+.logo-small { height: 25px !important; }
+.logo-xlarge { height: 45px !important; }
 
 @keyframes scroll {
   0% { transform: translateX(0); }
-  100% { transform: translateX(-25%); } /* Scroll precies een kwart (één set van de 4) */
+  100% { transform: translateX(-25%); }
 }
 
-.content-section {
-  padding: 60px 20px;
-}
-
-.header-section {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.shoot-info {
-  margin-bottom: 24px;
-}
-
-.shoot-name {
-  font-size: 24px;
-  font-weight: 600;
-  color: #2B3E72;
-  margin: 0 0 8px 0;
-}
-
-.shoot-details {
-  font-size: 16px;
-  color: #6B7280;
-  margin: 0;
-}
-
-.main-title {
-  font-size: 42px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  color: #1F2B4A;
-}
-
-.subtitle {
-  font-size: 16px;
-  color: #6B7280;
-  margin: 0;
-}
-
-.options-container {
-  max-width: 900px;
+/* Main Layout */
+.main-container {
+  padding: 40px 20px;
+  max-width: 1200px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 32px;
-}
-
-.option-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 48px 32px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  items-align: center;
 }
 
-.option-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+.invite-card {
+  background: #fff;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  overflow: hidden;
 }
 
-.option-icon {
-  margin-bottom: 24px;
+/* Card Header Split */
+.card-header-split {
+  display: flex;
+  flex-direction: row;
+  height: 240px; /* Fixed height for consistency */
+}
+
+.card-image-wrapper {
+  width: 40%;
+  position: relative;
+  background: #E5E7EB;
+}
+
+.card-image-placeholder {
+  width: 40%;
+  background: #F3F4F6;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.option-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1F2B4A;
-  margin: 0 0 12px 0;
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.option-description {
-  font-size: 16px;
+.card-info {
+  width: 60%;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.client-badge {
+  display: inline-block;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #6B7280;
+  margin-bottom: 8px;
+}
+
+.shoot-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1F2B4A;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #4B5563;
+  font-weight: 500;
+}
+.info-item svg { color: #2B3E72; }
+
+/* Divider */
+.card-divider {
+  height: 1px;
+  background: #F3F4F6;
+  width: 100%;
+}
+
+/* Body */
+.card-body {
+  padding: 32px;
+  background: #FAFAFA;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1F2B4A;
+  margin: 0 0 4px 0;
+}
+
+.section-subtitle {
+  font-size: 14px;
   color: #6B7280;
   margin: 0 0 24px 0;
 }
 
-.option-btn {
-  padding: 12px 32px;
-  background: #2B3E72;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+/* Options */
+.options-row {
+  display: flex;
+  gap: 16px;
+}
+
+.compact-option {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 20px;
   cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.compact-option:hover {
+  border-color: #2B3E72;
+  box-shadow: 0 4px 12px rgba(43, 62, 114, 0.08);
+  transform: translateY(-2px);
+}
+
+.compact-option-content h3 {
   font-size: 16px;
-  font-weight: 600;
-  font-family: inherit;
-  transition: all 0.3s ease;
+  font-weight: 700;
+  color: #1F2B4A;
+  margin: 0 0 4px 0;
 }
 
-.option-btn:hover {
-  background: #1F2B4A;
+.compact-option-content p {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.form-wrapper {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.back-btn {
-  background: none;
-  border: none;
-  color: #2B3E72;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-bottom: 24px;
-  padding: 8px 0;
-  font-family: inherit;
+.arrow-icon {
+  font-size: 20px;
+  color: #D1D5DB;
+  font-weight: bold;
   transition: color 0.2s;
 }
 
-.back-btn:hover {
-  color: #1F2B4A;
+.compact-option:hover .arrow-icon {
+  color: #2B3E72;
 }
 
-.registration-form {
-  background: #fff;
-  padding: 48px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.form-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1F2B4A;
-  margin: 0 0 8px 0;
-}
-
-.form-subtitle {
-  font-size: 16px;
-  color: #6B7280;
-  margin: 0 0 32px 0;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.form-field {
-  margin-bottom: 24px;
-}
-
-.form-row .form-field {
-  margin-bottom: 0;
-}
-
-.form-field label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 15px;
-  color: #1F2B4A;
-  font-weight: 500;
-}
-
-.form-field input {
-  width: 100%;
-  padding: 12px 16px;
-  background: #E5DDD5;
-  color: #1F2B4A;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
+/* Form View */
+.back-link {
+  background: none; border: none; padding: 0;
+  color: #6B7280; font-weight: 600; font-size: 14px;
+  cursor: pointer; margin-bottom: 24px;
   font-family: inherit;
+  transition: color 0.2s;
+}
+.back-link:hover { color: #1F2B4A; }
+
+.compact-form {
+  max-width: 600px;
+}
+
+.form-heading {
+  font-size: 18px; font-weight: 700; color: #1F2B4A; margin: 0 0 20px 0;
+}
+
+.compact-form-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block; font-size: 13px; font-weight: 600; color: #4B5563; margin-bottom: 6px;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%; padding: 10px 12px;
+  background: #fff; border: 1px solid #D1D5DB;
+  border-radius: 8px; font-size: 14px; font-family: inherit;
+  transition: border-color 0.2s;
   box-sizing: border-box;
 }
 
-.form-field input::placeholder {
-  color: #9CA3AF;
+.form-group input:focus, .form-group textarea:focus {
+  outline: none; border-color: #2B3E72;
 }
 
-.submit-btn {
-  width: 100%;
-  padding: 16px;
+.full-submit-btn {
+  width: 100%; background: #2B3E72; color: #fff;
+  padding: 14px; border: none; border-radius: 10px;
+  font-weight: 600; font-size: 15px; cursor: pointer;
+  transition: background 0.2s;
+}
+.full-submit-btn:hover { background: #1F2B4A; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .card-header-split { flex-direction: column; height: auto; }
+  .card-image-wrapper { width: 100%; height: 200px; }
+  .card-info { width: 100%; padding: 24px; }
+  .options-row { flex-direction: column; }
+  .compact-form-grid { grid-template-columns: 1fr; gap: 0; margin-bottom: 0; }
+  .logo-scroll img { height: 24px; }
+  .logo-xlarge { height: 36px !important; }
+}
+
+/* Success Page Override */
+.success-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+}
+.success-container {
+  text-align: center;
+  max-width: 600px;
+  padding: 40px 20px;
+}
+.primary-btn {
+  padding: 14px 28px;
   background: #2B3E72;
   color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
   font-size: 16px;
   font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
   font-family: inherit;
-  transition: all 0.3s ease;
-}
-
-.submit-btn:hover {
-  background: #1F2B4A;
-}
-
-.submit-btn.disabled {
-  background: #9CA3AF;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.primary-btn {
-  padding: 12px 24px;
-  background: #2B3E72;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: inherit;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(43, 62, 114, 0.2);
   transition: all 0.3s ease;
 }
 
 .primary-btn:hover {
   background: #1F2B4A;
   transform: translateY(-2px);
-}
-
-@media (max-width: 768px) {
-  .content-section {
-    padding: 20px 12px;
-  }
-
-  .main-title {
-    font-size: 28px;
-  }
-
-  .options-container {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .option-card {
-    padding: 32px 24px;
-  }
-
-  .option-icon {
-    font-size: 48px;
-  }
-
-  .registration-form {
-    padding: 24px 16px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 0;
-    margin-bottom: 0;
-  }
-
-  .form-row .form-field {
-    margin-bottom: 16px;
-  }
-
-  .success-title {
-    font-size: 28px;
-  }
-
-  .success-text {
-    font-size: 16px;
-  }
+  box-shadow: 0 6px 16px rgba(43, 62, 114, 0.25);
 }
 `;
