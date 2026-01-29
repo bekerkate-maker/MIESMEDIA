@@ -2,11 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
-import logoCasu from '@/components/logo_klanten/logo_casu.png';
-import logoKoekela from '@/components/logo_klanten/logo-koekela-winkels-denieuwebinnenweg.png';
-import logoJordys from '@/components/logo_klanten/JORDYS_LOGO.png';
-import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
-import logoDudok from '@/components/logo_klanten/dudok_logo.png';
+import ClientLogoBanner from '@/components/ClientLogoBanner';
 
 export default function ShootRegistration() {
   const [searchParams] = useSearchParams();
@@ -148,26 +144,7 @@ export default function ShootRegistration() {
   return (
     <div className="registration-page">
       {/* Logo Banner */}
-      <div className="logo-banner">
-        <div className="logo-banner-inner">
-          <div className="logo-scroll">
-            {[...Array(4)].map((_, i) => (
-              <React.Fragment key={i}>
-                <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-                <img src={logoKoekela} alt="Koekela" className="logo-small" />
-                <img src={logoJordys} alt="Jordys" className="logo-normal" />
-                <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-                <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-                <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-                <img src={logoKoekela} alt="Koekela" className="logo-small" />
-                <img src={logoJordys} alt="Jordys" className="logo-normal" />
-                <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-                <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </div>
+      <ClientLogoBanner />
 
       <div className="main-container">
         <div className="invite-card">
@@ -320,37 +297,7 @@ const styles = `
 }
 
 /* Logo Scroll Bar */
-.logo-banner {
-  background: #fff;
-  padding: 12px 0;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-  min-height: 60px;
-  z-index: 10;
-}
 
-.logo-banner-inner {
-  position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center;
-}
-
-.logo-scroll {
-  display: flex; gap: 60px; align-items: center;
-  animation: scroll 60s linear infinite; will-change: transform; white-space: nowrap;
-}
-
-.logo-scroll img {
-  width: auto; height: 30px; object-fit: contain; filter: grayscale(100%);
-  opacity: 1; transition: opacity 0.3s;
-}
-.logo-scroll img:hover { opacity: 1; }
-.logo-small { height: 25px !important; }
-.logo-xlarge { height: 45px !important; }
-
-@keyframes scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-25%); }
-}
 
 /* Main Layout */
 .main-container {

@@ -233,14 +233,15 @@ export default function Dashboard() {
     }
 
     if (cityFilter !== "all") {
-      filtered = filtered.filter((model) => model.city.toLowerCase() === cityFilter.toLowerCase());
+      filtered = filtered.filter((model) => model.city === cityFilter);
       console.log("After city filter:", filtered.length); // DEBUG
     }
 
     // Leeftijdsfilter
     filtered = filtered.filter((model) => {
       const age = calculateAge(model.birthdate);
-      if (age === null) return false;
+      // Als er geen leeftijd is en de filter is op default (0-100), toon het talent
+      if (age === null) return minAge === 0 && maxAge === 100;
       return age >= minAge && age <= maxAge;
     });
     console.log("After age filter:", filtered.length); // DEBUG
@@ -528,7 +529,7 @@ export default function Dashboard() {
         alert('✅ Talent succesvol verwijderd!');
       } catch (error) {
         console.error('Error deleting model:', error);
-        alert('❌ Fout bij verwijderen: ' + (error.message || JSON.stringify(error)));
+        alert('❌ Fout bij verwijderen: ' + ((error as Error).message || JSON.stringify(error)));
       }
     }
   };
@@ -551,7 +552,7 @@ export default function Dashboard() {
         alert('✅ Talent succesvol verwijderd!');
       } catch (error) {
         console.error('Error deleting model:', error);
-        alert('❌ Fout bij verwijderen: ' + (error.message || JSON.stringify(error)));
+        alert('❌ Fout bij verwijderen: ' + ((error as Error).message || JSON.stringify(error)));
       }
     }
   };
@@ -714,7 +715,7 @@ export default function Dashboard() {
           <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#1F2B4A' }}>The Unposed Collective</h1>
         </div>
 
-        <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginBottom: 32, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+        <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginBottom: 32, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)' }}>
           {/* Zoekbalk + Filter toggle knop voor mobiel */}
           <div className="search-row" style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
             <input
@@ -746,7 +747,7 @@ export default function Dashboard() {
           </div>
 
           {/* Desktop filters - altijd zichtbaar */}
-          <div className="filters-desktop" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+          <div className="filters-desktop" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 16, alignItems: 'center' }}>
             <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}
               style={{ padding: '12px 16px', background: '#E5DDD5', color: genderFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer' }}
             >
@@ -785,6 +786,43 @@ export default function Dashboard() {
                 style={{ padding: '12px 16px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, color: '#1F2B4A', fontFamily: 'inherit' }}
               />
             </div>
+
+            {/* Reset filter knop */}
+            <button
+              onClick={() => {
+                setGenderFilter('all');
+                setCityFilter('all');
+                setMinAge(0);
+                setMaxAge(100);
+                setSearchTerm('');
+              }}
+              style={{
+                padding: '12px 16px',
+                background: (genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100 || searchTerm !== '') ? '#EF4444' : '#E5DDD5',
+                color: (genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100 || searchTerm !== '') ? '#fff' : '#9CA3AF',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: (genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100 || searchTerm !== '') ? 'pointer' : 'not-allowed',
+                fontFamily: 'inherit',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s ease'
+              }}
+              disabled={genderFilter === 'all' && cityFilter === 'all' && minAge === 0 && maxAge === 100 && searchTerm === ''}
+              onMouseEnter={(e) => {
+                if (genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100 || searchTerm !== '') {
+                  e.currentTarget.style.background = '#DC2626';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100 || searchTerm !== '') {
+                  e.currentTarget.style.background = '#EF4444';
+                }
+              }}
+            >
+              Reset
+            </button>
           </div>
 
           {/* Mobiel filters - uitklapbaar */}
@@ -851,6 +889,30 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Aantal talenten teller - op beige achtergrond */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span style={{ fontSize: 15, color: '#1F2B4A', fontWeight: 600 }}>
+              {filteredModels.length} {filteredModels.length === 1 ? 'talent' : 'talenten'}
+            </span>
+            {filteredModels.length !== models.length && (
+              <span style={{ fontSize: 14, color: '#6B7280', fontWeight: 500 }}>
+                van {models.length}
+              </span>
+            )}
+          </div>
+        </div>
+
         <div className="models-grid">
           {filteredModels.map((model) => (
             <div
@@ -860,9 +922,12 @@ export default function Dashboard() {
                 background: '#fff',
                 borderRadius: 10,
                 overflow: 'hidden',
+                border: highlightedModelId === model.id
+                  ? '2px solid #2B3E72'
+                  : '1px solid rgba(0, 0, 0, 0.08)',
                 boxShadow: highlightedModelId === model.id
-                  ? '0 0 0 4px #2B3E72, 0 4px 12px rgba(43, 62, 114, 0.3)'
-                  : '0 1px 4px rgba(0,0,0,0.1)',
+                  ? 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5), 0 2px 8px rgba(43, 62, 114, 0.15)'
+                  : 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)',
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
@@ -970,11 +1035,20 @@ export default function Dashboard() {
                       cursor: 'pointer',
                       fontSize: 18,
                       lineHeight: 1,
-                      fontFamily: 'inherit'
+                      fontFamily: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                     title="Notities"
                   >
-                    📝
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
                   </button>
                   <button
                     onClick={() => handleEditModel(model)}
@@ -987,11 +1061,17 @@ export default function Dashboard() {
                       cursor: 'pointer',
                       fontSize: 18,
                       lineHeight: 1,
-                      fontFamily: 'inherit'
+                      fontFamily: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                     title="Bewerken"
                   >
-                    ✏️
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
                   </button>
                 </div>
 
@@ -1090,7 +1170,7 @@ export default function Dashboard() {
                         flex: 1
                       }}
                     >
-                      <span>QuitClaim</span>
+                      <span>Quitclaim</span>
                       <input
                         type="file"
                         accept=".pdf"
@@ -1159,13 +1239,13 @@ export default function Dashboard() {
         </div>
 
         {filteredModels.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 60, background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <div style={{ textAlign: 'center', padding: 60, background: '#fff', borderRadius: 12, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)' }}>
             <p style={{ color: '#6B7280', fontSize: 16 }}>Geen modellen gevonden</p>
           </div>
         )}
 
         {/* Aangemelde collega's sectie onderaan */}
-        <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginTop: 40, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', position: 'relative' }}>
+        <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginTop: 40, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#1F2B4A' }}>
               Geregistreerde collega's
@@ -1299,7 +1379,12 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div>
-                    <div style={{ fontSize: 48, marginBottom: 12 }}>📸</div>
+                    <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                      </svg>
+                    </div>
                     <p style={{ margin: 0, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
                       Klik om een foto te uploaden
                     </p>
@@ -1678,7 +1763,7 @@ export default function Dashboard() {
             zIndex: 2001
           }}>
             <h3 style={{ margin: 0, color: '#fff', fontSize: 20, fontWeight: 600 }}>
-              📷 {viewingPhotosFor.first_name} {viewingPhotosFor.last_name}
+              {viewingPhotosFor.first_name} {viewingPhotosFor.last_name}
             </h3>
             <button
               onClick={(e) => {
@@ -1980,7 +2065,7 @@ export default function Dashboard() {
             padding: 3px 5px !important;
             font-size: 12px !important;
           }
-          /* Contact/QuitClaim knoppen */
+          /* Contact/Quitclaim knoppen */
           .model-bottom-btns {
             gap: 4px !important;
             margin-top: 6px !important;
@@ -2319,7 +2404,10 @@ export default function Dashboard() {
                             fontSize: 12,
                             color: '#DC2626',
                             fontWeight: 600,
-                            fontFamily: 'inherit'
+                            fontFamily: 'inherit',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.background = '#FEE2E2';
@@ -2331,7 +2419,12 @@ export default function Dashboard() {
                           }}
                           title="Notitie verwijderen"
                         >
-                          🗑️
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
                         </button>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, paddingRight: 40 }}>
@@ -2549,7 +2642,13 @@ export default function Dashboard() {
                   fontFamily: 'inherit'
                 }}
               >
-                🗑️ Verwijderen
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                Verwijderen
               </button>
             </div>
           </div>

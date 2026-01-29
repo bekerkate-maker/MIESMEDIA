@@ -113,6 +113,8 @@ const EditProfile: React.FC = () => {
 
     const [newPassword, setNewPassword] = useState('');
     const [passwordMsg, setPasswordMsg] = useState<string | null>(null);
+    const [photoMsg, setPhotoMsg] = useState<string | null>(null);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     const handlePasswordUpdate = async () => {
         if (!newPassword || newPassword.length < 6) return;
@@ -196,7 +198,7 @@ const EditProfile: React.FC = () => {
 
             // Forceer een refresh van de gebruiker en profiel data
             // We updaten de lokale state direct voor instant feedback
-            setProfile(prev => ({
+            setProfile((prev: any) => ({
                 ...prev,
                 first_name: form.first_name,
                 last_name: form.last_name,
@@ -241,8 +243,9 @@ const EditProfile: React.FC = () => {
             if (dbError) throw dbError;
 
             fetchProfile(user);
-            setSuccessMsg('Hoofdfoto bijgewerkt');
-            setTimeout(() => setSuccessMsg(null), 3000);
+
+            setPhotoMsg('Hoofdfoto bijgewerkt');
+            setTimeout(() => setPhotoMsg(null), 3000);
         } catch (err: any) {
             console.error(err);
             alert('Fout bij uploaden hoofdfoto: ' + err.message);
@@ -284,6 +287,8 @@ const EditProfile: React.FC = () => {
             if (dbError) throw dbError;
 
             fetchProfile(user);
+            setPhotoMsg('Foto\'s geüpload');
+            setTimeout(() => setPhotoMsg(null), 3000);
         } catch (err: any) {
             console.error(err);
             alert('Fout bij uploaden foto: ' + err.message);
@@ -305,7 +310,10 @@ const EditProfile: React.FC = () => {
                 .eq('id', profile.id);
 
             if (error) throw error;
+
             fetchProfile(user);
+            setPhotoMsg('Foto verwijderd');
+            setTimeout(() => setPhotoMsg(null), 3000);
         } catch (err: any) {
             alert('Fout bij verwijderen: ' + err.message);
         } finally {
@@ -539,7 +547,14 @@ const EditProfile: React.FC = () => {
                         {/* Hoofdfoto */}
                         <div style={{ marginBottom: 24 }}>
                             <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Hoofdfoto</p>
-                            <div style={{ position: 'relative', width: 100, height: 100 }}>
+                            <div style={{ position: 'relative', width: 100, height: 100, cursor: 'pointer' }} onClick={() => {
+                                if (profile?.photo_url) {
+                                    const url = profile.photo_url.startsWith('http')
+                                        ? profile.photo_url
+                                        : supabase.storage.from('model-photos').getPublicUrl(profile.photo_url).data.publicUrl;
+                                    setPreviewImage(url);
+                                }
+                            }}>
                                 {profile?.photo_url ? (
                                     <img
                                         src={
@@ -567,7 +582,8 @@ const EditProfile: React.FC = () => {
                                     justifyContent: 'center',
                                     cursor: 'pointer',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                                }}>
+                                }}
+                                    onClick={(e) => e.stopPropagation()}>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -586,11 +602,17 @@ const EditProfile: React.FC = () => {
                                         : supabase.storage.from('model-photos').getPublicUrl(url).data.publicUrl;
 
                                     return (
-                                        <div key={idx} style={{ position: 'relative' }}>
-                                            <img src={imageUrl} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: 8 }} alt={`Foto ${idx}`} />
+                                        <div key={idx} style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setPreviewImage(imageUrl)}>
+                                            <img src={imageUrl} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: 8, transition: 'transform 0.2s' }} alt={`Foto ${idx}`}
+                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                            />
                                             <button
-                                                onClick={() => handleDeletePhoto(url)}
-                                                style={{ position: 'absolute', top: -6, right: -6, background: '#EF4444', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeletePhoto(url);
+                                                }}
+                                                style={{ position: 'absolute', top: -6, right: -6, background: '#EF4444', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
                                                 ×
                                             </button>
                                         </div>
@@ -603,9 +625,54 @@ const EditProfile: React.FC = () => {
                                 </label>
                             </div>
                         </div>
+
+                        <button
+                            onClick={() => {
+                                setPhotoMsg('Foto\'s zijn opgeslagen');
+                                setTimeout(() => setPhotoMsg(null), 3000);
+                            }}
+                            style={{
+                                marginTop: 24,
+                                padding: '12px 24px',
+                                background: '#2B3E72',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 8,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                width: '100%'
+                            }}
+                        >
+                            Foto's opslaan
+                        </button>
+                        {photoMsg && <p style={{ color: '#16A34A', fontSize: 14, textAlign: 'center', marginTop: 12 }}>{photoMsg}</p>}
                     </div>
                 </div>
             </main>
+
+            {/* Photo Preview Modal */}
+            {previewImage && (
+                <div
+                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}
+                    onClick={() => setPreviewImage(null)}
+                >
+                    <div style={{ position: 'relative', maxWidth: '100%', maxHeight: '90vh' }}>
+                        <img
+                            src={previewImage}
+                            style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 8, boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}
+                            alt="Voorbeeld"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        <button
+                            onClick={() => setPreviewImage(null)}
+                            style={{ position: 'absolute', top: -40, right: 0, background: 'transparent', border: 'none', color: '#fff', fontSize: 32, cursor: 'pointer' }}
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
+
 
             <style>{`
           @media (max-width: 900px) {

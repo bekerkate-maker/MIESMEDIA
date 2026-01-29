@@ -52,6 +52,7 @@ export default function App() {
       <Routes>
         {/* Publieke routes */}
         <Route path="/" element={<OpenShoots />} />
+        <Route path="/open-shoots" element={<OpenShoots />} />
         <Route path="/login" element={<Login />} />
         <Route path="/shoot-registration" element={<ShootRegistration />} />
         <Route path="/register-model" element={<RegisterModel />} />

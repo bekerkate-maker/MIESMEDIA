@@ -8,26 +8,26 @@ import logoDeBeren from '@/components/logo_klanten/de_beren_logo.png';
 import logoHeineken from '@/components/logo_klanten/heineken_logo.png';
 
 const ClientLogoBanner: React.FC = () => {
-    return (
-        <div className="logo-banner-wrapper">
-            <div className="logo-banner">
-                <div className="logo-banner-inner">
-                    <div className="logo-scroll">
-                        {[...Array(4)].map((_, i) => (
-                            <React.Fragment key={i}>
-                                <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-                                <img src={logoKoekela} alt="Koekela" className="logo-small" />
-                                <img src={logoJordys} alt="Jordys" className="logo-normal" />
-                                <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-                                <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-                                <img src={logoDeBeren} alt="De Beren" className="logo-large" />
-                                <img src={logoHeineken} alt="Heineken" className="logo-xxlarge" />
-                            </React.Fragment>
-                        ))}
-                    </div>
-                </div>
-            </div>
-            <style>{`
+  return (
+    <div className="logo-banner-wrapper">
+      <div className="logo-banner">
+        <div className="logo-banner-inner">
+          <div className="logo-scroll">
+            {[...Array(12)].map((_, setIndex) => (
+              <div key={`logo-set-${setIndex}`} style={{ display: 'flex', gap: 60, alignItems: 'center', flexShrink: 0, paddingRight: 60 }}>
+                <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
+                <img src={logoKoekela} alt="Koekela" className="logo-small" />
+                <img src={logoJordys} alt="Jordys" className="logo-normal" />
+                <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
+                <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
+                <img src={logoDeBeren} alt="De Beren" className="logo-large" />
+                <img src={logoHeineken} alt="Heineken" className="logo-xxlarge" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <style>{`
         .logo-banner-wrapper {
           width: 100%;
           position: relative;
@@ -53,11 +53,11 @@ const ClientLogoBanner: React.FC = () => {
         }
         .logo-scroll {
           display: flex;
-          gap: 60px;
           align-items: center;
-          animation: scroll 60s linear infinite;
+          animation: scroll 240s linear infinite;
           will-change: transform;
           white-space: nowrap;
+          width: max-content;
         }
         .logo-scroll img {
           width: auto;
@@ -73,12 +73,11 @@ const ClientLogoBanner: React.FC = () => {
 
         @keyframes scroll {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-25%); }
+          100% { transform: translateX(-50%); }
         }
 
         @media (max-width: 768px) {
           .logo-banner { min-height: 45px; }
-          .logo-scroll { gap: 30px; }
           .logo-small { height: 18px; }
           .logo-normal { height: 28px; }
           .logo-large { height: 35px; }
@@ -86,8 +85,8 @@ const ClientLogoBanner: React.FC = () => {
           .logo-xxlarge { height: 35px; transform: scale(2.0); }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 export default ClientLogoBanner;

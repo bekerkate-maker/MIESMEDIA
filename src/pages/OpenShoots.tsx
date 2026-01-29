@@ -2,13 +2,7 @@ import React, { useEffect, useState } from 'react';
 // import { supabase } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
-import logoCasu from '@/components/logo_klanten/logo_casu.png';
-import logoKoekela from '@/components/logo_klanten/logo-koekela-winkels-denieuwebinnenweg.png';
-import logoJordys from '@/components/logo_klanten/JORDYS_LOGO.png';
-import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
-import logoDudok from '@/components/logo_klanten/dudok_logo.png';
-import logoDeBeren from '@/components/logo_klanten/de_beren_logo.png';
-import logoHeineken from '@/components/logo_klanten/heineken_logo.png';
+import ClientLogoBanner from '@/components/ClientLogoBanner';
 
 function formatDateNL(dateString?: string, long: boolean = false): string {
   if (!dateString) return '';
@@ -65,24 +59,7 @@ const OpenShoots: React.FC = () => {
     <div style={{ minHeight: '100vh', background: '#E5DDD5', fontFamily: 'system-ui, -apple-system, sans-serif', display: 'flex', flexDirection: 'column' }}>
       {/* Banner helemaal bovenaan, tegen de rand */}
       <div style={{ margin: 0, padding: 0, position: 'relative', top: 0, left: 0, right: 0, zIndex: 20 }}>
-        <div className="logo-banner">
-          <div className="logo-banner-inner">
-            <div className="logo-scroll">
-              {[...Array(4)].map((_, i) => (
-                <React.Fragment key={i}>
-                  <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-                  <img src={logoKoekela} alt="Koekela" className="logo-small" />
-                  <img src={logoJordys} alt="Jordys" className="logo-normal" />
-                  <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-                  <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-                  <img src={logoDeBeren} alt="De Beren" className="logo-large" />
-                  <img src={logoHeineken} alt="Heineken" className="logo-xxlarge" />
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        </div>
-        <style>{`.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;gap:60px;align-items:center;animation:scroll 60s linear infinite;will-change:transform;white-space:nowrap}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%);flex-shrink:0}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}.logo-xxlarge{height:45px;transform:scale(2.2);margin:0 15px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-25%)}}@media(max-width:768px){.logo-banner{min-height:45px}.logo-scroll{gap:30px}.logo-small{height:18px}.logo-normal{height:28px}.logo-large{height:35px}.logo-xlarge{height:42px}.logo-xxlarge{height:35px;transform:scale(2.0)}}`}</style>
+        <ClientLogoBanner />
       </div>
       {/* Account icon direct onder de banner */}
       <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', padding: '12px 0 0 0' }}>

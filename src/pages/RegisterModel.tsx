@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
-import logoCasu from '@/components/logo_klanten/logo_casu.png';
-import logoKoekela from '@/components/logo_klanten/logo-koekela-winkels-denieuwebinnenweg.png';
-import logoJordys from '@/components/logo_klanten/JORDYS_LOGO.png';
-import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
-import logoDudok from '@/components/logo_klanten/dudok_logo.png';
+import ClientLogoBanner from '@/components/ClientLogoBanner';
 
 import PDFViewer from '@/components/PDFViewer';
 
@@ -51,11 +47,13 @@ export default function RegisterModel() {
           .select('document_url')
           .eq('is_active', true)
           .order('uploaded_at', { ascending: false })
-          .limit(1)
-          .single();
+          .limit(1);
 
-        if (!error && data) {
-          setTermsUrl(data.document_url);
+        if (!error && data && data.length > 0) {
+          setTermsUrl(data[0].document_url);
+          console.log('Terms URL loaded:', data[0].document_url);
+        } else {
+          console.log('No active terms found');
         }
       } catch (err) {
         console.error('Error fetching terms:', err);
@@ -250,12 +248,12 @@ export default function RegisterModel() {
           <div className="logo-center">
             <MiesLogo size={120} />
           </div>
-          <h1 className="success-title">Topper!</h1>
+          <h1 className="success-title">Succesvol aangemeld</h1>
           <p className="success-text">
-            Je bent officieel een Rotterdams Talent. Niet lullen maar poseren!! 📸🤳
+            Je bent nu onderdeel van The Unposed Collective. Check je mail voor de bevestiging van je aanmelding.
           </p>
           <button onClick={() => { window.location.href = '/'; }} className="primary-btn">
-            Meld je aan voor openstaande shoots
+            Bekijk openstaande shoots
           </button>
         </div>
         <style>{styles}</style>
@@ -265,26 +263,29 @@ export default function RegisterModel() {
 
   return (
     <div className="register-page">
-      <div className="logo-banner">
-        <div className="logo-banner-inner">
-          <div className="logo-scroll">
-            <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-            <img src={logoKoekela} alt="Koekela" className="logo-small" />
-            <img src={logoJordys} alt="Jordys" className="logo-normal" />
-            <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-            <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-            <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-            <img src={logoKoekela} alt="Koekela" className="logo-small" />
-            <img src={logoJordys} alt="Jordys" className="logo-normal" />
-            <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-            <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-            <img src={logoCasu} alt="La Cazuela" className="logo-normal" />
-            <img src={logoKoekela} alt="Koekela" className="logo-small" />
-            <img src={logoJordys} alt="Jordys" className="logo-normal" />
-            <img src={logoMorganMees} alt="Morgan & Mees" className="logo-normal" />
-            <img src={logoDudok} alt="Dudok" className="logo-xlarge" />
-          </div>
-        </div>
+      <ClientLogoBanner />
+      {/* Account icon direct onder de banner */}
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', padding: '12px 0 0 0' }}>
+        <button
+          onClick={() => window.location.href = '/account'}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            width: 44,
+            height: 44,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            marginRight: 24,
+          }}
+          aria-label="Inloggen of account wijzigen"
+        >
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
+          </svg>
+        </button>
       </div>
 
       <div className="content-section">
@@ -294,10 +295,10 @@ export default function RegisterModel() {
           </div>
           <div className="button-wrapper">
             <button onClick={() => { window.location.href = '/'; }} className="primary-btn">
-              Meld je aan voor openstaande shoots
+              Bekijk openstaande shoots
             </button>
           </div>
-          <h1 className="main-title">Registreer hier als Unposed Collective talent</h1>
+          <h1 className="main-title">Meld je aan als talent</h1>
           <p className="subtitle">Vul je gegevens in en word onderdeel van The Unposed Collective.</p>
         </div>
 
@@ -371,18 +372,58 @@ export default function RegisterModel() {
                 />
               </div>
               <div className="form-field">
-                <label>Hoofdfoto {photoFile && '✅'}</label>
+                <label>Hoofdfoto * {photoFile && '✅'}</label>
                 <input id="photo-upload-input" type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
-                {photoPreview && (
-                  <div className="photo-preview-container">
-                    <img src={photoPreview} alt="Preview" className="photo-preview" />
-                  </div>
-                )}
                 <button type="button" onClick={handleFileUpload} className="upload-btn">
                   {photoFile ? 'Wijzig hoofdfoto' : 'Upload hoofdfoto'}
                 </button>
               </div>
             </div>
+
+            {/* Gecentreerde Hoofdfoto Preview */}
+            {photoPreview && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                marginBottom: 32,
+                marginTop: -12
+              }}>
+                <div style={{
+                  position: 'relative',
+                  width: 200,
+                  height: 250,
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                  border: '4px solid #fff'
+                }}>
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: 'rgba(255,255,255,0.9)',
+                    padding: '8px',
+                    textAlign: 'center',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: '#1F2B4A',
+                    backdropFilter: 'blur(4px)'
+                  }}>
+                    Jouw hoofdfoto
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="form-field">
               <label>Extra foto's ({extraPhotoPreviews.length}) - optioneel</label>
@@ -403,21 +444,53 @@ export default function RegisterModel() {
             </div>
 
             <div className="form-field">
-              <label className="checkbox-label">
-                <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} />
-                <span>
-                  Ik ga akkoord met de privacyverklaring van Unposed en geef toestemming voor het opslaan en gebruiken van mijn gegevens voor casting- en shootdoeleinden.
-                  {termsUrl && (
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  style={{
+                    width: 18,
+                    height: 18,
+                    marginTop: 10,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    accentColor: '#2B3E72'
+                  }}
+                />
+                <span style={{ fontSize: 15, color: '#1F2B4A', lineHeight: 1.6 }}>
+                  Ik ga akkoord met de{' '}
+                  {termsUrl ? (
                     <button
                       type="button"
-                      style={{ color: '#2B3E72', fontWeight: 600, fontStyle: 'italic', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: 5, display: 'inline', fontSize: 'inherit' }}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTermsModal(true); }}
+                      style={{
+                        color: '#2B3E72',
+                        fontWeight: 700,
+                        textDecoration: 'underline',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        display: 'inline',
+                        fontSize: 'inherit',
+                        fontFamily: 'inherit',
+                        transition: 'color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#1F2B4A'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#2B3E72'}
+                      onClick={() => {
+                        console.log('Privacy policy clicked, termsUrl:', termsUrl);
+                        setShowTermsModal(true);
+                      }}
                     >
-                      Bekijk privacyverklaring
+                      privacyverklaring
                     </button>
+                  ) : (
+                    <span style={{ fontWeight: 700, textDecoration: 'underline' }}>privacyverklaring</span>
                   )}
+                  {' '}van Unposed en geef toestemming voor het opslaan en gebruiken van mijn gegevens voor casting- en shootdoeleinden.
                 </span>
-              </label>
+              </div>
             </div>
 
             {/* Modal voor voorwaarden */}
@@ -491,4 +564,4 @@ export default function RegisterModel() {
   );
 }
 
-const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#1F2B4A;font-weight:700}.success-text{font-size:20px;color:#1F2B4A;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;gap:60px;align-items:center;padding-right:60px;animation:scroll 30s linear infinite;will-change:transform}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(calc(-100% / 3))}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#1F2B4A;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#9CA3AF}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#1F2B4A;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #6B7280}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:10px;cursor:pointer;flex-shrink:0;accent-color:#2B3E72}.checkbox-label span{font-size:15px;color:#1F2B4A;line-height:1.6}.submit-btn{width:100%;padding:16px;background:#2B3E72;color:#fff;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-scroll{gap:30px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}}`;
+const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#1F2B4A;font-weight:700}.success-text{font-size:20px;color:#1F2B4A;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;align-items:center;animation:scroll 240s linear infinite;will-change:transform;width:max-content}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#1F2B4A;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#9CA3AF}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#1F2B4A;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #6B7280}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:10px;cursor:pointer;flex-shrink:0;accent-color:#2B3E72}.checkbox-label span{font-size:15px;color:#1F2B4A;line-height:1.6}.submit-btn{width:100%;padding:16px;background:#2B3E72;color:#fff;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}}`;
