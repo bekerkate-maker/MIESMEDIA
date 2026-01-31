@@ -108,6 +108,8 @@ export default function ShootRegistration() {
       }
 
       setSubmitted(true);
+
+      // Email notification removed per request
     } catch (error: any) {
       console.error('Error:', error);
       alert('Er ging iets mis: ' + error.message);

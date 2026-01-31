@@ -211,21 +211,21 @@ export default function RegisterModel() {
         throw new Error('Profiel opslaan mislukt: ' + error.message);
       }
 
-      try {
-        const { error: functionError } = await supabase.functions.invoke('send-shoot-registration-email', {
-          body: {
-            modelName: `${formData.first_name} ${formData.last_name}`,
-            email: formData.email,
-            phone: formData.phone,
-            instagram: formData.instagram
+      // Email notification
+      const { error: emailError } = await supabase.functions.invoke('send-shoot-registration-emails', {
+        body: {
+          record: {
+            ...formData,
+            id: userId,
+            photo_url: photoUrl,
+            extra_photos: extraPhotoUrls
           }
-        });
-
-        if (functionError) {
-          console.error('Email send error:', functionError);
         }
-      } catch (emailError) {
-        console.error('Email error:', emailError);
+      });
+
+      if (emailError) {
+        console.error('Error sending email:', emailError);
+        // We don't block the user flow if email fails, but we log it.
       }
 
       setSubmitted(true);
