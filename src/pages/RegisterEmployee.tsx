@@ -15,6 +15,8 @@ export default function RegisterEmployee() {
     setLoading(true);
 
     try {
+      console.log('Starting registration for:', email);
+
       // 1. Maak gebruiker aan in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -23,10 +25,21 @@ export default function RegisterEmployee() {
           data: {
             full_name: name,
           },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('Auth signup error:', authError);
+        throw authError;
+      }
+
+      console.log('Auth user created:', authData.user?.id);
+      console.log('User confirmed:', authData.user?.confirmed_at);
+
+      if (!authData.user) {
+        throw new Error('Geen gebruiker aangemaakt');
+      }
 
       // 2. Voeg gebruiker toe aan employees tabel
       if (authData.user) {
@@ -45,10 +58,56 @@ export default function RegisterEmployee() {
           console.error('Database insert error:', dbError);
           throw new Error('Fout bij opslaan in database: ' + dbError.message);
         }
+
+        // 3. Verstuur welkomstmail naar de nieuwe collega
+        try {
+          console.log('Attempting to send welcome email to:', email);
+          console.log('Calling edge function: send-email');
+
+          const emailResponse = await supabase.functions.invoke('send-email', {
+            body: {
+              name: name,
+              email: email
+            }
+          });
+
+          console.log('Email response:', emailResponse);
+          console.log('Email response data:', emailResponse.data);
+          console.log('Email response error:', emailResponse.error);
+
+          if (emailResponse.error) {
+            console.error('Email error details:', {
+              message: emailResponse.error.message,
+              context: emailResponse.error.context,
+              name: emailResponse.error.name
+            });
+            alert('⚠️ Account aangemaakt, maar email kon niet worden verstuurd: ' + emailResponse.error.message);
+          } else {
+            console.log('✅ Welkomstmail verstuurd naar:', email);
+            alert('✅ Account aangemaakt en welkomstmail verstuurd!');
+          }
+        } catch (emailError: any) {
+          console.error('Failed to send welcome email:', emailError);
+          console.error('Error details:', emailError.message, emailError.stack);
+          alert('⚠️ Account aangemaakt, maar email kon niet worden verstuurd.');
+        }
       }
 
-      alert('✅ Account succesvol aangemaakt! Je wordt nu doorgestuurd naar het dashboard.');
-      navigate('/dashboard');
+      alert('✅ Account succesvol aangemaakt! Je wordt automatisch ingelogd...');
+
+      // 4. Log automatisch in met de nieuwe credentials
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        console.error('Auto sign-in error:', signInError);
+        alert('Account is aangemaakt, maar automatisch inloggen is mislukt. Probeer handmatig in te loggen op /login');
+        navigate('/login');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
       alert(error.message || 'Er ging iets mis. Probeer het opnieuw.');

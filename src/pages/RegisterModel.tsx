@@ -211,22 +211,7 @@ export default function RegisterModel() {
         throw new Error('Profiel opslaan mislukt: ' + error.message);
       }
 
-      // Email notification
-      const { error: emailError } = await supabase.functions.invoke('send-shoot-registration-emails', {
-        body: {
-          record: {
-            ...formData,
-            id: userId,
-            photo_url: photoUrl,
-            extra_photos: extraPhotoUrls
-          }
-        }
-      });
-
-      if (emailError) {
-        console.error('Error sending email:', emailError);
-        // We don't block the user flow if email fails, but we log it.
-      }
+      // Email wordt automatisch verstuurd via database webhook 'stuur_welkomstmail'
 
       setSubmitted(true);
     } catch (error: any) {
