@@ -19,6 +19,12 @@ export default function ShootRegistration() {
     motivation: ''
   });
 
+  // Password reset state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
   // Fetch shoot details
   useEffect(() => {
     if (shootId) {
@@ -109,7 +115,31 @@ export default function ShootRegistration() {
 
       setSubmitted(true);
 
-      // Email notification removed per request
+      // Send email notification to hello@unposed.nl
+      try {
+        const talentName = `${model.first_name || ''} ${model.last_name || ''}`.trim() || 'Onbekend';
+        const shootDate = shoot?.shoot_date
+          ? new Date(shoot.shoot_date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })
+          : '';
+        const shootTime = shoot?.start_time && shoot?.end_time
+          ? `${shoot.start_time.slice(0, 5)} - ${shoot.end_time.slice(0, 5)} uur`
+          : '';
+
+        await supabase.functions.invoke('send-shoot-application-email', {
+          body: {
+            talentName,
+            shootTitle: shoot?.title || '',
+            shootDate,
+            shootTime,
+            shootLocation: shoot?.location || '',
+            motivation: existingTalentData.motivation || ''
+          }
+        });
+        console.log('Email notification sent successfully');
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError);
+        // Don't block the registration if email fails
+      }
     } catch (error: any) {
       console.error('Error:', error);
       alert('Er ging iets mis: ' + error.message);
@@ -121,6 +151,38 @@ export default function ShootRegistration() {
   const handleNewTalentClick = () => {
     // Redirect naar de registratie pagina met shoot_id
     window.location.href = `/register-model${shootId ? `?shoot_id=${shootId}` : ''}`;
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetLoading(true);
+    setResetMessage(null);
+
+    try {
+      if (!resetEmail || !resetEmail.includes('@')) {
+        throw new Error('Vul een geldig e-mailadres in.');
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      setResetMessage({
+        type: 'success',
+        text: 'Als dit e-mailadres bij ons bekend is, ontvang je binnen enkele minuten een e-mail met instructies.'
+      });
+      setResetEmail('');
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      setResetMessage({
+        type: 'error',
+        text: 'Er ging iets mis. Probeer het later opnieuw.'
+      });
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   if (submitted) {
@@ -228,52 +290,125 @@ export default function ShootRegistration() {
                 </button>
 
                 {selectedOption === 'existing' && (
-                  <form onSubmit={handleExistingTalentSubmit} className="compact-form">
-                    <h3 className="form-heading">Inloggen</h3>
-                    <p className="section-subtitle" style={{ marginBottom: 20 }}>Log in met je account om je aan te melden.</p>
+                  !showForgotPassword ? (
+                    <form onSubmit={handleExistingTalentSubmit} className="compact-form">
+                      <h3 className="form-heading">Inloggen</h3>
+                      <p className="section-subtitle" style={{ marginBottom: 20 }}>Log in met je account om je aan te melden.</p>
 
-                    <div className="form-group">
-                      <label>E-mailadres</label>
-                      <input
-                        required
-                        type="email"
-                        value={existingTalentData.email}
-                        onChange={(e) => setExistingTalentData({ ...existingTalentData, email: e.target.value })}
-                        placeholder="jan@example.com"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Wachtwoord</label>
-                      <input
-                        required
-                        type="password"
-                        placeholder="••••••••"
-                        value={existingTalentData.password}
-                        onChange={(e) => setExistingTalentData({ ...existingTalentData, password: e.target.value })}
-                        style={{ width: '100%' }}
-                      />
-                      <div style={{ textAlign: 'right', marginTop: 6 }}>
-                        <span style={{ fontSize: 13, color: '#6B7280', cursor: 'pointer', textDecoration: 'underline' }}>
-                          Wachtwoord vergeten?
-                        </span>
+                      <div className="form-group">
+                        <label>E-mailadres</label>
+                        <input
+                          required
+                          type="email"
+                          value={existingTalentData.email}
+                          onChange={(e) => setExistingTalentData({ ...existingTalentData, email: e.target.value })}
+                          placeholder="jan@example.com"
+                        />
                       </div>
-                    </div>
 
-                    <div className="form-group">
-                      <label>Motivatie</label>
-                      <textarea
-                        value={existingTalentData.motivation}
-                        onChange={(e) => setExistingTalentData({ ...existingTalentData, motivation: e.target.value })}
-                        placeholder="Korte toelichting..."
-                        rows={2}
-                      />
-                    </div>
+                      <div className="form-group">
+                        <label>Wachtwoord</label>
+                        <input
+                          required
+                          type="password"
+                          placeholder="••••••••"
+                          value={existingTalentData.password}
+                          onChange={(e) => setExistingTalentData({ ...existingTalentData, password: e.target.value })}
+                          style={{ width: '100%' }}
+                        />
+                        <div style={{ textAlign: 'right', marginTop: 6 }}>
+                          <button
+                            type="button"
+                            onClick={() => setShowForgotPassword(true)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              padding: 0,
+                              fontSize: 13,
+                              color: '#6B7280',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                              fontFamily: 'inherit'
+                            }}
+                          >
+                            Wachtwoord vergeten?
+                          </button>
+                        </div>
+                      </div>
 
-                    <button type="submit" disabled={loading} className="full-submit-btn">
-                      {loading ? 'Bezig...' : 'Inloggen & Aanmelden'}
-                    </button>
-                  </form>
+                      <div className="form-group">
+                        <label>Motivatie</label>
+                        <textarea
+                          value={existingTalentData.motivation}
+                          onChange={(e) => setExistingTalentData({ ...existingTalentData, motivation: e.target.value })}
+                          placeholder="Korte toelichting..."
+                          rows={2}
+                        />
+                      </div>
+
+                      <button type="submit" disabled={loading} className="full-submit-btn">
+                        {loading ? 'Bezig...' : 'Inloggen & Aanmelden'}
+                      </button>
+                    </form>
+                  ) : (
+                    <form onSubmit={handlePasswordReset} className="compact-form">
+                      <h3 className="form-heading">Wachtwoord herstellen</h3>
+                      <p className="section-subtitle" style={{ marginBottom: 20 }}>
+                        Vul je e-mailadres in om een herstellink te ontvangen.
+                      </p>
+
+                      <div className="form-group">
+                        <label>E-mailadres</label>
+                        <input
+                          required
+                          type="email"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          placeholder="jan@example.com"
+                        />
+                      </div>
+
+                      {resetMessage && (
+                        <div style={{
+                          background: resetMessage.type === 'success' ? '#DCFCE7' : '#FEF2F2',
+                          color: resetMessage.type === 'success' ? '#16A34A' : '#DC2626',
+                          padding: 12,
+                          borderRadius: 8,
+                          fontSize: 14,
+                          marginBottom: 20,
+                          lineHeight: 1.4
+                        }}>
+                          {resetMessage.text}
+                        </div>
+                      )}
+
+                      <button type="submit" disabled={resetLoading} className="full-submit-btn" style={{ marginBottom: 12 }}>
+                        {resetLoading ? 'Bezig...' : 'Verstuur link'}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowForgotPassword(false);
+                          setResetMessage(null);
+                          setResetEmail('');
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'transparent',
+                          color: '#6B7280',
+                          fontSize: 14,
+                          fontWeight: 500,
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontFamily: 'inherit'
+                        }}
+                      >
+                        Terug naar inloggen
+                      </button>
+                    </form>
+                  )
                 )}
               </div>
             )}

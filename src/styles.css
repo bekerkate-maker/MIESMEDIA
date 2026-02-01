@@ -28,3 +28,13 @@ select:focus {
   border-color: #2563eb;
   outline: none;
 }
+
+/* Spinner animation for loading states */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

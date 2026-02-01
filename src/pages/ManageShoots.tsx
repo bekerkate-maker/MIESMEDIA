@@ -12,6 +12,9 @@ export default function ManageShoots() {
   const [editingShoot, setEditingShoot] = useState<number | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [expandedShoot, setExpandedShoot] = useState<number | null>(null);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [pendingShootData, setPendingShootData] = useState<any>(null);
+  const [isSendingEmails, setIsSendingEmails] = useState(false);
 
   const [newShoot, setNewShoot] = useState<{
     client: string;
@@ -244,7 +247,7 @@ export default function ManageShoots() {
         }
         alert('✅ Shoot bijgewerkt!');
       } else {
-        // Nieuwe shoot
+        // Nieuwe shoot - toon bevestigingsdialoog voor email verzending
         const insertFields: any = {
           client_name: newShoot.client,
           title: newShoot.title,
@@ -265,9 +268,18 @@ export default function ManageShoots() {
         };
         const insertResult = await supabase
           .from('shoots')
-          .insert(insertFields);
+          .insert(insertFields)
+          .select();
         if (insertResult.error) throw insertResult.error;
-        alert('✅ Shoot toegevoegd!');
+
+        // Sla shoot data op en toon bevestigingsdialoog
+        if (insertResult.data && insertResult.data.length > 0) {
+          setPendingShootData(insertResult.data[0]);
+          setShowEmailConfirmation(true);
+          return; // Stop hier, wacht op gebruikersbevestiging
+        } else {
+          alert('✅ Shoot toegevoegd!');
+        }
       }
       setShowAddForm(false);
       setEditingShoot(null);
@@ -362,7 +374,96 @@ export default function ManageShoots() {
       compensationAmount: '',
       compensationBusinessName: ''
     });
+    fetchShoots();
   };
+
+  // Bevestig en verstuur emails naar alle models
+  const handleConfirmSendEmails = async () => {
+    if (!pendingShootData) return;
+
+    setIsSendingEmails(true); // Start loading
+
+    try {
+      console.log('Sending emails to all models about new shoot...');
+      const { data: functionData, error: functionError } = await supabase.functions.invoke('send-new-shoot-emails', {
+        body: {
+          shootId: pendingShootData.id,
+          shootTitle: newShoot.title,
+          shootDate: newShoot.date,
+          shootTime: `${newShoot.startTime} - ${newShoot.endTime}`,
+          shootLocation: newShoot.location
+        }
+      });
+
+      if (functionError) {
+        console.error('Error sending emails:', functionError);
+        alert('✅ Shoot toegevoegd! ⚠️ Let op: Er ging iets mis bij het versturen van de emails naar de talenten.');
+      } else {
+        console.log('Emails sent successfully:', functionData);
+        alert(`✅ Shoot toegevoegd en emails verzonden naar ${functionData.successCount || 'alle'} talenten!`);
+      }
+    } catch (emailError) {
+      console.error('Error invoking email function:', emailError);
+      alert('✅ Shoot toegevoegd! ⚠️ Let op: Er ging iets mis bij het versturen van de emails naar de talenten.');
+    } finally {
+      // Reset state
+      setIsSendingEmails(false); // Stop loading
+      setShowEmailConfirmation(false);
+      setPendingShootData(null);
+      setShowAddForm(false);
+      setEditingShoot(null);
+      setNewShoot({
+        client: '',
+        title: '',
+        date: '',
+        startTime: '',
+        endTime: '',
+        location: '',
+        description: '',
+        spots: '',
+        clientWebsite: '',
+        clientInstagram: '@',
+        moodboardLink: '',
+        bannerPhoto: null,
+        bannerPhotoUrl: '',
+        compensationType: 'financiële vergoeding',
+        compensationAmount: '',
+        compensationBusinessName: ''
+      });
+      await fetchShoots();
+    }
+  };
+
+  // Annuleer email verzending
+  const handleSkipSendEmails = async () => {
+    alert('✅ Shoot toegevoegd! Geen emails verzonden naar models.');
+
+    // Reset state
+    setShowEmailConfirmation(false);
+    setPendingShootData(null);
+    setShowAddForm(false);
+    setEditingShoot(null);
+    setNewShoot({
+      client: '',
+      title: '',
+      date: '',
+      startTime: '',
+      endTime: '',
+      location: '',
+      description: '',
+      spots: '',
+      clientWebsite: '',
+      clientInstagram: '@',
+      moodboardLink: '',
+      bannerPhoto: null,
+      bannerPhotoUrl: '',
+      compensationType: 'financiële vergoeding',
+      compensationAmount: '',
+      compensationBusinessName: ''
+    });
+    await fetchShoots();
+  };
+
 
   const handleDeleteShoot = async (id: number) => {
     if (window.confirm('Weet je zeker dat je deze shoot wilt verwijderen?')) {
@@ -1606,6 +1707,188 @@ E: hello@unposed.nl`;
               >
                 X
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Email Confirmation Modal */}
+        {showEmailConfirmation && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 10000,
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20
+          }}>
+            <div style={{
+              background: '#fff',
+              borderRadius: 16,
+              maxWidth: 500,
+              width: '100%',
+              padding: 32,
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              animation: 'slideIn 0.3s ease'
+            }}>
+              <div style={{
+                textAlign: 'center',
+                marginBottom: 24
+              }}>
+                {isSendingEmails ? (
+                  <div style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    background: '#DBEAFE',
+                    margin: '0 auto 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <div style={{
+                      width: 32,
+                      height: 32,
+                      border: '3px solid #2B3E72',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }}></div>
+                  </div>
+                ) : (
+                  <div style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    background: '#DBEAFE',
+                    margin: '0 auto 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                  </div>
+                )}
+                <h2 style={{
+                  fontSize: 24,
+                  fontWeight: 700,
+                  color: '#1F2B4A',
+                  marginBottom: 12
+                }}>
+                  {isSendingEmails ? 'Emails worden verzonden...' : 'Shoot toegevoegd!'}
+                </h2>
+                {isSendingEmails ? (
+                  <>
+                    <p style={{
+                      fontSize: 16,
+                      color: '#6B7280',
+                      lineHeight: 1.6,
+                      marginBottom: 8
+                    }}>
+                      Even geduld, de emails worden naar alle talenten verstuurd.
+                    </p>
+                    <p style={{
+                      fontSize: 14,
+                      color: '#9CA3AF',
+                      lineHeight: 1.5
+                    }}>
+                      Sluit dit venster niet en verwijder de tab niet.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p style={{
+                      fontSize: 16,
+                      color: '#6B7280',
+                      lineHeight: 1.6,
+                      marginBottom: 8
+                    }}>
+                      Wil je een email notificatie versturen naar alle geregistreerde talenten over deze nieuwe shoot?
+                    </p>
+                    <p style={{
+                      fontSize: 14,
+                      color: '#9CA3AF',
+                      lineHeight: 1.5
+                    }}>
+                      De talenten ontvangen een email met de shoot details en kunnen zich direct aanmelden.
+                    </p>
+                  </>
+                )}
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: 12,
+                marginTop: 24
+              }}>
+                <button
+                  onClick={handleSkipSendEmails}
+                  disabled={isSendingEmails}
+                  style={{
+                    flex: 1,
+                    padding: '14px 24px',
+                    background: isSendingEmails ? '#F3F4F6' : '#E5DDD5',
+                    color: isSendingEmails ? '#9CA3AF' : '#1F2B4A',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 16,
+                    fontWeight: 600,
+                    cursor: isSendingEmails ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontFamily: 'inherit',
+                    opacity: isSendingEmails ? 0.5 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSendingEmails) e.currentTarget.style.background = '#D1C7BB';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSendingEmails) e.currentTarget.style.background = '#E5DDD5';
+                  }}
+                >
+                  Nee, overslaan
+                </button>
+                <button
+                  onClick={handleConfirmSendEmails}
+                  disabled={isSendingEmails}
+                  style={{
+                    flex: 1,
+                    padding: '14px 24px',
+                    background: isSendingEmails ? '#9CA3AF' : '#2B3E72',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 16,
+                    fontWeight: 600,
+                    cursor: isSendingEmails ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontFamily: 'inherit',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSendingEmails) e.currentTarget.style.background = '#1F2B4A';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSendingEmails) e.currentTarget.style.background = '#2B3E72';
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  Ja, verstuur emails
+                </button>
+              </div>
             </div>
           </div>
         )}

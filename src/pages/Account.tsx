@@ -40,6 +40,10 @@ const Account: React.FC = () => {
   // Login form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -189,10 +193,69 @@ const Account: React.FC = () => {
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetLoading(true);
+    setResetMessage(null);
+
+    try {
+      // Validate email
+      if (!resetEmail || !resetEmail.includes('@')) {
+        throw new Error('Vul een geldig e-mailadres in.');
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      setResetMessage({
+        type: 'success',
+        text: 'Als dit e-mailadres bij ons bekend is, ontvang je binnen enkele minuten een e-mail met instructies om je wachtwoord te herstellen.'
+      });
+      setResetEmail('');
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      setResetMessage({
+        type: 'error',
+        text: 'Er ging iets mis bij het aanvragen van het wachtwoordherstel. Probeer het later opnieuw.'
+      });
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
   };
+
+  const handleCancelRegistration = async (registrationId: string, shootTitle: string) => {
+    if (!confirm(`Weet je zeker dat je je wilt afmelden voor "${shootTitle}"?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('shoot_registrations')
+        .delete()
+        .eq('id', registrationId);
+
+      if (error) throw error;
+
+      // Refresh de shoots lijst
+      if (profile?.id) {
+        await fetchMyShoots(profile.id);
+      }
+
+      alert('Je bent succesvol afgemeld voor deze shoot.');
+    } catch (err) {
+      console.error('Error canceling registration:', err);
+      alert('Er ging iets mis bij het afmelden. Probeer het opnieuw.');
+    }
+  };
+
 
 
 
@@ -223,95 +286,206 @@ const Account: React.FC = () => {
             </p>
           </div>
 
-          <form onSubmit={handleLogin} style={{ background: '#fff', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                E-mailadres
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="naam@voorbeeld.nl"
-                style={{
-                  width: '100%',
-                  padding: '14px 16px',
-                  background: '#E5DDD5',
-                  color: '#1F2B4A',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontSize: 15,
-                  fontFamily: 'inherit',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: 32 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
-                Wachtwoord
-              </label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                style={{
-                  width: '100%',
-                  padding: '14px 16px',
-                  background: '#E5DDD5',
-                  color: '#1F2B4A',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontSize: 15,
-                  fontFamily: 'inherit',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
-            {loginError && (
-              <div style={{
-                background: '#FEF2F2',
-                color: '#DC2626',
-                padding: 12,
-                borderRadius: 8,
-                fontSize: 14,
-                marginBottom: 20,
-                textAlign: 'center'
-              }}>
-                {loginError}
+          {!showForgotPassword ? (
+            <form onSubmit={handleLogin} style={{ background: '#fff', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
+                  E-mailadres
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="naam@voorbeeld.nl"
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    background: '#E5DDD5',
+                    color: '#1F2B4A',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 15,
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
+                  }}
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loggingIn}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: '#2B3E72',
-                color: '#fff',
-                fontSize: 16,
-                fontWeight: 600,
-                border: 'none',
-                borderRadius: 8,
-                cursor: loggingIn ? 'not-allowed' : 'pointer',
-                opacity: loggingIn ? 0.6 : 1,
-                fontFamily: 'inherit',
-                marginBottom: 20,
-                boxSizing: 'border-box'
-              }}
-            >
-              {loggingIn ? 'Even geduld...' : 'Inloggen'}
-            </button>
+              <div style={{ marginBottom: 32 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
+                  Wachtwoord
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    background: '#E5DDD5',
+                    color: '#1F2B4A',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 15,
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <div style={{ textAlign: 'right', marginTop: 6 }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      fontSize: 13,
+                      color: '#6B7280',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      fontFamily: 'inherit'
+                    }}
+                  >
+                    Wachtwoord vergeten?
+                  </button>
+                </div>
+              </div>
 
-            <div style={{ textAlign: 'center', fontSize: 14, color: '#6B7280', margin: 0 }}>
-              Nog niet aangemeld als talent? <a href="/register-model" style={{ color: '#2B3E72', textDecoration: 'underline' }}>Meld je hier aan</a>
-            </div>
-          </form>
+              {loginError && (
+                <div style={{
+                  background: '#FEF2F2',
+                  color: '#DC2626',
+                  padding: 12,
+                  borderRadius: 8,
+                  fontSize: 14,
+                  marginBottom: 20,
+                  textAlign: 'center'
+                }}>
+                  {loginError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loggingIn}
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  background: '#2B3E72',
+                  color: '#fff',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: loggingIn ? 'not-allowed' : 'pointer',
+                  opacity: loggingIn ? 0.6 : 1,
+                  fontFamily: 'inherit',
+                  marginBottom: 20,
+                  boxSizing: 'border-box'
+                }}
+              >
+                {loggingIn ? 'Even geduld...' : 'Inloggen'}
+              </button>
+
+              <div style={{ textAlign: 'center', fontSize: 14, color: '#6B7280', margin: 0 }}>
+                Nog niet aangemeld als talent? <a href="/register-model" style={{ color: '#2B3E72', textDecoration: 'underline' }}>Meld je hier aan</a>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handlePasswordReset} style={{ background: '#fff', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+              <div style={{ marginBottom: 24 }}>
+                <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 16px 0', color: '#1F2B4A' }}>
+                  Wachtwoord herstellen
+                </h2>
+                <p style={{ fontSize: 15, color: '#6B7280', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+                  Vul hieronder je e-mailadres in. We sturen je een link om een nieuw wachtwoord in te stellen.
+                </p>
+
+                <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
+                  E-mailadres
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="naam@voorbeeld.nl"
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    background: '#E5DDD5',
+                    color: '#1F2B4A',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 15,
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {resetMessage && (
+                <div style={{
+                  background: resetMessage.type === 'success' ? '#DCFCE7' : '#FEF2F2',
+                  color: resetMessage.type === 'success' ? '#16A34A' : '#DC2626',
+                  padding: 12,
+                  borderRadius: 8,
+                  fontSize: 14,
+                  marginBottom: 20,
+                  lineHeight: 1.4
+                }}>
+                  {resetMessage.text}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={resetLoading}
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  background: '#2B3E72',
+                  color: '#fff',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: resetLoading ? 'not-allowed' : 'pointer',
+                  opacity: resetLoading ? 0.6 : 1,
+                  fontFamily: 'inherit',
+                  marginBottom: 16,
+                  boxSizing: 'border-box'
+                }}
+              >
+                {resetLoading ? 'Bezig...' : 'Verstuur link'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForgotPassword(false);
+                  setResetMessage(null);
+                  setResetEmail('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: 'transparent',
+                  color: '#6B7280',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit'
+                }}
+              >
+                Terug naar inloggen
+              </button>
+            </form>
+          )}
         </div>
       </div>
     );
@@ -593,7 +767,37 @@ const Account: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                        <span style={{ fontSize: 12, padding: '4px 12px', background: '#FEF3C7', color: '#D97706', borderRadius: 99, fontWeight: 500 }}>Aangemeld</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 12, padding: '4px 12px', background: '#FEF3C7', color: '#D97706', borderRadius: 99, fontWeight: 500 }}>Aangemeld</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCancelRegistration(reg.id, reg.shoots?.title || 'deze shoot');
+                            }}
+                            style={{
+                              padding: '6px 12px',
+                              background: 'transparent',
+                              border: '1px solid #DC2626',
+                              color: '#DC2626',
+                              borderRadius: 8,
+                              fontSize: 12,
+                              fontWeight: 500,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              fontFamily: 'inherit'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = '#DC2626';
+                              e.currentTarget.style.color = '#fff';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'transparent';
+                              e.currentTarget.style.color = '#DC2626';
+                            }}
+                          >
+                            Meld je af
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

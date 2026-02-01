@@ -47,6 +47,7 @@ export default function App() {
   // ...existing code...
   const Account = React.lazy(() => import('./pages/Account'));
   const EditProfile = React.lazy(() => import('./pages/EditProfile'));
+  const ResetPassword = React.lazy(() => import('./pages/ResetPassword'));
   return (
     <BrowserRouter>
       <Routes>
@@ -65,6 +66,11 @@ export default function App() {
         <Route path="/edit-profile" element={
           <React.Suspense fallback={<div>Laden...</div>}>
             <EditProfile />
+          </React.Suspense>
+        } />
+        <Route path="/reset-password" element={
+          <React.Suspense fallback={<div>Laden...</div>}>
+            <ResetPassword />
           </React.Suspense>
         } />
         {/* Beveiligde routes */}
