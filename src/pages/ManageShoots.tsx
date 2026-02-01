@@ -1330,7 +1330,58 @@ export default function ManageShoots() {
                                       {/* Action Buttons for Group Email */}
                                       {items.length > 0 && status === 'accepted' && (
                                         <button
-                                          onClick={() => alert(`Mail sturen naar ${items.length} geselecteerde talenten... (Feature coming soon)`)}
+                                          onClick={() => {
+                                            // Verzamel alle emailadressen van geselecteerde talenten
+                                            const emails = items.map((reg: any) => reg.email).filter(Boolean);
+
+                                            // Maak het onderwerp
+                                            const subject = `Je bent geselecteerd voor een Unposed shoot!`;
+
+                                            // Maak de body van het bericht met shoot details
+                                            const shootDate = formatDateNL(shoot.shoot_date || shoot.date, true);
+                                            const startTime = shoot.start_time?.slice(0, 5) || '';
+                                            const endTime = shoot.end_time?.slice(0, 5) || '';
+
+                                            // Bereken vergoeding tekst
+                                            let compensationText = '';
+                                            if (shoot.compensation_type === 'financiële vergoeding' && shoot.compensation_amount) {
+                                              compensationText = `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
+                                            } else if (shoot.compensation_type === 'cadeaubon' && shoot.compensation_amount && shoot.compensation_business_name) {
+                                              compensationText = `Cadeaubon t.w.v. €${shoot.compensation_amount} bij ${shoot.compensation_business_name}`;
+                                            } else if (shoot.compensation_type === 'geen') {
+                                              compensationText = 'Geen vergoeding';
+                                            }
+
+                                            const body = `Hi,
+
+Leuk nieuws: je bent geselecteerd voor een Unposed shoot!
+
+We zien je graag terug bij deze shoot en kijken ernaar uit om samen iets moois te maken.
+
+${shootDate}
+${startTime}${endTime ? ' - ' + endTime : ''} uur
+${shoot.location}
+${compensationText}
+
+Voorbereiding & styling
+🔴 [Vul hier specifieke instructies in, zoals kledingvoorschriften, stylingtips, moodboardlink, sfeeromschrijving of andere praktische info.] 🔴
+
+Bevestig je deelname door te reageren op deze mail. Kun je er toch niet bij zijn? Laat het ons dan zo snel mogelijk weten.
+
+We kijken ernaar uit je binnenkort op set te zien!
+
+—
+
+Team Unposed
+W: Unposed.nl
+E: hello@unposed.nl`;
+
+                                            // Maak Gmail compose URL met BCC
+                                            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+                                            // Open Gmail in nieuw tabblad
+                                            window.open(gmailUrl, '_blank');
+                                          }}
                                           style={{
                                             padding: '12px',
                                             background: '#2B3E72',
@@ -1351,7 +1402,35 @@ export default function ManageShoots() {
                                       )}
                                       {items.length > 0 && status === 'rejected' && (
                                         <button
-                                          onClick={() => alert(`Afwijzing sturen naar ${items.length} niet-geselecteerde talenten... (Feature coming soon)`)}
+                                          onClick={() => {
+                                            // Verzamel alle emailadressen van niet-geselecteerde talenten
+                                            const emails = items.map((reg: any) => reg.email).filter(Boolean);
+
+                                            // Maak het onderwerp
+                                            const subject = `Update over je aanmelding voor een Unposed shoot.`;
+
+                                            // Maak de body van het bericht
+                                            const shootName = shoot.title || shoot.description?.split('\n\n')[0];
+                                            const body = `Hi,
+
+Bedankt voor je aanmelding voor de ${shootName} en leuk dat je interesse had om hieraan deel te nemen.
+
+Voor deze shoot hebben we inmiddels een selectie gemaakt, en helaas ben je niet uitgekozen. Bij nieuwe shoots die passen bij jouw profiel laten we altijd weer van ons horen.
+
+Dankjewel voor je enthousiasme en wie weet zien we je bij een volgende Unposed shoot!
+
+—
+
+Team Unposed
+W: Unposed.nl
+E: hello@unposed.nl`;
+
+                                            // Maak Gmail compose URL met BCC
+                                            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+                                            // Open Gmail in nieuw tabblad
+                                            window.open(gmailUrl, '_blank');
+                                          }}
                                           style={{
                                             padding: '12px',
                                             background: '#fff',
@@ -1446,7 +1525,7 @@ export default function ManageShoots() {
               }
             }
             .logo-scroll {
-              animation: scroll 40s linear infinite;
+              animation: scroll 240s linear infinite;
               will-change: transform;
             }
             .logo-scroll img {
