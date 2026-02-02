@@ -1242,31 +1242,64 @@ export default function ManageShoots() {
                               {/* Header with Shoot Info */}
                               <div style={{
                                 padding: '24px 32px',
+                                background: '#F9FAFB',
                                 borderBottom: '1px solid #E5E7EB',
-                                background: '#F9FAFB'
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start'
                               }}>
-                                <div style={{ marginBottom: 16 }}>
-                                  <div style={{
-                                    fontSize: 12,
-                                    fontWeight: 600,
-                                    color: '#2B3E72',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.5px',
-                                    marginBottom: 4
-                                  }}>
-                                    {shoot.client_name || shoot.client}
+                                <div>
+                                  <div style={{ marginBottom: 16 }}>
+                                    <div style={{
+                                      fontSize: 12,
+                                      fontWeight: 600,
+                                      color: '#2B3E72',
+                                      textTransform: 'uppercase',
+                                      letterSpacing: '0.5px',
+                                      marginBottom: 4
+                                    }}>
+                                      {shoot.client_name || shoot.client}
+                                    </div>
+                                    <h2 style={{ fontSize: 24, fontWeight: 700, color: '#1F2B4A', margin: 0 }}>
+                                      {shoot.title || shoot.description?.split('\n\n')[0]}
+                                    </h2>
                                   </div>
-                                  <h2 style={{ fontSize: 24, fontWeight: 700, color: '#1F2B4A', margin: 0 }}>
-                                    {shoot.title || shoot.description?.split('\n\n')[0]}
-                                  </h2>
+                                  <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#6B7280', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      {shoot.location}
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      {formatDateNL(shoot.shoot_date || shoot.date)}
+                                    </div>
+                                  </div>
                                 </div>
-                                <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#6B7280', flexWrap: 'wrap' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    {shoot.location}
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    {formatDateNL(shoot.shoot_date || shoot.date)}
-                                  </div>
+                                <div style={{ paddingTop: 0 }}>
+                                  {getRegistrationsForShoot(shoot.id).some(r => ['selected', 'rejected_draft'].includes(r.status)) && (
+                                    <button
+                                      onClick={async () => {
+                                        if (!window.confirm('Weet je zeker dat je alle concept-wijzigingen wilt doorvoeren? Dit maakt ze zichtbaar voor talenten.')) return;
+
+                                        const drafts = getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status));
+
+                                        for (const draft of drafts) {
+                                          const newStatus = draft.status === 'selected' ? 'accepted' : 'rejected';
+                                          await updateRegistrationStatus(draft.id, newStatus);
+                                        }
+                                      }}
+                                      style={{
+                                        padding: '8px 16px',
+                                        background: '#2563EB',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        fontSize: 14,
+                                        fontWeight: 600,
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      Push naar talentaccount ({getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status)).length})
+                                    </button>
+                                  )}
                                 </div>
                               </div>
 
@@ -1276,8 +1309,8 @@ export default function ManageShoots() {
                                   const shootRegistrations = getRegistrationsForShoot(shoot.id);
 
                                   const pending = shootRegistrations.filter(r => !r.status || r.status === 'pending');
-                                  const accepted = shootRegistrations.filter(r => r.status === 'accepted');
-                                  const rejected = shootRegistrations.filter(r => r.status === 'rejected');
+                                  const accepted = shootRegistrations.filter(r => ['accepted', 'selected'].includes(r.status));
+                                  const rejected = shootRegistrations.filter(r => ['rejected', 'rejected_draft'].includes(r.status));
 
                                   const Column = ({ title, items, status, color, bgColor }: any) => (
                                     <div style={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -1330,8 +1363,41 @@ export default function ManageShoots() {
                                               border: '1px solid #E5E7EB',
                                               display: 'flex',
                                               flexDirection: 'column',
-                                              gap: 12
+                                              gap: 12,
+                                              position: 'relative'
                                             }}>
+                                              {['selected', 'rejected_draft'].includes(reg.status) && (
+                                                <div style={{
+                                                  position: 'absolute',
+                                                  top: 8,
+                                                  right: 8,
+                                                  background: '#FEF3C7',
+                                                  color: '#D97706',
+                                                  fontSize: 10,
+                                                  fontWeight: 700,
+                                                  padding: '2px 6px',
+                                                  borderRadius: 4,
+                                                  zIndex: 2
+                                                }}>
+                                                  CONCEPT
+                                                </div>
+                                              )}
+                                              {['accepted', 'rejected'].includes(reg.status) && (
+                                                <div style={{
+                                                  position: 'absolute',
+                                                  top: 8,
+                                                  right: 8,
+                                                  background: '#DCFCE7',
+                                                  color: '#166534',
+                                                  fontSize: 10,
+                                                  fontWeight: 700,
+                                                  padding: '2px 6px',
+                                                  borderRadius: 4,
+                                                  zIndex: 2
+                                                }}>
+                                                  DEFINITIEF
+                                                </div>
+                                              )}
                                               <div
                                                 style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: reg.model_id ? 'pointer' : 'default' }}
                                                 onClick={() => reg.model_id && window.open(`/dashboard?model=${reg.model_id}`, '_blank')}
@@ -1393,13 +1459,13 @@ export default function ManageShoots() {
                                                 {status === 'pending' && (
                                                   <>
                                                     <button
-                                                      onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'accepted'); }}
+                                                      onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'selected'); }}
                                                       style={{ flex: 1, padding: '6px', background: '#DCFCE7', color: '#166534', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                                                     >
                                                       Selecteren
                                                     </button>
                                                     <button
-                                                      onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'rejected'); }}
+                                                      onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'rejected_draft'); }}
                                                       style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                                                     >
                                                       Niet nu
