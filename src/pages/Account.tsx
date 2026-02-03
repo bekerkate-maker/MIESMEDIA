@@ -11,7 +11,10 @@ function formatDateNL(dateString?: string, long: boolean = false): string {
   if (long) {
     return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
   }
-  return date.toLocaleDateString('nl-NL');
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
 }
 
 const Account: React.FC = () => {
@@ -513,10 +516,10 @@ const Account: React.FC = () => {
   return (
     <div style={{ minHeight: '100vh', background: '#E5DDD5', fontFamily: 'system-ui, -apple-system, sans-serif', display: 'flex', flexDirection: 'column' }}>
       <ClientLogoBanner />
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '32px 40px 16px 40px', position: 'relative', zIndex: 50, boxSizing: 'border-box' }}>
+      <div className="account-header-container" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '32px 40px 16px 40px', position: 'relative', zIndex: 50, boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{ fontSize: 13, color: '#6B7280', fontWeight: 500, textTransform: 'capitalize' }}>
-            {new Date().toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'long' })}
+            {formatDateNL(new Date().toISOString())}
           </div>
           <h2 style={{ fontSize: 24, color: '#1F2B4A', margin: 0, fontWeight: 700 }}>
             {profile?.first_name ? `Welkom ${profile.first_name}!` : 'Mijn Account'}
@@ -529,6 +532,7 @@ const Account: React.FC = () => {
         <div ref={menuRef} style={{ position: 'relative', marginTop: 4 }}>
           <button
             onClick={() => setShowMenu(!showMenu)}
+            className="account-icon-btn"
             style={{
               background: 'transparent',
               border: 'none',
@@ -540,7 +544,7 @@ const Account: React.FC = () => {
               color: '#1F2B4A'
             }}
           >
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="account-icon-svg">
               <circle cx="12" cy="8" r="4" />
               <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
             </svg>
@@ -624,7 +628,7 @@ const Account: React.FC = () => {
       <div style={{ padding: '0 40px' }}>
         <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', width: '100%' }} />
       </div>
-      <main style={{ maxWidth: '100%', margin: 0, padding: '40px 40px', width: '100%', boxSizing: 'border-box' }}>
+      <main style={{ maxWidth: '100%', margin: 0, padding: '40px 40px', width: '100%', boxSizing: 'border-box', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
 
 
         {/* RECHTERKOLOM: Shoots */}
@@ -690,7 +694,7 @@ const Account: React.FC = () => {
                             <div>
                               <div className="card-title">{reg.shoots?.title}</div>
                               <div className="card-date">
-                                {reg.shoots?.shoot_date ? new Date(reg.shoots.shoot_date).toLocaleDateString('nl-NL') : 'Datum onbekend'}
+                                {reg.shoots?.shoot_date ? formatDateNL(reg.shoots.shoot_date) : 'Datum onbekend'}
                                 {reg.shoots?.time && ` • ${reg.shoots.time}`}
                               </div>
                               <div className="card-location">{reg.shoots?.location}</div>
@@ -756,7 +760,7 @@ const Account: React.FC = () => {
                             <div>
                               <div className="card-title">{reg.shoots?.title || 'Naamloze shoot'}</div>
                               <div className="card-date">
-                                {reg.shoots?.shoot_date ? new Date(reg.shoots.shoot_date).toLocaleDateString('nl-NL') : 'Datum onbekend'}
+                                {reg.shoots?.shoot_date ? formatDateNL(reg.shoots.shoot_date) : 'Datum onbekend'}
                                 {reg.shoots?.time && ` • ${reg.shoots.time}`}
                               </div>
                               <div className="card-location">{reg.shoots?.location}</div>
@@ -885,7 +889,7 @@ const Account: React.FC = () => {
       {/* FOOTER BANNER: OPEN SHOOTS */}
       {
         openShoots.length > 0 && (
-          <div style={{ width: '100%', padding: '20px 0 40px 0', marginTop: 0 }}>
+          <div style={{ width: '100%', padding: '20px 0 0 0', marginTop: 'auto' }}>
             <h3 style={{ fontSize: 20, color: '#1F2B4A', marginBottom: 8, paddingLeft: 20 }}>
               Bekijk openstaande shoots
             </h3>
@@ -1271,6 +1275,22 @@ const Account: React.FC = () => {
             
             /* Specific fix for the absolute positioned badge in desktop */
             /* We removed position absolute in JS, controlled by class now */
+
+            .account-header-container {
+              padding: 24px 20px 16px 20px !important;
+            }
+            
+            .account-icon-btn {
+              padding: 4px !important;
+              margin-top: -4px;
+              margin-right: -8px; /* Push more to right */
+            }
+            
+            .account-icon-svg {
+              width: 26px !important;
+              height: 26px !important;
+              stroke-width: 2 !important; /* Slightly thinner stroke for smaller icon */
+            }
           }
 
           .hide-scrollbar::-webkit-scrollbar {

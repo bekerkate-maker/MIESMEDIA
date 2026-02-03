@@ -76,13 +76,14 @@ const ClientLogoBanner: React.FC = () => {
           100% { transform: translateX(-50%); }
         }
 
-        @media (max-width: 768px) {
-          .logo-banner { min-height: 45px; }
-          .logo-small { height: 18px; }
-          .logo-normal { height: 28px; }
-          .logo-large { height: 35px; }
-          .logo-xlarge { height: 42px; }
-          .logo-xxlarge { height: 35px; transform: scale(2.0); }
+@media (max-width: 768px) {
+          .logo-banner { min-height: 55px; } /* Increased min-height */
+          /* Adjusted mobile sizes to be larger */
+          .logo-small { height: 24px; } 
+          .logo-normal { height: 36px; }
+          .logo-large { height: 44px; }
+          .logo-xlarge { height: 50px; }
+          .logo-xxlarge { height: 42px; transform: scale(2.0); }
         }
       `}</style>
     </div>

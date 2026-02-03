@@ -210,10 +210,60 @@ export default function ShootRegistration() {
       {/* Logo Banner */}
       <ClientLogoBanner />
 
+      <div style={{
+        position: 'absolute',
+        top: 100,
+        left: 20,
+        right: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 10
+      }}>
+        <button
+          onClick={() => window.location.href = '/'}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            cursor: 'pointer',
+            padding: 8,
+            color: '#1F2B4A',
+            fontSize: 14,
+            fontWeight: 600
+          }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Terug
+        </button>
+
+        <button
+          onClick={() => window.location.href = '/account'}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            padding: 8
+          }}
+          aria-label="Inloggen of account wijzigen"
+        >
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
+          </svg>
+        </button>
+      </div>
+
       <div className="main-container">
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-          <MiesLogo size={80} />
-        </div>
+
         <div className="invite-card">
           {shoot && (
             <div className="card-header-split">
@@ -441,7 +491,7 @@ const styles = `
 .main-container {
   padding: 40px 20px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 120px auto 0;
   display: flex;
   flex-direction: column;
   items-align: center;
