@@ -54,9 +54,6 @@ export default function Login() {
     }}>
       <div style={{ width: '100%', maxWidth: 480 }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-            <MiesLogo size={90} />
-          </div>
           <h1 style={{ fontSize: 42, fontWeight: 700, margin: 0, color: '#1F2B4A', marginBottom: 8 }}>
             Welkom terug
           </h1>

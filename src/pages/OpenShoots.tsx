@@ -114,11 +114,11 @@ const OpenShoots: React.FC = () => {
                 </div>
                 <h3 className="shoot-title">{shoot.title}</h3>
                 <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 14, color: '#6B7280', display: 'grid', gridTemplateColumns: '32px 1fr', rowGap: '2px' }}>
-                    <span key="date-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
-                    <span key="date" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{formatDateNL(shoot.shoot_date || shoot.date)}</span>
-                    <span key="time-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
-                    <span key="time" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{(() => {
+                  <div className="shoot-metadata">
+                    <span className="metadata-icon">•</span>
+                    <span className="metadata-text">{formatDateNL(shoot.shoot_date || shoot.date)}</span>
+                    <span className="metadata-icon">•</span>
+                    <span className="metadata-text">{(() => {
                       if (shoot.start_time && shoot.end_time) {
                         return `${shoot.start_time.substring(0, 5)} - ${shoot.end_time.substring(0, 5)}`;
                       }
@@ -132,12 +132,12 @@ const OpenShoots: React.FC = () => {
                     })()}</span>
                     {shoot.location && (
                       <>
-                        <span key="loc-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
-                        <span key="loc" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{shoot.location}</span>
+                        <span className="metadata-icon">•</span>
+                        <span className="metadata-text">{shoot.location}</span>
                       </>
                     )}
-                    <span key="comp-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
-                    <span key="comp" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{(() => {
+                    <span className="metadata-icon">•</span>
+                    <span className="metadata-text">{(() => {
                       if (shoot.compensation_type === 'financiële vergoeding') return `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
                       if (shoot.compensation_type === 'cadeaubon') return `Cadeaubon t.w.v. €${shoot.compensation_amount}${shoot.compensation_business_name ? ` bij ${shoot.compensation_business_name}` : ''}`;
                       if (shoot.compensation_type === 'geen') return `Geen vergoeding`;
@@ -146,8 +146,8 @@ const OpenShoots: React.FC = () => {
                       if (shoot.compensation_type === 'eten') return `Eten betaald`;
                       return 'Geen vergoeding ingevuld';
                     })()}</span>
-                    <span key="spots-emoji" style={{ textAlign: 'center', height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#1F2B4A' }}>•</span>
-                    <span key="spots" style={{ height: 24, display: 'flex', alignItems: 'center' }}>{typeof shoot.spots !== 'undefined' ? `${shoot.spots} plekken beschikbaar` : 'Aantal plekken onbekend'}</span>
+                    <span className="metadata-icon">•</span>
+                    <span className="metadata-text">{typeof shoot.spots !== 'undefined' ? `${shoot.spots} plekken beschikbaar` : 'Aantal plekken onbekend'}</span>
                   </div>
                 </div>
                 {shoot.spots_available !== undefined && (
@@ -156,7 +156,7 @@ const OpenShoots: React.FC = () => {
                   </div>
                 )}
                 {shoot.description && (
-                  <p style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.6 }}>
+                  <p className="shoot-description">
                     {(() => {
                       // Verwijder de titel uit de beschrijving als die voorkomt
                       if (shoot.description && shoot.title && shoot.description.toLowerCase().startsWith(shoot.title.toLowerCase())) {
@@ -167,22 +167,15 @@ const OpenShoots: React.FC = () => {
                     })()}
                   </p>
                 )}
-                <div style={{ marginTop: 12, marginBottom: 12 }}>
+                <div className="shoot-links">
                   {shoot.moodboard_link && (
                     <a
                       href={shoot.moodboard_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{
-                        display: 'block',
-                        fontSize: 15,
-                        color: '#2563eb', // blue-600
-                        textDecoration: 'none',
-                        fontWeight: 500,
-                        marginBottom: 6
-                      }}
+                      className="shoot-link"
                     >
-                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> Bekijk moodboard →
+                      <span className="link-icon">•</span> Bekijk moodboard →
                     </a>
                   )}
                   {shoot.client_website && (
@@ -190,16 +183,9 @@ const OpenShoots: React.FC = () => {
                       href={shoot.client_website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{
-                        display: 'block',
-                        fontSize: 15,
-                        color: '#2563EB',
-                        textDecoration: 'none',
-                        fontWeight: 500,
-                        marginBottom: 6
-                      }}
+                      className="shoot-link"
                     >
-                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> Bekijk website →
+                      <span className="link-icon">•</span> Bekijk website →
                     </a>
                   )}
                   {shoot.client_instagram && (
@@ -207,28 +193,13 @@ const OpenShoots: React.FC = () => {
                       href={`https://instagram.com/${shoot.client_instagram.replace('@', '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{
-                        fontSize: 15,
-                        color: '#2563EB',
-                        marginBottom: 6,
-                        textDecoration: 'none',
-                        cursor: 'pointer',
-                        transition: 'color 0.2s, text-decoration 0.2s'
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.textDecoration = 'underline';
-                        e.currentTarget.style.color = '#2B3E72';
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.textDecoration = 'none';
-                        e.currentTarget.style.color = '#2563EB';
-                      }}
+                      className="shoot-link instagram-link"
                     >
-                      <span style={{ fontSize: 18, color: '#1F2B4A', marginRight: 8 }}>•</span> {shoot.client_instagram.startsWith('@') ? shoot.client_instagram : '@' + shoot.client_instagram}
+                      <span className="link-icon">•</span> {shoot.client_instagram.startsWith('@') ? shoot.client_instagram : '@' + shoot.client_instagram}
                     </a>
                   )}
                 </div>
-                <div style={{ marginTop: 'auto' }}>
+                <div>
                   {(() => {
                     const isExpired = shoot.shoot_date && new Date(shoot.shoot_date) < new Date();
                     return (
@@ -253,7 +224,46 @@ const OpenShoots: React.FC = () => {
           </div>
         )}
       </div>
-      <style>{`.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover:not(.disabled){background:#1F2B4A;transform:translateY(-2px)}.primary-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6;transform:none !important}.primary-btn.disabled:hover{background:#9CA3AF;transform:none}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.shoots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:1200px;margin:0 auto}.shoot-card{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0 0 24px 0;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow 0.2s;min-width:0}.shoot-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13)}.shoot-banner img{width:100%;height:180px;object-fit:cover;display:block}.shoot-card-content{padding:24px;display:flex;flex-direction:column;flex:1}.shoot-client{font-size:13px;color:#2B3E72;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}.shoot-title{font-size:22px;font-weight:700;color:#1F2B4A;margin-bottom:8px}.primary-btn{margin-top:auto}.shoot-card .primary-btn{margin-top:16px}.shoot-card .primary-btn:active:not(.disabled){background:#1F2B4A}.shoot-card .primary-btn:focus:not(.disabled){outline:2px solid #1F2B4A}@media(max-width:1024px){.shoots-grid{grid-template-columns:1fr 1fr}}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.shoots-grid{grid-template-columns:1fr}.shoot-card-content{padding:16px}.shoot-title{font-size:18px}.shoot-banner img{height:120px}}`}</style>
+      <style>{`.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover:not(.disabled){background:#1F2B4A;transform:translateY(-2px)}.primary-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6;transform:none !important}.primary-btn.disabled:hover{background:#9CA3AF;transform:none}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.shoots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:1200px;margin:0 auto}.shoot-card{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0 0 24px 0;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow 0.2s;min-width:0}.shoot-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13)}.shoot-banner img{width:100%;height:180px;object-fit:cover;display:block}.shoot-card-content{padding:24px;display:flex;flex-direction:column;flex:1}.shoot-client{font-size:13px;color:#2B3E72;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}.shoot-title{font-size:22px;font-weight:700;color:#1F2B4A;margin-bottom:8px}
+      
+      /* Metadata Styles */
+      .shoot-metadata { font-size: 14px; color: #6B7280; display: grid; grid-template-columns: 32px 1fr; row-gap: 2px; }
+      .metadata-icon { text-align: center; min-height: 24px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #1F2B4A; }
+      .metadata-text { min-height: 24px; display: flex; align-items: center; line-height: 1.3; }
+      .shoot-description { font-size: 14px; color: #4B5563; line-height: 1.6; }
+      .shoot-links { margin-top: auto; margin-bottom: 12px; padding-top: 12px; }
+      .shoot-link { display: block; fontSize: 15px; color: #2563eb; text-decoration: none; font-weight: 500; margin-bottom: 6px; }
+      .link-icon { font-size: 18px; color: #1F2B4A; margin-right: 8px; }
+      .instagram-link { transition: color 0.2s, text-decoration 0.2s; cursor: pointer; }
+      .instagram-link:hover { text-decoration: underline; color: #2B3E72; }
+
+      .primary-btn{margin-top:auto}.shoot-card .primary-btn{margin-top:16px}.shoot-card .primary-btn:active:not(.disabled){background:#1F2B4A}.shoot-card .primary-btn:focus:not(.disabled){outline:2px solid #1F2B4A}
+      
+      @media(max-width:1024px){.shoots-grid{grid-template-columns:1fr 1fr}}
+      
+      @media(max-width:768px){
+        .content-section{padding:20px 16px}
+        .header-section{margin-bottom:24px}
+        .main-title{font-size:24px;line-height:1.3}
+        .subtitle{font-size:14px}
+        .primary-btn{padding:8px 12px;font-size:12px; width: 100% !important;}
+        .shoots-grid{grid-template-columns:1fr 1fr; gap: 16px}
+        .shoot-card{border-radius: 12px;}
+        .shoot-card-content{padding:10px}
+        .shoot-title{font-size:15px; margin-bottom: 4px; line-height: 1.2}
+        .shoot-client{font-size: 10px; margin-bottom: 4px;}
+        .shoot-banner img{height:110px}
+        
+        /* Compact Metadata for Mobile */
+        .shoot-metadata { font-size: 11px; grid-template-columns: 16px 1fr; row-gap: 0; }
+        .metadata-icon { font-size: 14px; min-height: 18px; }
+        .metadata-text { min-height: 18px; }
+        .shoot-description { font-size: 11px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .shoot-links { margin-bottom: 8px; padding-top: 8px; }
+        .shoot-link { font-size: 11px; margin-bottom: 2px; }
+        .link-icon { font-size: 12px; margin-right: 4px; }
+      }
+      `}</style>
     </div>
   );
 };

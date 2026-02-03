@@ -33,9 +33,9 @@ const Account: React.FC = () => {
   const [selectedShoot, setSelectedShoot] = useState<any>(null);
 
   // Collapsible sections state
-  const [isAgendaOpen, setIsAgendaOpen] = useState(true);
-  const [isPendingOpen, setIsPendingOpen] = useState(true);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [isAgendaOpen, setIsAgendaOpen] = useState(false);
+  const [isPendingOpen, setIsPendingOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // Login form state
   const [email, setEmail] = useState('');
@@ -231,8 +231,12 @@ const Account: React.FC = () => {
     navigate('/');
   };
 
-  const handleCancelRegistration = async (registrationId: string, shootTitle: string) => {
-    if (!confirm(`Weet je zeker dat je je wilt afmelden voor "${shootTitle}"?`)) {
+  const handleCancelRegistration = async (registrationId: string, shootTitle: string, isRejection: boolean = false) => {
+    const message = isRejection
+      ? `Weet je zeker dat je "${shootTitle}" uit je geschiedenis wilt verwijderen?`
+      : `Weet je zeker dat je je wilt afmelden voor "${shootTitle}"?`;
+
+    if (!confirm(message)) {
       return;
     }
 
@@ -249,10 +253,10 @@ const Account: React.FC = () => {
         await fetchMyShoots(profile.id);
       }
 
-      alert('Je bent succesvol afgemeld voor deze shoot.');
+      alert(isRejection ? 'Shoot succesvol verwijderd uit geschiedenis.' : 'Je bent succesvol afgemeld voor deze shoot.');
     } catch (err) {
       console.error('Error canceling registration:', err);
-      alert('Er ging iets mis bij het afmelden. Probeer het opnieuw.');
+      alert('Er ging iets mis. Probeer het opnieuw.');
     }
   };
 
@@ -632,12 +636,13 @@ const Account: React.FC = () => {
 
 
 
-          <div className="shoots-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, alignItems: 'start' }}>
+          <div className="shoots-grid">
             {/* Bevestigd / Toekomstig (Agenda) - Nu bovenaan */}
-            <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <div className="section-card">
               <h3
                 onClick={() => setIsAgendaOpen(!isAgendaOpen)}
-                style={{ marginTop: 0, color: '#1F2B4A', marginBottom: isAgendaOpen ? 16 : 0, display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}
+                className="section-title"
+                style={{ marginBottom: isAgendaOpen ? 16 : 0 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2B4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -669,47 +674,29 @@ const Account: React.FC = () => {
                       {futureShoots.map(reg => (
                         <div
                           key={reg.id}
-                          style={{ ...shootCardStyle, cursor: 'pointer', transition: 'all 0.2s', position: 'relative' }}
+                          className="account-shoot-card"
                           onClick={() => setSelectedShoot(reg.shoots)}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'none';
-                            e.currentTarget.style.boxShadow = 'none';
-                          }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1 }}>
+                          <div className="card-content">
                             {reg.shoots?.banner_photo_url ? (
                               <img
                                 src={reg.shoots.banner_photo_url}
                                 alt={reg.shoots.title}
-                                style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
+                                className="card-image"
                               />
                             ) : (
-                              <div style={{ width: 80, height: 60, background: '#E5E7EB', borderRadius: 8, flexShrink: 0 }} />
+                              <div className="card-image-placeholder" />
                             )}
                             <div>
-                              <div style={{ fontWeight: 600, color: '#1F2B4A' }}>{reg.shoots?.title}</div>
-                              <div style={{ fontSize: 13, color: '#6B7280' }}>
+                              <div className="card-title">{reg.shoots?.title}</div>
+                              <div className="card-date">
                                 {reg.shoots?.shoot_date ? new Date(reg.shoots.shoot_date).toLocaleDateString('nl-NL') : 'Datum onbekend'}
                                 {reg.shoots?.time && ` • ${reg.shoots.time}`}
                               </div>
-                              <div style={{ fontSize: 13, color: '#4B5563', marginTop: 2 }}>{reg.shoots?.location}</div>
+                              <div className="card-location">{reg.shoots?.location}</div>
                             </div>
                           </div>
-                          <span style={{
-                            fontSize: 12,
-                            padding: '4px 12px',
-                            background: '#DCFCE7',
-                            color: '#16A34A',
-                            borderRadius: 99,
-                            fontWeight: 500,
-                            position: 'absolute',
-                            top: 16,
-                            right: 16
-                          }}>Bevestigd</span>
+                          <span className="status-badge confirmed">Bevestigd</span>
                         </div>
                       ))}
                     </div>
@@ -719,10 +706,11 @@ const Account: React.FC = () => {
             </div>
 
             {/* Aangemeld (In afwachting) */}
-            <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <div className="section-card">
               <h3
                 onClick={() => setIsPendingOpen(!isPendingOpen)}
-                style={{ marginTop: 0, color: '#1F2B4A', marginBottom: isPendingOpen ? 16 : 0, display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}
+                className="section-title"
+                style={{ marginBottom: isPendingOpen ? 16 : 0 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2B4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
@@ -752,68 +740,37 @@ const Account: React.FC = () => {
                       {pendingShoots.map(reg => (
                         <div
                           key={reg.id}
-                          style={{
-                            ...shootCardStyle,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            position: 'relative'
-                          }}
+                          className="account-shoot-card"
                           onClick={() => setSelectedShoot(reg.shoots)}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'none';
-                            e.currentTarget.style.boxShadow = 'none';
-                          }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1 }}>
+                          <div className="card-content">
                             {reg.shoots?.banner_photo_url ? (
                               <img
                                 src={reg.shoots.banner_photo_url}
                                 alt={reg.shoots.title}
-                                style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
+                                className="card-image"
                               />
                             ) : (
-                              <div style={{ width: 80, height: 60, background: '#E5E7EB', borderRadius: 8, flexShrink: 0 }} />
+                              <div className="card-image-placeholder" />
                             )}
                             <div>
-                              <div style={{ fontWeight: 600, color: '#1F2B4A' }}>{reg.shoots?.title || 'Naamloze shoot'}</div>
-                              <div style={{ fontSize: 13, color: '#6B7280' }}>
+                              <div className="card-title">{reg.shoots?.title || 'Naamloze shoot'}</div>
+                              <div className="card-date">
                                 {reg.shoots?.shoot_date ? new Date(reg.shoots.shoot_date).toLocaleDateString('nl-NL') : 'Datum onbekend'}
                                 {reg.shoots?.time && ` • ${reg.shoots.time}`}
                               </div>
-                              <div style={{ fontSize: 13, color: '#4B5563', marginTop: 2 }}>{reg.shoots?.location}</div>
+                              <div className="card-location">{reg.shoots?.location}</div>
                             </div>
                           </div>
 
-                          <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontSize: 12, padding: '4px 12px', background: '#FEF3C7', color: '#D97706', borderRadius: 99, fontWeight: 500 }}>Aangemeld</span>
+                          <div className="status-badge-container">
+                            <span className="status-badge pending">Aangemeld</span>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleCancelRegistration(reg.id, reg.shoots?.title || 'deze shoot');
                               }}
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                padding: 8,
-                                color: '#DC2626',
-                                borderRadius: '50%',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s',
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#FEE2E2';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.color = '#DC2626';
-                              }}
+                              className="cancel-btn"
                               title="Meld je af"
                             >
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -831,10 +788,11 @@ const Account: React.FC = () => {
             </div>
 
             {/* Afgerond */}
-            <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', opacity: 0.8 }}>
+            <div className="section-card" style={{ opacity: 0.8 }}>
               <h3
                 onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-                style={{ marginTop: 0, color: '#1F2B4A', marginBottom: isHistoryOpen ? 16 : 0, display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}
+                className="section-title"
+                style={{ marginBottom: isHistoryOpen ? 16 : 0 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2B4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -864,47 +822,54 @@ const Account: React.FC = () => {
                       {pastShoots.map(reg => (
                         <div
                           key={reg.id}
-                          style={{ ...shootCardStyle, cursor: 'pointer', transition: 'all 0.2s', position: 'relative' }}
+                          className="account-shoot-card"
                           onClick={() => setSelectedShoot(reg.shoots)}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'none';
-                            e.currentTarget.style.boxShadow = 'none';
-                          }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1 }}>
+                          <div className="card-content">
                             {reg.shoots?.banner_photo_url ? (
                               <img
                                 src={reg.shoots.banner_photo_url}
                                 alt={reg.shoots.title}
-                                style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
+                                className="card-image"
                               />
                             ) : (
-                              <div style={{ width: 80, height: 60, background: '#E5E7EB', borderRadius: 8, flexShrink: 0 }} />
+                              <div className="card-image-placeholder" />
                             )}
                             <div>
-                              <div style={{ fontWeight: 600, color: '#1F2B4A' }}>{reg.shoots?.title}</div>
+                              <div className="card-title">{reg.shoots?.title}</div>
                               <div style={{ fontSize: 13, color: '#6B7280' }}>
                                 {reg.shoots?.shoot_date ? new Date(reg.shoots.shoot_date).toLocaleDateString('nl-NL') : 'Datum onbekend'}
                               </div>
                             </div>
                           </div>
-                          <span style={{
-                            fontSize: 12,
-                            padding: '4px 12px',
-                            background: reg.status === 'rejected' ? '#FEE2E2' : '#F3F4F6',
-                            color: reg.status === 'rejected' ? '#DC2626' : '#6B7280',
-                            borderRadius: 99,
-                            fontWeight: 500,
-                            position: 'absolute',
-                            top: 16,
-                            right: 16
-                          }}>
-                            {reg.status === 'completed' ? 'Afgerond' : (reg.status === 'rejected' ? 'Niet geselecteerd' : 'Verlopen')}
-                          </span>
+
+                          {reg.status === 'rejected' ? (
+                            <div className="status-badge-container">
+                              <span className="status-badge rejected">
+                                Niet geselecteerd
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCancelRegistration(reg.id, reg.shoots?.title || 'deze shoot', true);
+                                }}
+                                className="cancel-btn"
+                                title="Verwijder uit geschiedenis"
+                              >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                              </button>
+                            </div>
+                          ) : (
+                            /* For non-rejected history items (completed/expired), just show the badge, possibly wrapped so layout is consistent if needed or just absolute/flexed as per css */
+                            <span
+                              className={`status-badge ${reg.status === 'rejected' ? 'rejected' : 'expired'}`}
+                            >
+                              {reg.status === 'completed' ? 'Afgerond' : (reg.status === 'rejected' ? 'Niet geselecteerd' : 'Verlopen')}
+                            </span>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -1160,9 +1125,154 @@ const Account: React.FC = () => {
       }
 
       <style>{`
-          @media (max-width: 1100px) {
-            .shoots-grid { grid-template-columns: 1fr !important; }
+          .shoots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            align-items: start;
           }
+
+          @media (max-width: 1100px) {
+            .shoots-grid {
+              grid-template-columns: 1fr !important;
+            }
+          }
+          
+          .section-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          }
+
+          .section-title {
+            margin-top: 0;
+            color: #1F2B4A;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 18px;
+            font-weight: 700;
+          }
+
+          .account-shoot-card {
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #FAFAFA;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+          }
+
+          .account-shoot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          }
+
+          .card-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+          }
+
+          .card-image {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+          }
+
+          .card-image-placeholder {
+            width: 80px;
+            height: 60px;
+            background: #E5E7EB;
+            border-radius: 8px;
+            flex-shrink: 0;
+          }
+
+          .card-title {
+            font-weight: 600;
+            color: #1F2B4A;
+            font-size: 15px;
+          }
+
+          .card-date, .card-location {
+            font-size: 13px;
+            color: #6B7280;
+          }
+          .card-location {
+            margin-top: 2px;
+            color: #4B5563;
+          }
+
+          .status-badge-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .status-badge {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-weight: 500;
+            white-space: nowrap;
+          }
+/* ... skipped lines ... */
+          .cancel-btn {
+            background: transparent;
+            border: none;
+            padding: 8px;
+            color: #DC2626;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+          }
+/* ... skipped lines ... */
+          @media (max-width: 768px) {
+            .content-section { padding: 20px 16px }
+            .section-card { padding: 16px; }
+            .section-title { font-size: 16px; }
+
+            .account-shoot-card {
+              flex-direction: column;
+              align-items: flex-start;
+              gap: 12px;
+            }
+
+            .card-content {
+              width: 100%;
+            }
+
+            .status-badge-container {
+              width: 100%;
+              justify-content: space-between;
+              border-top: 1px solid #E5E7EB;
+              padding-top: 6px;
+              margin-top: 0px;
+            }
+
+            /* For confirmed/history badges within card */
+            .account-shoot-card > .status-badge {
+              align-self: flex-start;
+              margin-top: 4px;
+            }
+            
+            /* Specific fix for the absolute positioned badge in desktop */
+            /* We removed position absolute in JS, controlled by class now */
+          }
+
           .hide-scrollbar::-webkit-scrollbar {
             display: none;
           }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
 import ClientLogoBanner from '@/components/ClientLogoBanner';
+import { X, Check } from 'lucide-react';
 
 import PDFViewer from '@/components/PDFViewer';
 
@@ -357,11 +358,38 @@ export default function RegisterModel() {
                 />
               </div>
               <div className="form-field">
-                <label>Hoofdfoto * {photoFile && '✅'}</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  Hoofdfoto * {photoFile && <Check size={18} color="#1F2B4A" />}
+                </label>
                 <input id="photo-upload-input" type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
-                <button type="button" onClick={handleFileUpload} className="upload-btn">
-                  {photoFile ? 'Wijzig hoofdfoto' : 'Upload hoofdfoto'}
-                </button>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button type="button" onClick={handleFileUpload} className="upload-btn" style={{ flex: 1 }}>
+                    {photoFile ? 'Wijzig hoofdfoto' : 'Upload hoofdfoto'}
+                  </button>
+                  {photoFile && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhotoFile(null);
+                        setPhotoPreview(null);
+                        // Reset file input value so same file can be selected again if needed
+                        const input = document.getElementById('photo-upload-input') as HTMLInputElement;
+                        if (input) input.value = '';
+                      }}
+                      className="upload-btn"
+                      style={{
+                        width: 'auto',
+                        background: '#DC2626',
+                        color: '#fff',
+                        padding: '12px 16px',
+                        flex: '0 0 auto'
+                      }}
+                      aria-label="Verwijder hoofdfoto"
+                    >
+                      <X size={20} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -549,4 +577,6 @@ export default function RegisterModel() {
   );
 }
 
-const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#1F2B4A;font-weight:700}.success-text{font-size:20px;color:#1F2B4A;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;align-items:center;animation:scroll 240s linear infinite;will-change:transform;width:max-content}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#1F2B4A;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#9CA3AF}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#1F2B4A;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #6B7280}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:10px;cursor:pointer;flex-shrink:0;accent-color:#2B3E72}.checkbox-label span{font-size:15px;color:#1F2B4A;line-height:1.6}.submit-btn{width:100%;padding:16px;background:#2B3E72;color:#fff;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 12px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}}`;
+const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#1F2B4A;font-weight:700}.success-text{font-size:20px;color:#1F2B4A;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;align-items:center;animation:scroll 240s linear infinite;will-change:transform;width:max-content}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#1F2B4A;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#9CA3AF}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#1F2B4A;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #6B7280}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:10px;cursor:pointer;flex-shrink:0;accent-color:#2B3E72}.checkbox-label span{font-size:15px;color:#1F2B4A;line-height:1.6}
+.mobile-text { display: none; }
+.submit-btn{width:100%;padding:16px;background:#2B3E72;color:#fff;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 20px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}.checkbox-label span{font-size:9px !important;line-height:1.1 !important}}`

@@ -886,7 +886,7 @@ export default function ManageShoots() {
                 Alle shoots ({shoots.length})
               </h2>
 
-              <div style={{
+              <div className="manage-shoots-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
                 gap: 24
@@ -918,6 +918,7 @@ export default function ManageShoots() {
                             borderTopLeftRadius: 12,
                             borderTopRightRadius: 12
                           }}
+                          className="shoot-banner-container"
                           onClick={() => setPreviewImage(shoot.banner_photo_url)}
                           title="Klik voor voorbeeld"
                         >
@@ -933,7 +934,7 @@ export default function ManageShoots() {
                           />
                         </div>
                       )}
-                      <div style={{
+                      <div className="shoot-card-content" style={{
                         padding: 24,
                         textAlign: 'left',
                         flex: 1,
@@ -963,7 +964,7 @@ export default function ManageShoots() {
                             <div style={{ fontSize: 12, color: statusLabel === 'verlopen' ? '#DC2626' : '#10B981', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase' }}>{statusLabel}</div>
                           );
                         })()}
-                        <h3 style={{
+                        <h3 className="shoot-title" style={{
                           fontSize: 20,
                           fontWeight: 600,
                           color: '#1F2B4A',
@@ -971,7 +972,7 @@ export default function ManageShoots() {
                         }}>
                           {shoot.title || shoot.description?.split('\n\n')[0]}
                         </h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                        <div className="shoot-details" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
                           <div style={{
                             fontSize: 14,
                             color: '#6B7280',
@@ -1031,7 +1032,7 @@ export default function ManageShoots() {
                             </div>
                           )}
                         </div>
-                        <p style={{
+                        <p className="shoot-description" style={{
                           fontSize: 14,
                           color: '#4B5563',
                           lineHeight: 1.6,
@@ -1104,7 +1105,7 @@ export default function ManageShoots() {
 
 
                         {/* Footer Actions Row */}
-                        <div style={{
+                        <div className="shoot-actions" style={{
                           marginTop: 10,
                           display: 'flex',
                           alignItems: 'center',
@@ -1206,320 +1207,388 @@ export default function ManageShoots() {
                           </div>
                         </div>
 
-                        {/* Expandable Registrations List (Full Width Below) */}
-                        {expandedShoot === shoot.id && (
-                          <div
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Add global styles for mobile responsiveness */}
+              <style>{`
+                @media (max-width: 768px) {
+                  .manage-shoots-grid {
+                    grid-template-columns: 1fr 1fr !important;
+                    gap: 16px !important;
+                  }
+                  /* Override inline styles for logo */
+                  .manage-page-logo img {
+                    height: 100px !important;
+                    width: auto !important;
+                  }
+                  /* Compact card styles for mobile */
+                  .shoot-card-content {
+                    padding: 12px !important;
+                  }
+                  .shoot-banner-container {
+                     height: 110px !important;
+                  }
+                  .shoot-title {
+                    font-size: 15px !important;
+                    margin-bottom: 6px !important;
+                    line-height: 1.2 !important;
+                  }
+                  .shoot-details {
+                    gap: 4px !important;
+                    margin-bottom: 8px !important;
+                  }
+                  .shoot-details > div {
+                    font-size: 11px !important;
+                    gap: 4px !important;
+                  }
+                  .shoot-details span {
+                    font-size: 12px !important;
+                  }
+                  .shoot-description {
+                    font-size: 11px !important;
+                    line-height: 1.3 !important;
+                    margin-bottom: 12px !important;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                  }
+                  .shoot-actions {
+                    flex-direction: column;
+                    align-items: stretch !important;
+                    gap: 8px !important;
+                  }
+                  .shoot-actions button {
+                    font-size: 11px !important;
+                    padding: 6px 10px !important;
+                    justify-content: center;
+                  }
+                  .shoot-actions > div {
+                     width: 100%;
+                     display: grid;
+                     grid-template-columns: 1fr 1fr;
+                  }
+                }
+              `}</style>
+
+              {/* Expandable Registrations List (Full Width Below) */}
+              {expandedShoot === shoot.id && (
+                <div
+                  style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 9999,
+                    background: 'rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  onClick={() => setExpandedShoot(null)}
+                >
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      width: '100%',
+                      maxWidth: 1000,
+                      maxHeight: '85vh',
+                      background: '#fff',
+                      borderRadius: 16,
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden',
+                      margin: 20
+                    }}
+                  >
+                    {/* Header with Shoot Info */}
+                    <div style={{
+                      padding: '24px 32px',
+                      background: '#F9FAFB',
+                      borderBottom: '1px solid #E5E7EB',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start'
+                    }}>
+                      <div>
+                        <div style={{ marginBottom: 16 }}>
+                          <div style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: '#2B3E72',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px',
+                            marginBottom: 4
+                          }}>
+                            {shoot.client_name || shoot.client}
+                          </div>
+                          <h2 style={{ fontSize: 24, fontWeight: 700, color: '#1F2B4A', margin: 0 }}>
+                            {shoot.title || shoot.description?.split('\n\n')[0]}
+                          </h2>
+                        </div>
+                        <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#6B7280', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {shoot.location}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {formatDateNL(shoot.shoot_date || shoot.date)}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ paddingTop: 0 }}>
+                        {getRegistrationsForShoot(shoot.id).some(r => ['selected', 'rejected_draft'].includes(r.status)) && (
+                          <button
+                            onClick={async () => {
+                              if (!window.confirm('Weet je zeker dat je alle concept-wijzigingen wilt doorvoeren? Dit maakt ze zichtbaar voor talenten.')) return;
+
+                              const drafts = getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status));
+
+                              for (const draft of drafts) {
+                                const newStatus = draft.status === 'selected' ? 'accepted' : 'rejected';
+                                await updateRegistrationStatus(draft.id, newStatus);
+                              }
+                            }}
                             style={{
-                              position: 'fixed',
+                              padding: '8px 16px',
+                              background: '#2563EB',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: 8,
+                              fontSize: 14,
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Push naar talentaccount ({getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status)).length})
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Registrations Board */}
+                    <div style={{ padding: '0 32px 32px 32px', overflowY: 'auto', flex: 1, background: '#F3F4F6' }}>
+                      {(() => {
+                        const shootRegistrations = getRegistrationsForShoot(shoot.id);
+
+                        const pending = shootRegistrations.filter(r => !r.status || r.status === 'pending');
+                        const accepted = shootRegistrations.filter(r => ['accepted', 'selected'].includes(r.status));
+                        const rejected = shootRegistrations.filter(r => ['rejected', 'rejected_draft'].includes(r.status));
+
+                        const Column = ({ title, items, status, color, bgColor }: any) => (
+                          <div style={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                            <div style={{
+                              position: 'sticky',
                               top: 0,
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              zIndex: 9999,
-                              background: 'rgba(0,0,0,0.5)',
-                              backdropFilter: 'blur(4px)',
+                              padding: '24px 0 16px 0',
+                              background: '#F3F4F6',
+                              zIndex: 10,
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                            onClick={() => setExpandedShoot(null)}
-                          >
-                            <div
-                              onClick={(e) => e.stopPropagation()}
-                              style={{
-                                width: '100%',
-                                maxWidth: 1000,
-                                maxHeight: '85vh',
-                                background: '#fff',
-                                borderRadius: 16,
-                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                overflow: 'hidden',
-                                margin: 20
-                              }}
-                            >
-                              {/* Header with Shoot Info */}
-                              <div style={{
-                                padding: '24px 32px',
-                                background: '#F9FAFB',
-                                borderBottom: '1px solid #E5E7EB',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start'
+                              justifyContent: 'space-between'
+                            }}>
+                              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1F2B4A', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+                                {title}
+                              </h3>
+                              <span style={{
+                                background: '#E5E7EB',
+                                color: '#4B5563',
+                                padding: '2px 8px',
+                                borderRadius: 12,
+                                fontSize: 12,
+                                fontWeight: 600
                               }}>
-                                <div>
-                                  <div style={{ marginBottom: 16 }}>
-                                    <div style={{
-                                      fontSize: 12,
-                                      fontWeight: 600,
-                                      color: '#2B3E72',
-                                      textTransform: 'uppercase',
-                                      letterSpacing: '0.5px',
-                                      marginBottom: 4
-                                    }}>
-                                      {shoot.client_name || shoot.client}
-                                    </div>
-                                    <h2 style={{ fontSize: 24, fontWeight: 700, color: '#1F2B4A', margin: 0 }}>
-                                      {shoot.title || shoot.description?.split('\n\n')[0]}
-                                    </h2>
-                                  </div>
-                                  <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#6B7280', flexWrap: 'wrap' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                      {shoot.location}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                      {formatDateNL(shoot.shoot_date || shoot.date)}
-                                    </div>
-                                  </div>
+                                {items.length}
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 24, flex: 1 }}>
+                              {items.length === 0 ? (
+                                <div style={{
+                                  padding: 24,
+                                  textAlign: 'center',
+                                  color: '#9CA3AF',
+                                  background: '#fff',
+                                  borderRadius: 12,
+                                  border: '1px dashed #E5E7EB',
+                                  fontSize: 13
+                                }}>
+                                  Geen talenten
                                 </div>
-                                <div style={{ paddingTop: 0 }}>
-                                  {getRegistrationsForShoot(shoot.id).some(r => ['selected', 'rejected_draft'].includes(r.status)) && (
-                                    <button
-                                      onClick={async () => {
-                                        if (!window.confirm('Weet je zeker dat je alle concept-wijzigingen wilt doorvoeren? Dit maakt ze zichtbaar voor talenten.')) return;
-
-                                        const drafts = getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status));
-
-                                        for (const draft of drafts) {
-                                          const newStatus = draft.status === 'selected' ? 'accepted' : 'rejected';
-                                          await updateRegistrationStatus(draft.id, newStatus);
-                                        }
-                                      }}
-                                      style={{
-                                        padding: '8px 16px',
-                                        background: '#2563EB',
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: 8,
-                                        fontSize: 14,
-                                        fontWeight: 600,
-                                        cursor: 'pointer'
-                                      }}
-                                    >
-                                      Push naar talentaccount ({getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status)).length})
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* Registrations Board */}
-                              <div style={{ padding: '0 32px 32px 32px', overflowY: 'auto', flex: 1, background: '#F3F4F6' }}>
-                                {(() => {
-                                  const shootRegistrations = getRegistrationsForShoot(shoot.id);
-
-                                  const pending = shootRegistrations.filter(r => !r.status || r.status === 'pending');
-                                  const accepted = shootRegistrations.filter(r => ['accepted', 'selected'].includes(r.status));
-                                  const rejected = shootRegistrations.filter(r => ['rejected', 'rejected_draft'].includes(r.status));
-
-                                  const Column = ({ title, items, status, color, bgColor }: any) => (
-                                    <div style={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                              ) : (
+                                items.map((reg: any) => (
+                                  <div key={reg.id} style={{
+                                    background: '#fff',
+                                    borderRadius: 12,
+                                    padding: 16,
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                    border: '1px solid #E5E7EB',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 12,
+                                    position: 'relative'
+                                  }}>
+                                    {['selected', 'rejected_draft'].includes(reg.status) && (
                                       <div style={{
-                                        position: 'sticky',
-                                        top: 0,
-                                        padding: '24px 0 16px 0',
+                                        position: 'absolute',
+                                        top: 8,
+                                        right: 8,
+                                        background: '#FEF3C7',
+                                        color: '#D97706',
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        padding: '2px 6px',
+                                        borderRadius: 4,
+                                        zIndex: 2
+                                      }}>
+                                        CONCEPT
+                                      </div>
+                                    )}
+                                    {['accepted', 'rejected'].includes(reg.status) && (
+                                      <div style={{
+                                        position: 'absolute',
+                                        top: 8,
+                                        right: 8,
+                                        background: '#DCFCE7',
+                                        color: '#166534',
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        padding: '2px 6px',
+                                        borderRadius: 4,
+                                        zIndex: 2
+                                      }}>
+                                        DEFINITIEF
+                                      </div>
+                                    )}
+                                    <div
+                                      style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: reg.model_id ? 'pointer' : 'default' }}
+                                      onClick={() => reg.model_id && window.open(`/dashboard?model=${reg.model_id}`, '_blank')}
+                                    >
+                                      <div style={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: '50%',
+                                        overflow: 'hidden',
                                         background: '#F3F4F6',
-                                        zIndex: 10,
+                                        border: '2px solid #fff',
+                                        flexShrink: 0,
                                         display: 'flex',
                                         alignItems: 'center',
-                                        justifyContent: 'space-between'
+                                        justifyContent: 'center'
                                       }}>
-                                        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1F2B4A', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
-                                          {title}
-                                        </h3>
-                                        <span style={{
-                                          background: '#E5E7EB',
-                                          color: '#4B5563',
-                                          padding: '2px 8px',
-                                          borderRadius: 12,
-                                          fontSize: 12,
-                                          fontWeight: 600
-                                        }}>
-                                          {items.length}
-                                        </span>
-                                      </div>
-
-                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 24, flex: 1 }}>
-                                        {items.length === 0 ? (
-                                          <div style={{
-                                            padding: 24,
-                                            textAlign: 'center',
-                                            color: '#9CA3AF',
-                                            background: '#fff',
-                                            borderRadius: 12,
-                                            border: '1px dashed #E5E7EB',
-                                            fontSize: 13
-                                          }}>
-                                            Geen talenten
-                                          </div>
+                                        {reg.models?.photo_url ? (
+                                          <img
+                                            src={
+                                              reg.models.photo_url.startsWith('http')
+                                                ? reg.models.photo_url
+                                                : supabase.storage.from('model-photos').getPublicUrl(reg.models.photo_url).data.publicUrl
+                                            }
+                                            alt={reg.name}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                          />
                                         ) : (
-                                          items.map((reg: any) => (
-                                            <div key={reg.id} style={{
-                                              background: '#fff',
-                                              borderRadius: 12,
-                                              padding: 16,
-                                              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                                              border: '1px solid #E5E7EB',
-                                              display: 'flex',
-                                              flexDirection: 'column',
-                                              gap: 12,
-                                              position: 'relative'
-                                            }}>
-                                              {['selected', 'rejected_draft'].includes(reg.status) && (
-                                                <div style={{
-                                                  position: 'absolute',
-                                                  top: 8,
-                                                  right: 8,
-                                                  background: '#FEF3C7',
-                                                  color: '#D97706',
-                                                  fontSize: 10,
-                                                  fontWeight: 700,
-                                                  padding: '2px 6px',
-                                                  borderRadius: 4,
-                                                  zIndex: 2
-                                                }}>
-                                                  CONCEPT
-                                                </div>
-                                              )}
-                                              {['accepted', 'rejected'].includes(reg.status) && (
-                                                <div style={{
-                                                  position: 'absolute',
-                                                  top: 8,
-                                                  right: 8,
-                                                  background: '#DCFCE7',
-                                                  color: '#166534',
-                                                  fontSize: 10,
-                                                  fontWeight: 700,
-                                                  padding: '2px 6px',
-                                                  borderRadius: 4,
-                                                  zIndex: 2
-                                                }}>
-                                                  DEFINITIEF
-                                                </div>
-                                              )}
-                                              <div
-                                                style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: reg.model_id ? 'pointer' : 'default' }}
-                                                onClick={() => reg.model_id && window.open(`/dashboard?model=${reg.model_id}`, '_blank')}
-                                              >
-                                                <div style={{
-                                                  width: 40,
-                                                  height: 40,
-                                                  borderRadius: '50%',
-                                                  overflow: 'hidden',
-                                                  background: '#F3F4F6',
-                                                  border: '2px solid #fff',
-                                                  flexShrink: 0,
-                                                  display: 'flex',
-                                                  alignItems: 'center',
-                                                  justifyContent: 'center'
-                                                }}>
-                                                  {reg.models?.photo_url ? (
-                                                    <img
-                                                      src={
-                                                        reg.models.photo_url.startsWith('http')
-                                                          ? reg.models.photo_url
-                                                          : supabase.storage.from('model-photos').getPublicUrl(reg.models.photo_url).data.publicUrl
-                                                      }
-                                                      alt={reg.name}
-                                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                    />
-                                                  ) : (
-                                                    <span style={{ fontSize: 10, color: '#2B3E72' }}>Geen foto</span>
-                                                  )}
-                                                </div>
-                                                <div style={{ flex: 1, minWidth: 0 }}>
-                                                  <div
-                                                    style={{ fontWeight: 600, color: '#1F2B4A', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                                                    onMouseEnter={(e) => reg.model_id && (e.currentTarget.style.textDecoration = 'underline')}
-                                                    onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-                                                  >
-                                                    {reg.name}
-                                                  </div>
-                                                  {reg.model_id && (
-                                                    <div style={{ fontSize: 11, color: '#2563EB' }}>Bekijk profiel</div>
-                                                  )}
-                                                </div>
-                                              </div>
-
-                                              {reg.message && (
-                                                <div style={{
-                                                  background: '#F9FAFB',
-                                                  padding: '8px 10px',
-                                                  borderRadius: 8,
-                                                  fontSize: 12,
-                                                  color: '#4B5563',
-                                                  fontStyle: 'italic'
-                                                }}>
-                                                  "{reg.message}"
-                                                </div>
-                                              )}
-
-                                              <div style={{ display: 'flex', gap: 8, paddingTop: 8, borderTop: '1px solid #F3F4F6' }}>
-                                                {status === 'pending' && (
-                                                  <>
-                                                    <button
-                                                      onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'selected'); }}
-                                                      style={{ flex: 1, padding: '6px', background: '#DCFCE7', color: '#166534', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                                                    >
-                                                      Selecteren
-                                                    </button>
-                                                    <button
-                                                      onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'rejected_draft'); }}
-                                                      style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                                                    >
-                                                      Niet nu
-                                                    </button>
-                                                  </>
-                                                )}
-                                                {status === 'accepted' && (
-                                                  <button
-                                                    onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
-                                                    style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                                                  >
-                                                    Terugzetten
-                                                  </button>
-                                                )}
-                                                {status === 'rejected' && (
-                                                  <button
-                                                    onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
-                                                    style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                                                  >
-                                                    Terugzetten
-                                                  </button>
-                                                )}
-                                              </div>
-                                            </div>
-                                          ))
+                                          <span style={{ fontSize: 10, color: '#2B3E72' }}>Geen foto</span>
                                         )}
                                       </div>
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div
+                                          style={{ fontWeight: 600, color: '#1F2B4A', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                          onMouseEnter={(e) => reg.model_id && (e.currentTarget.style.textDecoration = 'underline')}
+                                          onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                                        >
+                                          {reg.name}
+                                        </div>
+                                        {reg.model_id && (
+                                          <div style={{ fontSize: 11, color: '#2563EB' }}>Bekijk profiel</div>
+                                        )}
+                                      </div>
+                                    </div>
 
-                                      {/* Action Buttons for Group Email */}
-                                      {items.length > 0 && status === 'accepted' && (
+                                    {reg.message && (
+                                      <div style={{
+                                        background: '#F9FAFB',
+                                        padding: '8px 10px',
+                                        borderRadius: 8,
+                                        fontSize: 12,
+                                        color: '#4B5563',
+                                        fontStyle: 'italic'
+                                      }}>
+                                        "{reg.message}"
+                                      </div>
+                                    )}
+
+                                    <div style={{ display: 'flex', gap: 8, paddingTop: 8, borderTop: '1px solid #F3F4F6' }}>
+                                      {status === 'pending' && (
+                                        <>
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'selected'); }}
+                                            style={{ flex: 1, padding: '6px', background: '#DCFCE7', color: '#166534', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                          >
+                                            Selecteren
+                                          </button>
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'rejected_draft'); }}
+                                            style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                          >
+                                            Niet nu
+                                          </button>
+                                        </>
+                                      )}
+                                      {status === 'accepted' && (
                                         <button
-                                          onClick={() => {
-                                            // Verzamel alle emailadressen van geselecteerde talenten
-                                            const emails = items.map((reg: any) => reg.email).filter(Boolean);
+                                          onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
+                                          style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                        >
+                                          Terugzetten
+                                        </button>
+                                      )}
+                                      {status === 'rejected' && (
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
+                                          style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                        >
+                                          Terugzetten
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
 
-                                            // Maak het onderwerp
-                                            const subject = `Je bent geselecteerd voor een Unposed shoot!`;
+                            {/* Action Buttons for Group Email */}
+                            {items.length > 0 && status === 'accepted' && (
+                              <button
+                                onClick={() => {
+                                  // Verzamel alle emailadressen van geselecteerde talenten
+                                  const emails = items.map((reg: any) => reg.email).filter(Boolean);
 
-                                            // Maak de body van het bericht met shoot details
-                                            const shootDate = formatDateNL(shoot.shoot_date || shoot.date, true);
-                                            const startTime = shoot.start_time?.slice(0, 5) || '';
-                                            const endTime = shoot.end_time?.slice(0, 5) || '';
+                                  // Maak het onderwerp
+                                  const subject = `Je bent geselecteerd voor een Unposed shoot!`;
 
-                                            // Bereken vergoeding tekst
-                                            let compensationText = '';
-                                            if (shoot.compensation_type === 'financiële vergoeding' && shoot.compensation_amount) {
-                                              compensationText = `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
-                                            } else if (shoot.compensation_type === 'cadeaubon' && shoot.compensation_amount && shoot.compensation_business_name) {
-                                              compensationText = `Cadeaubon t.w.v. €${shoot.compensation_amount} bij ${shoot.compensation_business_name}`;
-                                            } else if (shoot.compensation_type === 'geen') {
-                                              compensationText = 'Geen vergoeding';
-                                            }
+                                  // Maak de body van het bericht met shoot details
+                                  const shootDate = formatDateNL(shoot.shoot_date || shoot.date, true);
+                                  const startTime = shoot.start_time?.slice(0, 5) || '';
+                                  const endTime = shoot.end_time?.slice(0, 5) || '';
 
-                                            const body = `Hi,
+                                  // Bereken vergoeding tekst
+                                  let compensationText = '';
+                                  if (shoot.compensation_type === 'financiële vergoeding' && shoot.compensation_amount) {
+                                    compensationText = `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
+                                  } else if (shoot.compensation_type === 'cadeaubon' && shoot.compensation_amount && shoot.compensation_business_name) {
+                                    compensationText = `Cadeaubon t.w.v. €${shoot.compensation_amount} bij ${shoot.compensation_business_name}`;
+                                  } else if (shoot.compensation_type === 'geen') {
+                                    compensationText = 'Geen vergoeding';
+                                  }
+
+                                  const body = `Hi,
 
 Leuk nieuws: je bent geselecteerd voor een Unposed shoot!
 
@@ -1543,42 +1612,42 @@ Team Unposed
 W: Unposed.nl
 E: hello@unposed.nl`;
 
-                                            // Maak Gmail compose URL met BCC
-                                            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                  // Maak Gmail compose URL met BCC
+                                  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-                                            // Open Gmail in nieuw tabblad
-                                            window.open(gmailUrl, '_blank');
-                                          }}
-                                          style={{
-                                            padding: '12px',
-                                            background: '#2B3E72',
-                                            color: '#fff',
-                                            border: 'none',
-                                            borderRadius: 8,
-                                            fontWeight: 600,
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: 8,
-                                            marginTop: 'auto'
-                                          }}
-                                        >
-                                          Uitnodiging sturen ({items.length})
-                                        </button>
-                                      )}
-                                      {items.length > 0 && status === 'rejected' && (
-                                        <button
-                                          onClick={() => {
-                                            // Verzamel alle emailadressen van niet-geselecteerde talenten
-                                            const emails = items.map((reg: any) => reg.email).filter(Boolean);
+                                  // Open Gmail in nieuw tabblad
+                                  window.open(gmailUrl, '_blank');
+                                }}
+                                style={{
+                                  padding: '12px',
+                                  background: '#2B3E72',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 8,
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: 8,
+                                  marginTop: 'auto'
+                                }}
+                              >
+                                Uitnodiging sturen ({items.length})
+                              </button>
+                            )}
+                            {items.length > 0 && status === 'rejected' && (
+                              <button
+                                onClick={() => {
+                                  // Verzamel alle emailadressen van niet-geselecteerde talenten
+                                  const emails = items.map((reg: any) => reg.email).filter(Boolean);
 
-                                            // Maak het onderwerp
-                                            const subject = `Update over je aanmelding voor een Unposed shoot.`;
+                                  // Maak het onderwerp
+                                  const subject = `Update over je aanmelding voor een Unposed shoot.`;
 
-                                            // Maak de body van het bericht
-                                            const shootName = shoot.title || shoot.description?.split('\n\n')[0];
-                                            const body = `Hi,
+                                  // Maak de body van het bericht
+                                  const shootName = shoot.title || shoot.description?.split('\n\n')[0];
+                                  const body = `Hi,
 
 Bedankt voor je aanmelding voor de ${shootName} en leuk dat je interesse had om hieraan deel te nemen.
 
@@ -1592,97 +1661,95 @@ Team Unposed
 W: Unposed.nl
 E: hello@unposed.nl`;
 
-                                            // Maak Gmail compose URL met BCC
-                                            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                  // Maak Gmail compose URL met BCC
+                                  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-                                            // Open Gmail in nieuw tabblad
-                                            window.open(gmailUrl, '_blank');
-                                          }}
-                                          style={{
-                                            padding: '12px',
-                                            background: '#fff',
-                                            color: '#6B7280',
-                                            border: '1px solid #D1D5DB',
-                                            borderRadius: 8,
-                                            fontWeight: 600,
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: 8,
-                                            marginTop: 'auto'
-                                          }}
-                                        >
-                                          Afwijzing sturen ({items.length})
-                                        </button>
-                                      )}
-                                    </div>
-                                  );
-
-                                  return (
-                                    <div style={{ display: 'flex', gap: 24, paddingBottom: 40, alignItems: 'flex-start', height: '100%' }}>
-                                      <Column title="Nieuwe aanmeldingen" items={pending} status="pending" color="#3B82F6" bgColor="#EFF6FF" />
-                                      <Column title="Geselecteerd" items={accepted} status="accepted" color="#22C55E" bgColor="#F0FDF4" />
-                                      <Column title="Niet geselecteerd" items={rejected} status="rejected" color="#9CA3AF" bgColor="#F9FAFB" />
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            </div>
+                                  // Open Gmail in nieuw tabblad
+                                  window.open(gmailUrl, '_blank');
+                                }}
+                                style={{
+                                  padding: '12px',
+                                  background: '#fff',
+                                  color: '#6B7280',
+                                  border: '1px solid #D1D5DB',
+                                  borderRadius: 8,
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: 8,
+                                  marginTop: 'auto'
+                                }}
+                              >
+                                Afwijzing sturen ({items.length})
+                              </button>
+                            )}
                           </div>
-                        )}
-                      </div>
+                        );
+
+                        return (
+                          <div style={{ display: 'flex', gap: 24, paddingBottom: 40, alignItems: 'flex-start', height: '100%' }}>
+                            <Column title="Nieuwe aanmeldingen" items={pending} status="pending" color="#3B82F6" bgColor="#EFF6FF" />
+                            <Column title="Geselecteerd" items={accepted} status="accepted" color="#22C55E" bgColor="#F0FDF4" />
+                            <Column title="Niet geselecteerd" items={rejected} status="rejected" color="#9CA3AF" bgColor="#F9FAFB" />
+                          </div>
+                        );
+                      })()}
                     </div>
-
-                  );
-                })}
-              </div>
-
-              {/* Fixed Registration Overlay Banner */}
-
-
-              {
-                shoots.length === 0 && (
-                  <div style={{
-                    textAlign: 'center',
-                    padding: 60,
-                    color: '#9CA3AF'
-                  }}>
-                    <p style={{ fontSize: 18 }}>Geen shoots gevonden</p>
-                    <p style={{ fontSize: 14, marginTop: 8 }}>Klik op "Nieuwe Shoot Toevoegen" om te beginnen</p>
                   </div>
-                )
-              }
+                </div>
+              )}
             </div>
+            );
+        })}
+          </div>
 
-            {/* Terug naar dashboard knop */}
-            <div style={{ textAlign: 'center', marginTop: 60 }}>
-              <button
-                onClick={() => window.location.href = '/dashboard'}
-                style={{
-                  padding: '12px 24px',
-                  background: '#fff',
-                  color: '#2B3E72',
-                  border: '2px solid #2B3E72',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  fontFamily: 'inherit'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#2B3E72';
-                  e.currentTarget.style.color = '#fff';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#fff';
-                  e.currentTarget.style.color = '#2B3E72';
-                }}
-              >
-                ← Terug naar Dashboard
-              </button>
-              <style>{`
+          {/* Fixed Registration Overlay Banner */}
+
+
+          {
+            shoots.length === 0 && (
+              <div style={{
+                textAlign: 'center',
+                padding: 60,
+                color: '#9CA3AF'
+              }}>
+                <p style={{ fontSize: 18 }}>Geen shoots gevonden</p>
+                <p style={{ fontSize: 14, marginTop: 8 }}>Klik op "Nieuwe Shoot Toevoegen" om te beginnen</p>
+              </div>
+            )
+          }
+        </div>
+
+        {/* Terug naar dashboard knop */}
+        <div style={{ textAlign: 'center', marginTop: 60 }}>
+          <button
+            onClick={() => window.location.href = '/dashboard'}
+            style={{
+              padding: '12px 24px',
+              background: '#fff',
+              color: '#2B3E72',
+              border: '2px solid #2B3E72',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              fontFamily: 'inherit'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#2B3E72';
+              e.currentTarget.style.color = '#fff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#fff';
+              e.currentTarget.style.color = '#2B3E72';
+            }}
+          >
+            ← Terug naar Dashboard
+          </button>
+          <style>{`
             @keyframes scroll {
               0% {
                 transform: translateX(0);
@@ -1713,251 +1780,255 @@ E: hello@unposed.nl`;
               height: 60px;
             }
           `}</style>
-            </div>
-          </div>
         </div>
+      </div >
+    </div >
 
-        {/* Image Preview Modal */}
-        {previewImage && (
-          <div
+      {/* Image Preview Modal */ }
+  {
+    previewImage && (
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: 24,
+          cursor: 'pointer'
+        }}
+        onClick={() => setPreviewImage(null)}
+      >
+        <div style={{ position: 'relative', maxWidth: '90%', maxHeight: '90%' }}>
+          <img
+            src={previewImage}
+            alt="Preview"
             style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0,0,0,0.8)',
+              maxWidth: '100%',
+              maxHeight: '90vh',
+              borderRadius: 8,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+              display: 'block'
+            }}
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setPreviewImage(null);
+            }}
+            style={{
+              position: 'absolute',
+              top: -15,
+              right: -15,
+              width: 30,
+              height: 30,
+              borderRadius: '50%',
+              background: '#fff',
+              color: '#1F2B4A',
+              border: 'none',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 9999,
-              padding: 24,
-              cursor: 'pointer'
+              justifyContent: 'center'
             }}
-            onClick={() => setPreviewImage(null)}
           >
-            <div style={{ position: 'relative', maxWidth: '90%', maxHeight: '90%' }}>
-              <img
-                src={previewImage}
-                alt="Preview"
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '90vh',
-                  borderRadius: 8,
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                  display: 'block'
-                }}
-              />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPreviewImage(null);
-                }}
-                style={{
-                  position: 'absolute',
-                  top: -15,
-                  right: -15,
-                  width: 30,
-                  height: 30,
-                  borderRadius: '50%',
-                  background: '#fff',
-                  color: '#1F2B4A',
-                  border: 'none',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                X
-              </button>
-            </div>
-          </div>
-        )}
+            X
+          </button>
+        </div>
+      </div>
+    )
+  }
 
-        {/* Email Confirmation Modal */}
-        {showEmailConfirmation && (
+  {/* Email Confirmation Modal */ }
+  {
+    showEmailConfirmation && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 10000,
+        background: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20
+      }}>
+        <div style={{
+          background: '#fff',
+          borderRadius: 16,
+          maxWidth: 500,
+          width: '100%',
+          padding: 32,
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          animation: 'slideIn 0.3s ease'
+        }}>
           <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 10000,
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 20
+            textAlign: 'center',
+            marginBottom: 24
           }}>
-            <div style={{
-              background: '#fff',
-              borderRadius: 16,
-              maxWidth: 500,
-              width: '100%',
-              padding: 32,
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              animation: 'slideIn 0.3s ease'
-            }}>
+            {isSendingEmails ? (
               <div style={{
-                textAlign: 'center',
-                marginBottom: 24
-              }}>
-                {isSendingEmails ? (
-                  <div style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: '50%',
-                    background: '#DBEAFE',
-                    margin: '0 auto 16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <div style={{
-                      width: 32,
-                      height: 32,
-                      border: '3px solid #2B3E72',
-                      borderTopColor: 'transparent',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite'
-                    }}></div>
-                  </div>
-                ) : (
-                  <div style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: '50%',
-                    background: '#DBEAFE',
-                    margin: '0 auto 16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                      <polyline points="22,6 12,13 2,6"></polyline>
-                    </svg>
-                  </div>
-                )}
-                <h2 style={{
-                  fontSize: 24,
-                  fontWeight: 700,
-                  color: '#1F2B4A',
-                  marginBottom: 12
-                }}>
-                  {isSendingEmails ? 'Emails worden verzonden...' : 'Shoot toegevoegd!'}
-                </h2>
-                {isSendingEmails ? (
-                  <>
-                    <p style={{
-                      fontSize: 16,
-                      color: '#6B7280',
-                      lineHeight: 1.6,
-                      marginBottom: 8
-                    }}>
-                      Even geduld, de emails worden naar alle talenten verstuurd.
-                    </p>
-                    <p style={{
-                      fontSize: 14,
-                      color: '#9CA3AF',
-                      lineHeight: 1.5
-                    }}>
-                      Sluit dit venster niet en verwijder de tab niet.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p style={{
-                      fontSize: 16,
-                      color: '#6B7280',
-                      lineHeight: 1.6,
-                      marginBottom: 8
-                    }}>
-                      Wil je een email notificatie versturen naar alle geregistreerde talenten over deze nieuwe shoot?
-                    </p>
-                    <p style={{
-                      fontSize: 14,
-                      color: '#9CA3AF',
-                      lineHeight: 1.5
-                    }}>
-                      De talenten ontvangen een email met de shoot details en kunnen zich direct aanmelden.
-                    </p>
-                  </>
-                )}
-              </div>
-
-              <div style={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                background: '#DBEAFE',
+                margin: '0 auto 16px',
                 display: 'flex',
-                gap: 12,
-                marginTop: 24
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
-                <button
-                  onClick={handleSkipSendEmails}
-                  disabled={isSendingEmails}
-                  style={{
-                    flex: 1,
-                    padding: '14px 24px',
-                    background: isSendingEmails ? '#F3F4F6' : '#E5DDD5',
-                    color: isSendingEmails ? '#9CA3AF' : '#1F2B4A',
-                    border: 'none',
-                    borderRadius: 8,
-                    fontSize: 16,
-                    fontWeight: 600,
-                    cursor: isSendingEmails ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease',
-                    fontFamily: 'inherit',
-                    opacity: isSendingEmails ? 0.5 : 1
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSendingEmails) e.currentTarget.style.background = '#D1C7BB';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSendingEmails) e.currentTarget.style.background = '#E5DDD5';
-                  }}
-                >
-                  Nee, overslaan
-                </button>
-                <button
-                  onClick={handleConfirmSendEmails}
-                  disabled={isSendingEmails}
-                  style={{
-                    flex: 1,
-                    padding: '14px 24px',
-                    background: isSendingEmails ? '#9CA3AF' : '#2B3E72',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    fontSize: 16,
-                    fontWeight: 600,
-                    cursor: isSendingEmails ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease',
-                    fontFamily: 'inherit',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSendingEmails) e.currentTarget.style.background = '#1F2B4A';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSendingEmails) e.currentTarget.style.background = '#2B3E72';
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                    <polyline points="22,6 12,13 2,6"></polyline>
-                  </svg>
-                  Ja, verstuur emails
-                </button>
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  border: '3px solid #2B3E72',
+                  borderTopColor: 'transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }}></div>
               </div>
-            </div>
+            ) : (
+              <div style={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                background: '#DBEAFE',
+                margin: '0 auto 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </div>
+            )}
+            <h2 style={{
+              fontSize: 24,
+              fontWeight: 700,
+              color: '#1F2B4A',
+              marginBottom: 12
+            }}>
+              {isSendingEmails ? 'Emails worden verzonden...' : 'Shoot toegevoegd!'}
+            </h2>
+            {isSendingEmails ? (
+              <>
+                <p style={{
+                  fontSize: 16,
+                  color: '#6B7280',
+                  lineHeight: 1.6,
+                  marginBottom: 8
+                }}>
+                  Even geduld, de emails worden naar alle talenten verstuurd.
+                </p>
+                <p style={{
+                  fontSize: 14,
+                  color: '#9CA3AF',
+                  lineHeight: 1.5
+                }}>
+                  Sluit dit venster niet en verwijder de tab niet.
+                </p>
+              </>
+            ) : (
+              <>
+                <p style={{
+                  fontSize: 16,
+                  color: '#6B7280',
+                  lineHeight: 1.6,
+                  marginBottom: 8
+                }}>
+                  Wil je een email notificatie versturen naar alle geregistreerde talenten over deze nieuwe shoot?
+                </p>
+                <p style={{
+                  fontSize: 14,
+                  color: '#9CA3AF',
+                  lineHeight: 1.5
+                }}>
+                  De talenten ontvangen een email met de shoot details en kunnen zich direct aanmelden.
+                </p>
+              </>
+            )}
           </div>
-        )}
+
+          <div style={{
+            display: 'flex',
+            gap: 12,
+            marginTop: 24
+          }}>
+            <button
+              onClick={handleSkipSendEmails}
+              disabled={isSendingEmails}
+              style={{
+                flex: 1,
+                padding: '14px 24px',
+                background: isSendingEmails ? '#F3F4F6' : '#E5DDD5',
+                color: isSendingEmails ? '#9CA3AF' : '#1F2B4A',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 16,
+                fontWeight: 600,
+                cursor: isSendingEmails ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: 'inherit',
+                opacity: isSendingEmails ? 0.5 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (!isSendingEmails) e.currentTarget.style.background = '#D1C7BB';
+              }}
+              onMouseLeave={(e) => {
+                if (!isSendingEmails) e.currentTarget.style.background = '#E5DDD5';
+              }}
+            >
+              Nee, overslaan
+            </button>
+            <button
+              onClick={handleConfirmSendEmails}
+              disabled={isSendingEmails}
+              style={{
+                flex: 1,
+                padding: '14px 24px',
+                background: isSendingEmails ? '#9CA3AF' : '#2B3E72',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 16,
+                fontWeight: 600,
+                cursor: isSendingEmails ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: 'inherit',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8
+              }}
+              onMouseEnter={(e) => {
+                if (!isSendingEmails) e.currentTarget.style.background = '#1F2B4A';
+              }}
+              onMouseLeave={(e) => {
+                if (!isSendingEmails) e.currentTarget.style.background = '#2B3E72';
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              Ja, verstuur emails
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
       </div >
     </>
   );

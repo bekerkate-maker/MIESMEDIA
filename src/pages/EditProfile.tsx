@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
 import { useNavigate } from 'react-router-dom';
 import ClientLogoBanner from '@/components/ClientLogoBanner';
+import { User } from 'lucide-react';
 
 const EditProfile: React.FC = () => {
     const navigate = useNavigate();
@@ -89,7 +91,7 @@ const EditProfile: React.FC = () => {
                 if (data.birthdate) {
                     const parts = data.birthdate.split('-');
                     if (parts.length === 3) {
-                        displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        displayDate = `${parts[2]} /${parts[1]}/${parts[0]} `;
                     } else {
                         displayDate = data.birthdate;
                     }
@@ -146,7 +148,7 @@ const EditProfile: React.FC = () => {
         if (form.birthdate) {
             const parts = form.birthdate.split('/');
             if (parts.length === 3) {
-                dbDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                dbDate = `${parts[2]} -${parts[1]} -${parts[0]} `;
             }
         }
 
@@ -457,6 +459,9 @@ const EditProfile: React.FC = () => {
 
             <main style={{ maxWidth: 800, margin: '0 auto', padding: '40px 20px', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+                        <MiesLogo size={100} />
+                    </div>
                     <h2 style={{ fontSize: 28, color: '#1F2B4A', margin: 0 }}>Mijn Profiel</h2>
 
                     <div style={{ background: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
@@ -566,7 +571,9 @@ const EditProfile: React.FC = () => {
                                         alt="Hoofdfoto"
                                     />
                                 ) : (
-                                    <div style={{ width: '100%', height: '100%', background: '#F3F4F6', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>👤</div>
+                                    <div style={{ width: '100%', height: '100%', background: '#F3F4F6', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <User size={32} color="#9CA3AF" />
+                                    </div>
                                 )}
                                 <label style={{
                                     position: 'absolute',

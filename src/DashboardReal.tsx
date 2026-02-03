@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Instagram } from "lucide-react";
+import { Mail, Instagram, Filter } from "lucide-react";
 import MiesLogo from "@/components/MiesLogo";
 
 type Model = {
@@ -592,95 +592,102 @@ export default function Dashboard() {
       <header style={{ background: 'transparent', padding: '16px 20px' }}>
         <div className="header-container" style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <MiesLogo size={70} />
 
-            <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0, marginLeft: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', height: 56, minHeight: 56 }}>
+                {/* Zet het logo links, verticaal gecentreerd */}
+                <MiesLogo size={40} style={{ margin: 0 }} />
+              </div>
+              <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0, marginLeft: 'auto' }}>
 
-              <button
-                onClick={handleManageShoots}
-                className="header-btn shoots-btn"
-                style={{
-                  background: 'transparent',
-                  color: '#1F2B4A',
-                  border: '2px solid #fff',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: '8px 16px',
-                  borderRadius: 8,
-                  transition: 'all 0.3s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8
-                }}
-                title="Beheer shoots"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#fff';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <span className="btn-text">Shoots Beheren</span>
-              </button>
-              <div ref={userMenuRef} style={{ position: 'relative' }}>
                 <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="header-btn logout-btn"
+                  onClick={handleManageShoots}
+                  className="header-btn shoots-btn"
                   style={{
                     background: 'transparent',
-                    border: 'none',
-                    padding: 8,
+                    color: '#1F2B4A',
+                    border: '2px solid #fff',
+                    fontSize: 14,
+                    fontWeight: 600,
                     cursor: 'pointer',
+                    padding: '8px 16px',
+                    borderRadius: 8,
+                    transition: 'all 0.3s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                  title="Account"
-                >
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
-                  </svg>
-                </button>
-                {showUserMenu && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: 8,
-                    background: '#fff',
-                    borderRadius: 8,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    padding: 4,
-                    zIndex: 100,
+                    gap: 8,
                     whiteSpace: 'nowrap'
-                  }}>
-                    <button
-                      onClick={handleLogout}
-                      style={{
-                        display: 'block',
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: '8px 16px',
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#1F2B4A',
-                        fontSize: 14,
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        borderRadius: 4
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#F3F4F6'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                    >
-                      Uitloggen
-                    </button>
-                  </div>
-                )}
+                  }}
+                  title="Beheer shoots"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#fff';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <span className="btn-text">Shoots Beheren</span>
+                </button>
+                <div ref={userMenuRef} style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="header-btn logout-btn"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      padding: 8,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                    title="Account"
+                  >
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+                      <circle cx="12" cy="8" r="4" />
+                      <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
+                    </svg>
+                  </button>
+                  {showUserMenu && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      marginTop: 8,
+                      background: '#fff',
+                      borderRadius: 8,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                      padding: 4,
+                      zIndex: 100,
+                      whiteSpace: 'nowrap'
+                    }}>
+                      <button
+                        onClick={handleLogout}
+                        style={{
+                          display: 'block',
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '8px 16px',
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#1F2B4A',
+                          fontSize: 14,
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          borderRadius: 4
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#F3F4F6'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        Uitloggen
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
+
             </div>
           </div>
           {/* mobile-quote verwijderd, alles via desktop-quote */}
@@ -712,7 +719,21 @@ export default function Dashboard() {
           </div>
         )}
         <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#1F2B4A' }}>The Unposed Collective</h1>
+          <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#1F2B4A' }}>Talenten Dashboard</h1>
+          <p className="dashboard-subtitle" style={{ marginTop: 12, color: '#4B5563', maxWidth: '800px', lineHeight: 1.5 }}>
+            Filter op kenmerken, vind de perfecte match en nodig talenten direct uit voor je volgende productie.
+          </p>
+          <style>{`
+            .dashboard-subtitle {
+              font-size: 16px;
+            }
+            @media (max-width: 768px) {
+              .dashboard-subtitle {
+                font-size: 13px !important;
+                line-height: 1.4 !important;
+              }
+            }
+          `}</style>
         </div>
 
         <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginBottom: 32, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)' }}>
@@ -742,7 +763,7 @@ export default function Dashboard() {
                 fontFamily: 'inherit'
               }}
             >
-              🔍 {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && <span style={{ background: '#EF4444', color: '#fff', borderRadius: '50%', width: 18, height: 18, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>!</span>}
+              <Filter size={20} /> {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && <span style={{ background: '#EF4444', color: '#fff', borderRadius: '50%', width: 18, height: 18, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>!</span>}
             </button>
           </div>
 
