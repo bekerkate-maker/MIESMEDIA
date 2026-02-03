@@ -211,6 +211,9 @@ export default function ShootRegistration() {
       <ClientLogoBanner />
 
       <div className="main-container">
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+          <MiesLogo size={80} />
+        </div>
         <div className="invite-card">
           {shoot && (
             <div className="card-header-split">
@@ -415,9 +418,7 @@ export default function ShootRegistration() {
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 32 }}>
-          <MiesLogo size={40} />
-        </div>
+
       </div>
 
       <style>{styles}</style>
