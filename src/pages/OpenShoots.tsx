@@ -78,7 +78,7 @@ const OpenShoots: React.FC = () => {
           }}
           aria-label={session ? 'Account wijzigen' : 'Inloggen'}
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f8f7f2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
             <circle cx="12" cy="8" r="4" />
             <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
           </svg>
@@ -151,7 +151,7 @@ const OpenShoots: React.FC = () => {
                   </div>
                 </div>
                 {shoot.spots_available !== undefined && (
-                  <div style={{ fontSize: 14, color: '#1F2B4A', fontWeight: 600, marginTop: 2 }}>
+                  <div style={{ fontSize: 14, color: '#050606', fontWeight: 600, marginTop: 2 }}>
                     {shoot.spots_available} plekken beschikbaar
                   </div>
                 )}
@@ -219,23 +219,23 @@ const OpenShoots: React.FC = () => {
           ))}
         </div>
         {shoots.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 60, color: '#9CA3AF' }}>
+          <div style={{ textAlign: 'center', padding: 60, color: '#050606' }}>
             <p style={{ fontSize: 18 }}>Geen shoots gevonden</p>
           </div>
         )}
       </div>
-      <style>{`.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover:not(.disabled){background:#1F2B4A;transform:translateY(-2px)}.primary-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6;transform:none !important}.primary-btn.disabled:hover{background:#9CA3AF;transform:none}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.shoots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:1200px;margin:0 auto}.shoot-card{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0 0 24px 0;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow 0.2s;min-width:0}.shoot-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13)}.shoot-banner img{width:100%;height:180px;object-fit:cover;display:block}.shoot-card-content{padding:24px;display:flex;flex-direction:column;flex:1}.shoot-client{font-size:13px;color:#2B3E72;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}.shoot-title{font-size:22px;font-weight:700;color:#1F2B4A;margin-bottom:8px}
+      <style>{`.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#402e27;color:#f8f7f2;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover:not(.disabled){background:#1F2B4A;transform:translateY(-2px)}.primary-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6;transform:none !important}.primary-btn.disabled:hover{background:#9CA3AF;transform:none}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#050606}.subtitle{font-size:16px;color:#050606;margin:0}.shoots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:1200px;margin:0 auto}.shoot-card{background:#f8f7f2;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0 0 24px 0;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow 0.2s;min-width:0}.shoot-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.13)}.shoot-banner img{width:100%;height:180px;object-fit:cover;display:block}.shoot-card-content{padding:24px;display:flex;flex-direction:column;flex:1}.shoot-client{font-size:13px;color:#050606;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}.shoot-title{font-size:22px;font-weight:700;color:#050606;margin-bottom:8px}
       
       /* Metadata Styles */
-      .shoot-metadata { font-size: 14px; color: #6B7280; display: grid; grid-template-columns: 32px 1fr; row-gap: 2px; }
-      .metadata-icon { text-align: center; min-height: 24px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #1F2B4A; }
+      .shoot-metadata { font-size: 14px; color: #050606; display: grid; grid-template-columns: 32px 1fr; row-gap: 2px; }
+      .metadata-icon { text-align: center; min-height: 24px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #050606; }
       .metadata-text { min-height: 24px; display: flex; align-items: center; line-height: 1.3; }
-      .shoot-description { font-size: 14px; color: #4B5563; line-height: 1.6; }
+      .shoot-description { font-size: 14px; color: #050606; line-height: 1.6; }
       .shoot-links { margin-top: auto; margin-bottom: 12px; padding-top: 12px; }
-      .shoot-link { display: block; fontSize: 15px; color: #2563eb; text-decoration: none; font-weight: 500; margin-bottom: 6px; }
-      .link-icon { font-size: 18px; color: #1F2B4A; margin-right: 8px; }
+      .shoot-link { display: block; fontSize: 15px; color: #050606; text-decoration: none; font-weight: 500; margin-bottom: 6px; }
+      .link-icon { font-size: 18px; color: #050606; margin-right: 8px; }
       .instagram-link { transition: color 0.2s, text-decoration 0.2s; cursor: pointer; }
-      .instagram-link:hover { text-decoration: underline; color: #2B3E72; }
+      .instagram-link:hover { text-decoration: underline; color: #050606; }
 
       .primary-btn{margin-top:auto}.shoot-card .primary-btn{margin-top:16px}.shoot-card .primary-btn:active:not(.disabled){background:#1F2B4A}.shoot-card .primary-btn:focus:not(.disabled){outline:2px solid #1F2B4A}
       

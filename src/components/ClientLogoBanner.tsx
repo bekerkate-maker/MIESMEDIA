@@ -34,7 +34,7 @@ const ClientLogoBanner: React.FC = () => {
           z-index: 20;
         }
         .logo-banner {
-          background: #fff;
+          background: #f8f7f2;
           padding: 12px 0;
           overflow: hidden;
           position: relative;

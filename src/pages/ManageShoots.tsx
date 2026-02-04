@@ -503,16 +503,16 @@ export default function ManageShoots() {
               <MiesLogo size={110} />
             </div>
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              <h1 style={{ fontSize: 32, fontWeight: 700, color: '#1F2B4A', margin: 0 }}>Shoots beheren</h1>
-              <p style={{ fontSize: 16, color: '#6B7280', marginTop: 8, marginBottom: 0 }}>
+              <h1 style={{ fontSize: 32, fontWeight: 700, color: '#050606', margin: 0 }}>Shoots beheren</h1>
+              <p style={{ fontSize: 16, color: '#050606', marginTop: 8, marginBottom: 0 }}>
                 Maak nieuwe shoots aan en beheer lopende shoots.
               </p>
               <button
                 style={{
                   marginTop: 18,
                   padding: '12px 32px',
-                  background: '#2B3E72',
-                  color: '#fff',
+                  background: '#402e27',
+                  color: '#f8f7f2',
                   border: 'none',
                   borderRadius: 8,
                   fontSize: 18,
@@ -524,7 +524,7 @@ export default function ManageShoots() {
                 }}
                 onClick={() => setShowAddForm(true)}
                 onMouseEnter={e => (e.currentTarget.style.background = '#1F2B4A')}
-                onMouseLeave={e => (e.currentTarget.style.background = '#2B3E72')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#402e27')}
               >
                 + Nieuwe shoot aanmaken
               </button>
@@ -536,7 +536,7 @@ export default function ManageShoots() {
               <div style={{
                 maxWidth: 700,
                 margin: '0 auto 40px',
-                background: '#fff',
+                background: '#f8f7f2',
                 borderRadius: 12,
                 padding: 32,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
@@ -544,7 +544,7 @@ export default function ManageShoots() {
                 <h2 style={{
                   fontSize: 24,
                   fontWeight: 600,
-                  color: '#1F2B4A',
+                  color: '#050606',
                   marginBottom: 24
                 }}>
                   {editingShoot ? 'Shoot bewerken' : 'Nieuwe shoot'}
@@ -565,7 +565,7 @@ export default function ManageShoots() {
                   await handleAddShootWithBanner(bannerPhotoUrl);
                 }}>
                   <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Bannerfoto (optioneel)
                     </label>
                     {/* Preview huidige banner als die er is en er geen nieuwe gekozen is */}
@@ -593,7 +593,7 @@ export default function ManageShoots() {
                       }}
                       style={{ marginBottom: 8 }}
                     />
-                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Klant *
                     </label>
                     <input
@@ -607,7 +607,7 @@ export default function ManageShoots() {
                   </div>
 
                   <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Website klant / instagram klant
                     </label>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -640,13 +640,13 @@ export default function ManageShoots() {
                         style={{ flex: 1, padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
                       />
                     </div>
-                    <small style={{ fontSize: 12, color: '#6B7280', marginTop: 4, display: 'block' }}>
+                    <small style={{ fontSize: 12, color: '#050606', marginTop: 4, display: 'block' }}>
                       Optioneel - Modellen kunnen naar de website of Instagram van de klant gaan
                     </small>
                   </div>
 
                   <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Link naar Moodboard (Canva)
                     </label>
                     <input
@@ -659,7 +659,7 @@ export default function ManageShoots() {
                   </div>
 
                   <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Titel *
                     </label>
                     <input
@@ -674,7 +674,7 @@ export default function ManageShoots() {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
                     <div>
-                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                         Datum *
                       </label>
                       <input
@@ -687,7 +687,7 @@ export default function ManageShoots() {
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                         Begintijd *
                       </label>
                       <input
@@ -699,7 +699,7 @@ export default function ManageShoots() {
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                         Eindtijd *
                       </label>
                       <input
@@ -711,7 +711,7 @@ export default function ManageShoots() {
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                         Aantal plekken *
                       </label>
                       <input
@@ -727,7 +727,7 @@ export default function ManageShoots() {
                   </div>
 
                   <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Locatie *
                     </label>
                     <input
@@ -741,7 +741,7 @@ export default function ManageShoots() {
                   </div>
 
                   <div style={{ marginBottom: 24 }}>
-                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Beschrijving *
                     </label>
                     <textarea
@@ -755,7 +755,7 @@ export default function ManageShoots() {
                   </div>
 
                   <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Soort vergoeding *
                     </label>
                     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
@@ -824,7 +824,7 @@ export default function ManageShoots() {
                         flex: 1,
                         padding: '14px',
                         background: '#E5DDD5',
-                        color: '#1F2B4A',
+                        color: '#050606',
                         border: 'none',
                         borderRadius: 8,
                         fontSize: 16,
@@ -847,8 +847,8 @@ export default function ManageShoots() {
                       style={{
                         flex: 2,
                         padding: '14px',
-                        background: '#2B3E72',
-                        color: '#fff',
+                        background: '#402e27',
+                        color: '#f8f7f2',
                         border: 'none',
                         borderRadius: 8,
                         fontSize: 16,
@@ -861,7 +861,7 @@ export default function ManageShoots() {
                         e.currentTarget.style.background = '#1F2B4A';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#2B3E72';
+                        e.currentTarget.style.background = '#402e27';
                       }}
                     >
                       {editingShoot ? 'Shoot bijwerken' : 'Shoot toevoegen'}
@@ -880,7 +880,7 @@ export default function ManageShoots() {
               <h2 style={{
                 fontSize: 24,
                 fontWeight: 600,
-                color: '#1F2B4A',
+                color: '#050606',
                 marginBottom: 24
               }}>
                 Alle shoots ({shoots.length})
@@ -897,7 +897,7 @@ export default function ManageShoots() {
 
                   return (
                     <div key={shoot.id} style={{
-                      background: '#fff',
+                      background: '#f8f7f2',
                       borderRadius: 12,
                       padding: 0,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -944,7 +944,7 @@ export default function ManageShoots() {
                         <div style={{
                           fontSize: 12,
                           fontWeight: 600,
-                          color: '#2B3E72',
+                          color: '#050606',
                           textTransform: 'uppercase',
                           letterSpacing: '0.5px',
                           marginBottom: 2
@@ -967,7 +967,7 @@ export default function ManageShoots() {
                         <h3 className="shoot-title" style={{
                           fontSize: 20,
                           fontWeight: 600,
-                          color: '#1F2B4A',
+                          color: '#050606',
                           marginBottom: 12
                         }}>
                           {shoot.title || shoot.description?.split('\n\n')[0]}
@@ -975,51 +975,51 @@ export default function ManageShoots() {
                         <div className="shoot-details" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
                           <div style={{
                             fontSize: 14,
-                            color: '#6B7280',
+                            color: '#050606',
                             display: 'flex',
                             alignItems: 'center',
                             gap: 8
                           }}>
-                            <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {formatDateNL(shoot.shoot_date || shoot.date)}
+                            <span style={{ fontSize: 18, color: '#050606' }}>•</span> {formatDateNL(shoot.shoot_date || shoot.date)}
                           </div>
                           {shoot.start_time && shoot.end_time && (
                             <div style={{
                               fontSize: 14,
-                              color: '#6B7280',
+                              color: '#050606',
                               display: 'flex',
                               alignItems: 'center',
                               gap: 8
                             }}>
-                              <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {shoot.start_time.substring(0, 5)} - {shoot.end_time.substring(0, 5)}
+                              <span style={{ fontSize: 18, color: '#050606' }}>•</span> {shoot.start_time.substring(0, 5)} - {shoot.end_time.substring(0, 5)}
                             </div>
                           )}
                           <div style={{
                             fontSize: 14,
-                            color: '#6B7280',
+                            color: '#050606',
                             display: 'flex',
                             alignItems: 'center',
                             gap: 8
                           }}>
-                            <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {shoot.location}
+                            <span style={{ fontSize: 18, color: '#050606' }}>•</span> {shoot.location}
                           </div>
                           <div style={{
                             fontSize: 14,
-                            color: '#6B7280',
+                            color: '#050606',
                             display: 'flex',
                             alignItems: 'center',
                             gap: 8
                           }}>
-                            <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span> {shoot.spots} plekken
+                            <span style={{ fontSize: 18, color: '#050606' }}>•</span> {shoot.spots} plekken
                           </div>
                           {shoot.compensation_type && (
                             <div style={{
                               fontSize: 14,
-                              color: '#6B7280',
+                              color: '#050606',
                               display: 'flex',
                               alignItems: 'center',
                               gap: 8
                             }}>
-                              <span style={{ fontSize: 18, color: '#1F2B4A' }}>•</span>
+                              <span style={{ fontSize: 18, color: '#050606' }}>•</span>
                               {(() => {
                                 if (shoot.compensation_type === 'financiële vergoeding') return `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
                                 if (shoot.compensation_type === 'cadeaubon') return `Cadeaubon t.w.v. €${shoot.compensation_amount}${shoot.compensation_business_name ? ` bij ${shoot.compensation_business_name}` : ''}`;
@@ -1034,7 +1034,7 @@ export default function ManageShoots() {
                         </div>
                         <p className="shoot-description" style={{
                           fontSize: 14,
-                          color: '#4B5563',
+                          color: '#050606',
                           lineHeight: 1.6,
                           marginBottom: 16,
                           flex: 1
@@ -1052,7 +1052,7 @@ export default function ManageShoots() {
                             style={{
                               display: 'inline-block',
                               fontSize: 13,
-                              color: '#2B3E72',
+                              color: '#050606',
                               textDecoration: 'none',
                               fontWeight: 600,
                               marginBottom: 12
@@ -1070,7 +1070,7 @@ export default function ManageShoots() {
                             style={{
                               display: 'inline-block',
                               fontSize: 13,
-                              color: '#2B3E72',
+                              color: '#050606',
                               textDecoration: 'none',
                               fontWeight: 600,
                               marginBottom: 16
@@ -1090,7 +1090,7 @@ export default function ManageShoots() {
                             style={{
                               display: 'inline-block',
                               fontSize: 13,
-                              color: '#2B3E72',
+                              color: '#050606',
                               textDecoration: 'none',
                               fontWeight: 600,
                               marginBottom: 16
@@ -1122,7 +1122,7 @@ export default function ManageShoots() {
                               gap: 8,
                               padding: '8px 12px',
                               background: getRegistrationsForShoot(shoot.id).length > 0 ? '#DBEAFE' : '#F3F4F6',
-                              color: getRegistrationsForShoot(shoot.id).length > 0 ? '#1E40AF' : '#6B7280',
+                              color: getRegistrationsForShoot(shoot.id).length > 0 ? '#050606' : '#050606',
                               border: 'none',
                               borderRadius: 6,
                               fontSize: 13,
@@ -1144,7 +1144,7 @@ export default function ManageShoots() {
                               style={{
                                 padding: '8px 12px',
                                 background: '#E5DDD5',
-                                color: '#1F2B4A',
+                                color: '#050606',
                                 border: 'none',
                                 borderRadius: 8,
                                 fontSize: 14,
@@ -1296,7 +1296,7 @@ export default function ManageShoots() {
                               width: '100%',
                               maxWidth: 1000,
                               maxHeight: '85vh',
-                              background: '#fff',
+                              background: '#f8f7f2',
                               borderRadius: 16,
                               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
                               display: 'flex',
@@ -1319,18 +1319,18 @@ export default function ManageShoots() {
                                   <div style={{
                                     fontSize: 12,
                                     fontWeight: 600,
-                                    color: '#2B3E72',
+                                    color: '#050606',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
                                     marginBottom: 4
                                   }}>
                                     {shoot.client_name || shoot.client}
                                   </div>
-                                  <h2 style={{ fontSize: 24, fontWeight: 700, color: '#1F2B4A', margin: 0 }}>
+                                  <h2 style={{ fontSize: 24, fontWeight: 700, color: '#050606', margin: 0 }}>
                                     {shoot.title || shoot.description?.split('\n\n')[0]}
                                   </h2>
                                 </div>
-                                <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#6B7280', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#050606', flexWrap: 'wrap' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                     {shoot.location}
                                   </div>
@@ -1354,8 +1354,8 @@ export default function ManageShoots() {
                                     }}
                                     style={{
                                       padding: '8px 16px',
-                                      background: '#2563EB',
-                                      color: '#fff',
+                                      background: '#402e27',
+                                      color: '#f8f7f2',
                                       border: 'none',
                                       borderRadius: 8,
                                       fontSize: 14,
@@ -1390,13 +1390,13 @@ export default function ManageShoots() {
                                       alignItems: 'center',
                                       justifyContent: 'space-between'
                                     }}>
-                                      <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1F2B4A', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                      <h3 style={{ fontSize: 16, fontWeight: 700, color: '#050606', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                                         <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
                                         {title}
                                       </h3>
                                       <span style={{
                                         background: '#E5E7EB',
-                                        color: '#4B5563',
+                                        color: '#050606',
                                         padding: '2px 8px',
                                         borderRadius: 12,
                                         fontSize: 12,
@@ -1411,8 +1411,8 @@ export default function ManageShoots() {
                                         <div style={{
                                           padding: 24,
                                           textAlign: 'center',
-                                          color: '#9CA3AF',
-                                          background: '#fff',
+                                          color: '#050606',
+                                          background: '#f8f7f2',
                                           borderRadius: 12,
                                           border: '1px dashed #E5E7EB',
                                           fontSize: 13
@@ -1422,7 +1422,7 @@ export default function ManageShoots() {
                                       ) : (
                                         items.map((reg: any) => (
                                           <div key={reg.id} style={{
-                                            background: '#fff',
+                                            background: '#f8f7f2',
                                             borderRadius: 12,
                                             padding: 16,
                                             boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
@@ -1474,7 +1474,7 @@ export default function ManageShoots() {
                                                 borderRadius: '50%',
                                                 overflow: 'hidden',
                                                 background: '#F3F4F6',
-                                                border: '2px solid #fff',
+                                                border: '2px solid #f8f7f2',
                                                 flexShrink: 0,
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -1491,19 +1491,19 @@ export default function ManageShoots() {
                                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                   />
                                                 ) : (
-                                                  <span style={{ fontSize: 10, color: '#2B3E72' }}>Geen foto</span>
+                                                  <span style={{ fontSize: 10, color: '#050606' }}>Geen foto</span>
                                                 )}
                                               </div>
                                               <div style={{ flex: 1, minWidth: 0 }}>
                                                 <div
-                                                  style={{ fontWeight: 600, color: '#1F2B4A', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                                  style={{ fontWeight: 600, color: '#050606', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                                                   onMouseEnter={(e) => reg.model_id && (e.currentTarget.style.textDecoration = 'underline')}
                                                   onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
                                                 >
                                                   {reg.name}
                                                 </div>
                                                 {reg.model_id && (
-                                                  <div style={{ fontSize: 11, color: '#2563EB' }}>Bekijk profiel</div>
+                                                  <div style={{ fontSize: 11, color: '#050606' }}>Bekijk profiel</div>
                                                 )}
                                               </div>
                                             </div>
@@ -1514,7 +1514,7 @@ export default function ManageShoots() {
                                                 padding: '8px 10px',
                                                 borderRadius: 8,
                                                 fontSize: 12,
-                                                color: '#4B5563',
+                                                color: '#050606',
                                                 fontStyle: 'italic'
                                               }}>
                                                 "{reg.message}"
@@ -1532,7 +1532,7 @@ export default function ManageShoots() {
                                                   </button>
                                                   <button
                                                     onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'rejected_draft'); }}
-                                                    style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                                    style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                                                   >
                                                     Niet nu
                                                   </button>
@@ -1541,7 +1541,7 @@ export default function ManageShoots() {
                                               {status === 'accepted' && (
                                                 <button
                                                   onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
-                                                  style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                                  style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                                                 >
                                                   Terugzetten
                                                 </button>
@@ -1549,7 +1549,7 @@ export default function ManageShoots() {
                                               {status === 'rejected' && (
                                                 <button
                                                   onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
-                                                  style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#4B5563', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                                  style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                                                 >
                                                   Terugzetten
                                                 </button>
@@ -1617,8 +1617,8 @@ E: hello@unposed.nl`;
                                         }}
                                         style={{
                                           padding: '12px',
-                                          background: '#2B3E72',
-                                          color: '#fff',
+                                          background: '#402e27',
+                                          color: '#f8f7f2',
                                           border: 'none',
                                           borderRadius: 8,
                                           fontWeight: 600,
@@ -1666,8 +1666,8 @@ E: hello@unposed.nl`;
                                         }}
                                         style={{
                                           padding: '12px',
-                                          background: '#fff',
-                                          color: '#6B7280',
+                                          background: '#f8f7f2',
+                                          color: '#050606',
                                           border: '1px solid #D1D5DB',
                                           borderRadius: 8,
                                           fontWeight: 600,
@@ -1710,7 +1710,7 @@ E: hello@unposed.nl`;
                   <div style={{
                     textAlign: 'center',
                     padding: 60,
-                    color: '#9CA3AF'
+                    color: '#050606'
                   }}>
                     <p style={{ fontSize: 18 }}>Geen shoots gevonden</p>
                     <p style={{ fontSize: 14, marginTop: 8 }}>Klik op "Nieuwe Shoot Toevoegen" om te beginnen</p>
@@ -1725,9 +1725,9 @@ E: hello@unposed.nl`;
                 onClick={() => window.location.href = '/dashboard'}
                 style={{
                   padding: '12px 24px',
-                  background: '#fff',
-                  color: '#2B3E72',
-                  border: '2px solid #2B3E72',
+                  background: '#f8f7f2',
+                  color: '#402e27',
+                  border: '2px solid #402e27',
                   borderRadius: 8,
                   fontSize: 14,
                   fontWeight: 600,
@@ -1736,12 +1736,12 @@ E: hello@unposed.nl`;
                   fontFamily: 'inherit'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#2B3E72';
-                  e.currentTarget.style.color = '#fff';
+                  e.currentTarget.style.background = '#402e27';
+                  e.currentTarget.style.color = '#f8f7f2';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#fff';
-                  e.currentTarget.style.color = '#2B3E72';
+                  e.currentTarget.style.background = '#f8f7f2';
+                  e.currentTarget.style.color = '#402e27';
                 }}
               >
                 ← Terug naar Dashboard
@@ -1824,8 +1824,8 @@ E: hello@unposed.nl`;
                       width: 30,
                       height: 30,
                       borderRadius: '50%',
-                      background: '#fff',
-                      color: '#1F2B4A',
+                      background: '#f8f7f2',
+                      color: '#050606',
                       border: 'none',
                       fontWeight: 'bold',
                       cursor: 'pointer',
@@ -1860,7 +1860,7 @@ E: hello@unposed.nl`;
                 padding: 20
               }}>
                 <div style={{
-                  background: '#fff',
+                  background: '#f8f7f2',
                   borderRadius: 16,
                   maxWidth: 500,
                   width: '100%',
@@ -1886,7 +1886,7 @@ E: hello@unposed.nl`;
                         <div style={{
                           width: 32,
                           height: 32,
-                          border: '3px solid #2B3E72',
+                          border: '3px solid #402e27',
                           borderTopColor: 'transparent',
                           borderRadius: '50%',
                           animation: 'spin 1s linear infinite'
@@ -1903,7 +1903,7 @@ E: hello@unposed.nl`;
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#402e27" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                           <polyline points="22,6 12,13 2,6"></polyline>
                         </svg>
@@ -1912,7 +1912,7 @@ E: hello@unposed.nl`;
                     <h2 style={{
                       fontSize: 24,
                       fontWeight: 700,
-                      color: '#1F2B4A',
+                      color: '#050606',
                       marginBottom: 12
                     }}>
                       {isSendingEmails ? 'Emails worden verzonden...' : 'Shoot toegevoegd!'}
@@ -1921,7 +1921,7 @@ E: hello@unposed.nl`;
                       <>
                         <p style={{
                           fontSize: 16,
-                          color: '#6B7280',
+                          color: '#050606',
                           lineHeight: 1.6,
                           marginBottom: 8
                         }}>
@@ -1929,7 +1929,7 @@ E: hello@unposed.nl`;
                         </p>
                         <p style={{
                           fontSize: 14,
-                          color: '#9CA3AF',
+                          color: '#050606',
                           lineHeight: 1.5
                         }}>
                           Sluit dit venster niet en verwijder de tab niet.
@@ -1939,7 +1939,7 @@ E: hello@unposed.nl`;
                       <>
                         <p style={{
                           fontSize: 16,
-                          color: '#6B7280',
+                          color: '#050606',
                           lineHeight: 1.6,
                           marginBottom: 8
                         }}>
@@ -1947,7 +1947,7 @@ E: hello@unposed.nl`;
                         </p>
                         <p style={{
                           fontSize: 14,
-                          color: '#9CA3AF',
+                          color: '#050606',
                           lineHeight: 1.5
                         }}>
                           De talenten ontvangen een email met de shoot details en kunnen zich direct aanmelden.
@@ -1968,7 +1968,7 @@ E: hello@unposed.nl`;
                         flex: 1,
                         padding: '14px 24px',
                         background: isSendingEmails ? '#F3F4F6' : '#E5DDD5',
-                        color: isSendingEmails ? '#9CA3AF' : '#1F2B4A',
+                        color: isSendingEmails ? '#9CA3AF' : '#050606',
                         border: 'none',
                         borderRadius: 8,
                         fontSize: 16,
@@ -1993,8 +1993,8 @@ E: hello@unposed.nl`;
                       style={{
                         flex: 1,
                         padding: '14px 24px',
-                        background: isSendingEmails ? '#9CA3AF' : '#2B3E72',
-                        color: '#fff',
+                        background: isSendingEmails ? '#9CA3AF' : '#402e27',
+                        color: '#f8f7f2',
                         border: 'none',
                         borderRadius: 8,
                         fontSize: 16,
@@ -2011,7 +2011,7 @@ E: hello@unposed.nl`;
                         if (!isSendingEmails) e.currentTarget.style.background = '#1F2B4A';
                       }}
                       onMouseLeave={(e) => {
-                        if (!isSendingEmails) e.currentTarget.style.background = '#2B3E72';
+                        if (!isSendingEmails) e.currentTarget.style.background = '#402e27';
                       }}
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -109,17 +109,17 @@ export default function ResetPassword() {
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
                         <MiesLogo size={90} />
                     </div>
-                    <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0, color: '#1F2B4A', marginBottom: 8 }}>
+                    <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0, color: '#050606', marginBottom: 8 }}>
                         Nieuw wachtwoord
                     </h1>
-                    <p style={{ fontSize: 16, color: '#6B7280', margin: 0 }}>
+                    <p style={{ fontSize: 16, color: '#050606', margin: 0 }}>
                         Stel hieronder je nieuwe wachtwoord in
                     </p>
                 </div>
 
-                <form onSubmit={handleUpdatePassword} style={{ background: '#fff', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                <form onSubmit={handleUpdatePassword} style={{ background: '#f8f7f2', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                     <div style={{ marginBottom: 32 }}>
-                        <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
+                        <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
                             Nieuw wachtwoord
                         </label>
                         <input
@@ -133,7 +133,7 @@ export default function ResetPassword() {
                                 width: '100%',
                                 padding: '14px 16px',
                                 background: '#E5DDD5',
-                                color: '#1F2B4A',
+                                color: '#050606',
                                 border: 'none',
                                 borderRadius: 8,
                                 fontSize: 15,
@@ -163,8 +163,8 @@ export default function ResetPassword() {
                         style={{
                             width: '100%',
                             padding: '16px',
-                            background: '#2B3E72',
-                            color: '#fff',
+                            background: '#402e27',
+                            color: '#f8f7f2',
                             fontSize: 16,
                             fontWeight: 600,
                             border: 'none',
@@ -179,8 +179,8 @@ export default function ResetPassword() {
                         {loading ? 'Bezig...' : 'Wachtwoord opslaan'}
                     </button>
 
-                    <div style={{ textAlign: 'center', fontSize: 14, color: '#6B7280', margin: 0 }}>
-                        <a href="/account" style={{ color: '#2B3E72', textDecoration: 'underline' }}>Terug naar inloggen</a>
+                    <div style={{ textAlign: 'center', fontSize: 14, color: '#050606', margin: 0 }}>
+                        <a href="/account" style={{ color: '#050606', textDecoration: 'underline' }}>Terug naar inloggen</a>
                     </div>
                 </form>
             </div>

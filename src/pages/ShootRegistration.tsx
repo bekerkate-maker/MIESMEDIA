@@ -230,7 +230,7 @@ export default function ShootRegistration() {
             gap: 8,
             cursor: 'pointer',
             padding: 8,
-            color: '#1F2B4A',
+            color: '#050606',
             fontSize: 14,
             fontWeight: 600
           }}
@@ -255,7 +255,7 @@ export default function ShootRegistration() {
           }}
           aria-label="Inloggen of account wijzigen"
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f8f7f2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
             <circle cx="12" cy="8" r="4" />
             <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
           </svg>
@@ -378,7 +378,7 @@ export default function ShootRegistration() {
                               border: 'none',
                               padding: 0,
                               fontSize: 13,
-                              color: '#6B7280',
+                              color: '#050606',
                               cursor: 'pointer',
                               textDecoration: 'underline',
                               fontFamily: 'inherit'
@@ -450,7 +450,7 @@ export default function ShootRegistration() {
                           width: '100%',
                           padding: '12px',
                           background: 'transparent',
-                          color: '#6B7280',
+                          color: '#050606',
                           fontSize: 14,
                           fontWeight: 500,
                           border: 'none',
@@ -481,7 +481,7 @@ const styles = `
   min-height: 100vh;
   background: #E5DDD5;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: #1F2B4A;
+  color: #050606;
 }
 
 /* Logo Scroll Bar */
@@ -498,7 +498,7 @@ const styles = `
 }
 
 .invite-card {
-  background: #fff;
+  background: #f8f7f2;
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
@@ -548,14 +548,14 @@ const styles = `
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 700;
-  color: #6B7280;
+  color: #050606;
   margin-bottom: 8px;
 }
 
 .shoot-title {
   font-size: 28px;
   font-weight: 800;
-  color: #1F2B4A;
+  color: #050606;
   margin: 0 0 16px 0;
   line-height: 1.2;
 }
@@ -571,10 +571,10 @@ const styles = `
   align-items: center;
   gap: 10px;
   font-size: 15px;
-  color: #4B5563;
+  color: #050606;
   font-weight: 500;
 }
-.info-item svg { color: #2B3E72; }
+.info-item svg { color: #050606; }
 
 /* Divider */
 .card-divider {
@@ -592,13 +592,13 @@ const styles = `
 .section-title {
   font-size: 20px;
   font-weight: 700;
-  color: #1F2B4A;
+  color: #050606;
   margin: 0 0 4px 0;
 }
 
 .section-subtitle {
   font-size: 14px;
-  color: #6B7280;
+  color: #050606;
   margin: 0 0 24px 0;
 }
 
@@ -610,7 +610,7 @@ const styles = `
 
 .compact-option {
   flex: 1;
-  background: #fff;
+  background: #f8f7f2;
   border: 1px solid #E5E7EB;
   border-radius: 12px;
   padding: 20px;
@@ -622,8 +622,8 @@ const styles = `
 }
 
 .compact-option:hover {
-  border-color: #2B3E72;
-  box-shadow: 0 4px 12px rgba(43, 62, 114, 0.08);
+  border-color: #402e27;
+  box-shadow: 0 4px 12px rgba(64, 46, 39, 0.08);
   transform: translateY(-2px);
 }
 
@@ -636,7 +636,7 @@ const styles = `
 
 .compact-option-content p {
   font-size: 13px;
-  color: #6B7280;
+  color: #050606;
   margin: 0;
   line-height: 1.4;
 }
@@ -649,25 +649,25 @@ const styles = `
 }
 
 .compact-option:hover .arrow-icon {
-  color: #2B3E72;
+  color: #402e27;
 }
 
 /* Form View */
 .back-link {
   background: none; border: none; padding: 0;
-  color: #6B7280; font-weight: 600; font-size: 14px;
+  color: #050606; font-weight: 600; font-size: 14px;
   cursor: pointer; margin-bottom: 24px;
   font-family: inherit;
   transition: color 0.2s;
 }
-.back-link:hover { color: #1F2B4A; }
+.back-link:hover { color: #050606; }
 
 .compact-form {
   max-width: 600px;
 }
 
 .form-heading {
-  font-size: 18px; font-weight: 700; color: #1F2B4A; margin: 0 0 20px 0;
+  font-size: 18px; font-weight: 700; color: #050606; margin: 0 0 20px 0;
 }
 
 .compact-form-grid {
@@ -679,23 +679,23 @@ const styles = `
 }
 
 .form-group label {
-  display: block; font-size: 13px; font-weight: 600; color: #4B5563; margin-bottom: 6px;
+  display: block; font-size: 13px; font-weight: 600; color: #050606; margin-bottom: 6px;
 }
 
 .form-group input, .form-group textarea {
   width: 100%; padding: 10px 12px;
-  background: #fff; border: 1px solid #D1D5DB;
+  background: #f8f7f2; border: 1px solid #D1D5DB;
   border-radius: 8px; font-size: 14px; font-family: inherit;
   transition: border-color 0.2s;
   box-sizing: border-box;
 }
 
 .form-group input:focus, .form-group textarea:focus {
-  outline: none; border-color: #2B3E72;
+  outline: none; border-color: #402e27;
 }
 
 .full-submit-btn {
-  width: 100%; background: #2B3E72; color: #fff;
+  width: 100%; background: #402e27; color: #f8f7f2;
   padding: 14px; border: none; border-radius: 10px;
   font-weight: 600; font-size: 15px; cursor: pointer;
   transition: background 0.2s;
@@ -724,21 +724,21 @@ const styles = `
 }
 .primary-btn {
   padding: 14px 28px;
-  background: #2B3E72;
-  color: #fff;
+  background: #402e27;
+  color: #f8f7f2;
   border: none;
   border-radius: 12px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
   font-family: inherit;
-  box-shadow: 0 4px 12px rgba(43, 62, 114, 0.2);
+  box-shadow: 0 4px 12px rgba(64, 46, 39, 0.2);
   transition: all 0.3s ease;
 }
 
 .primary-btn:hover {
   background: #1F2B4A;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(43, 62, 114, 0.25);
+  box-shadow: 0 6px 16px rgba(64, 46, 39, 0.25);
 }
 `;

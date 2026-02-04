@@ -30,20 +30,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
     return () => clearTimeout(timeout);
   }, [effectiveUrl]);
 
-    if (!url) {
-      return <div style={{ color: 'red', padding: 16 }}>Geen PDF-url opgegeven.</div>;
-    }
-    return (
-      <div style={{ width: '100%', height: '70vh', background: '#fff', borderRadius: 8 }}>
-        <embed
-          src={url}
-          type="application/pdf"
-          width="100%"
-          height="100%"
-          style={{ border: 0, minHeight: 500, borderRadius: 8 }}
-        />
-      </div>
-    );
+  if (!url) {
+    return <div style={{ color: 'red', padding: 16 }}>Geen PDF-url opgegeven.</div>;
+  }
+  return (
+    <div style={{ width: '100%', height: '70vh', background: '#f8f7f2', borderRadius: 8 }}>
+      <embed
+        src={url}
+        type="application/pdf"
+        width="100%"
+        height="100%"
+        style={{ border: 0, minHeight: 500, borderRadius: 8 }}
+      />
+    </div>
+  );
 };
 
 export default PDFViewer;

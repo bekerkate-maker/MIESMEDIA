@@ -605,8 +605,8 @@ export default function Dashboard() {
                   className="header-btn shoots-btn"
                   style={{
                     background: 'transparent',
-                    color: '#1F2B4A',
-                    border: '2px solid #fff',
+                    color: '#050606',
+                    border: '2px solid #f8f7f2',
                     fontSize: 14,
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -620,7 +620,7 @@ export default function Dashboard() {
                   }}
                   title="Beheer shoots"
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#fff';
+                    e.currentTarget.style.background = '#f8f7f2';
                     e.currentTarget.style.transform = 'translateY(-2px)';
                   }}
                   onMouseLeave={(e) => {
@@ -645,7 +645,7 @@ export default function Dashboard() {
                     }}
                     title="Account"
                   >
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f8f7f2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
                       <circle cx="12" cy="8" r="4" />
                       <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
                     </svg>
@@ -656,7 +656,7 @@ export default function Dashboard() {
                       top: '100%',
                       right: 0,
                       marginTop: 8,
-                      background: '#fff',
+                      background: '#f8f7f2',
                       borderRadius: 8,
                       boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                       padding: 4,
@@ -672,7 +672,7 @@ export default function Dashboard() {
                           padding: '8px 16px',
                           background: 'transparent',
                           border: 'none',
-                          color: '#1F2B4A',
+                          color: '#050606',
                           fontSize: 14,
                           fontWeight: 500,
                           cursor: 'pointer',
@@ -703,24 +703,24 @@ export default function Dashboard() {
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
           }} onClick={() => setShowTermsModal(false)}>
-            <div style={{ background: '#fff', borderRadius: 12, maxWidth: 700, width: '90vw', maxHeight: '80vh', overflow: 'auto', position: 'relative', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }} onClick={e => e.stopPropagation()}>
+            <div style={{ background: '#f8f7f2', borderRadius: 12, maxWidth: 700, width: '90vw', maxHeight: '80vh', overflow: 'auto', position: 'relative', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }} onClick={e => e.stopPropagation()}>
               <iframe src={activeTerms.document_url} title="Privacyverklaring" style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }} />
               <div style={{ display: 'flex', gap: 12, marginTop: 16, justifyContent: 'flex-end' }}>
                 <button
                   onClick={() => setShowTermsModal(false)}
-                  style={{ padding: '10px 24px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ padding: '10px 24px', background: '#E5DDD5', color: '#050606', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
                 >Annuleren</button>
                 <button
                   onClick={handleDeleteTerms}
-                  style={{ padding: '10px 24px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ padding: '10px 24px', background: '#ef4444', color: '#f8f7f2', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
                 >Verwijder privacyverklaring</button>
               </div>
             </div>
           </div>
         )}
         <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#1F2B4A' }}>Talenten Dashboard</h1>
-          <p className="dashboard-subtitle" style={{ marginTop: 12, color: '#4B5563', maxWidth: '800px', lineHeight: 1.5 }}>
+          <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#050606' }}>Talenten Dashboard</h1>
+          <p className="dashboard-subtitle" style={{ marginTop: 12, color: '#050606', maxWidth: '800px', lineHeight: 1.5 }}>
             Filter op kenmerken, vind de perfecte match en nodig talenten direct uit voor je volgende productie.
           </p>
           <style>{`
@@ -736,14 +736,14 @@ export default function Dashboard() {
           `}</style>
         </div>
 
-        <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginBottom: 32, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)' }}>
+        <div style={{ background: '#f8f7f2', padding: 24, borderRadius: 12, marginBottom: 32, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)' }}>
           {/* Zoekbalk + Filter toggle knop voor mobiel */}
           <div className="search-row" style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
             <input
               placeholder="Zoek op naam of email..."
               value={searchTerm}
               onChange={(e: any) => setSearchTerm(e.target.value)}
-              style={{ flex: 1, padding: '12px 16px', background: '#E5DDD5', color: '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit' }}
+              style={{ flex: 1, padding: '12px 16px', background: '#E5DDD5', color: '#050606', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit' }}
             />
             <button
               className="filter-toggle-btn"
@@ -751,7 +751,7 @@ export default function Dashboard() {
               style={{
                 padding: '12px 16px',
                 background: '#E5DDD5',
-                color: '#1F2B4A',
+                color: '#050606',
                 border: 'none',
                 borderRadius: 8,
                 fontSize: 14,
@@ -763,14 +763,14 @@ export default function Dashboard() {
                 fontFamily: 'inherit'
               }}
             >
-              <Filter size={20} /> {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && <span style={{ background: '#EF4444', color: '#fff', borderRadius: '50%', width: 18, height: 18, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>!</span>}
+              <Filter size={20} /> {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && <span style={{ background: '#EF4444', color: '#f8f7f2', borderRadius: '50%', width: 18, height: 18, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>!</span>}
             </button>
           </div>
 
           {/* Desktop filters - altijd zichtbaar */}
           <div className="filters-desktop" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 16, alignItems: 'center' }}>
             <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}
-              style={{ padding: '12px 16px', background: '#E5DDD5', color: genderFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer' }}
+              style={{ padding: '12px 16px', background: '#E5DDD5', color: genderFilter === 'all' ? '#050606' : '#050606', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer' }}
             >
               <option value="all">Kies geslacht</option>
               <option value="man">Man</option>
@@ -779,7 +779,7 @@ export default function Dashboard() {
             </select>
 
             <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}
-              style={{ padding: '12px 16px', background: '#E5DDD5', color: cityFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer' }}
+              style={{ padding: '12px 16px', background: '#E5DDD5', color: cityFilter === 'all' ? '#050606' : '#050606', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer' }}
             >
               <option value="all">Kies locatie</option>
               {Array.from(new Set(models.map(m => m.city))).sort().map(city => (
@@ -795,7 +795,7 @@ export default function Dashboard() {
                 max="100"
                 value={minAge === 0 ? '' : minAge}
                 onChange={(e) => setMinAge(e.target.value === '' ? 0 : parseInt(e.target.value))}
-                style={{ padding: '12px 16px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, color: '#1F2B4A', fontFamily: 'inherit' }}
+                style={{ padding: '12px 16px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, color: '#050606', fontFamily: 'inherit' }}
               />
               <input
                 type="number"
@@ -804,7 +804,7 @@ export default function Dashboard() {
                 max="100"
                 value={maxAge === 100 ? '' : maxAge}
                 onChange={(e) => setMaxAge(e.target.value === '' ? 100 : parseInt(e.target.value))}
-                style={{ padding: '12px 16px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, color: '#1F2B4A', fontFamily: 'inherit' }}
+                style={{ padding: '12px 16px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, color: '#050606', fontFamily: 'inherit' }}
               />
             </div>
 
@@ -820,7 +820,7 @@ export default function Dashboard() {
               style={{
                 padding: '12px 16px',
                 background: (genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100 || searchTerm !== '') ? '#EF4444' : '#E5DDD5',
-                color: (genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100 || searchTerm !== '') ? '#fff' : '#9CA3AF',
+                color: (genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100 || searchTerm !== '') ? '#f8f7f2' : '#050606',
                 border: 'none',
                 borderRadius: 8,
                 fontSize: 14,
@@ -853,7 +853,7 @@ export default function Dashboard() {
                 {/* Geslacht en Locatie op één rij */}
                 <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
                   <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}
-                    style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', color: genderFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 6, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer' }}
+                    style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', color: genderFilter === 'all' ? '#050606' : '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer' }}
                   >
                     <option value="all">Geslacht</option>
                     <option value="man">Man</option>
@@ -862,7 +862,7 @@ export default function Dashboard() {
                   </select>
 
                   <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}
-                    style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', color: cityFilter === 'all' ? '#9CA3AF' : '#1F2B4A', border: 'none', borderRadius: 6, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer' }}
+                    style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', color: cityFilter === 'all' ? '#050606' : '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer' }}
                   >
                     <option value="all">Locatie</option>
                     {Array.from(new Set(models.map(m => m.city))).sort().map(city => (
@@ -881,7 +881,7 @@ export default function Dashboard() {
                       max="100"
                       value={minAge === 0 ? '' : minAge}
                       onChange={(e) => setMinAge(e.target.value === '' ? 0 : parseInt(e.target.value))}
-                      style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', border: 'none', borderRadius: 6, fontSize: 12, color: '#1F2B4A', fontFamily: 'inherit' }}
+                      style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', border: 'none', borderRadius: 6, fontSize: 12, color: '#050606', fontFamily: 'inherit' }}
                     />
                   </div>
                   <div style={{ flex: 1, display: 'flex', gap: 4, alignItems: 'center' }}>
@@ -892,13 +892,13 @@ export default function Dashboard() {
                       max="100"
                       value={maxAge === 100 ? '' : maxAge}
                       onChange={(e) => setMaxAge(e.target.value === '' ? 100 : parseInt(e.target.value))}
-                      style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', border: 'none', borderRadius: 6, fontSize: 12, color: '#1F2B4A', fontFamily: 'inherit' }}
+                      style={{ flex: 1, minWidth: 0, padding: '8px 6px', background: '#E5DDD5', border: 'none', borderRadius: 6, fontSize: 12, color: '#050606', fontFamily: 'inherit' }}
                     />
                     {/* Reset knop alleen als filters actief zijn */}
                     {(genderFilter !== 'all' || cityFilter !== 'all' || minAge > 0 || maxAge < 100) && (
                       <button
                         onClick={() => { setGenderFilter('all'); setCityFilter('all'); setMinAge(0); setMaxAge(100); }}
-                        style={{ padding: '8px 10px', background: '#EF4444', color: '#fff', border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}
+                        style={{ padding: '8px 10px', background: '#EF4444', color: '#f8f7f2', border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}
                       >
                         ✕
                       </button>
@@ -917,17 +917,17 @@ export default function Dashboard() {
             alignItems: 'center',
             gap: 8
           }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#402e27" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
               <circle cx="9" cy="7" r="4"></circle>
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
-            <span style={{ fontSize: 15, color: '#1F2B4A', fontWeight: 600 }}>
+            <span style={{ fontSize: 15, color: '#050606', fontWeight: 600 }}>
               {filteredModels.length} {filteredModels.length === 1 ? 'talent' : 'talenten'}
             </span>
             {filteredModels.length !== models.length && (
-              <span style={{ fontSize: 14, color: '#6B7280', fontWeight: 500 }}>
+              <span style={{ fontSize: 14, color: '#050606', fontWeight: 500 }}>
                 van {models.length}
               </span>
             )}
@@ -940,14 +940,14 @@ export default function Dashboard() {
               key={model.id}
               ref={(el) => { modelRefs.current[model.id] = el; }}
               style={{
-                background: '#fff',
+                background: '#f8f7f2',
                 borderRadius: 10,
                 overflow: 'hidden',
                 border: highlightedModelId === model.id
-                  ? '2px solid #2B3E72'
+                  ? '2px solid #402e27'
                   : '1px solid rgba(0, 0, 0, 0.08)',
                 boxShadow: highlightedModelId === model.id
-                  ? 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5), 0 2px 8px rgba(43, 62, 114, 0.15)'
+                  ? 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5), 0 2px 8px rgba(64, 46, 39, 0.15)'
                   : 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)',
                 position: 'relative',
                 display: 'flex',
@@ -974,7 +974,7 @@ export default function Dashboard() {
                   justifyContent: 'center',
                   fontSize: 48,
                   fontWeight: 700,
-                  color: '#2B3E72',
+                  color: '#402e27',
                   overflow: 'hidden',
                   position: 'relative',
                   cursor: model.photo_url ? 'pointer' : 'default'
@@ -1004,7 +1004,7 @@ export default function Dashboard() {
                         bottom: 10,
                         right: 10,
                         background: 'rgba(0,0,0,0.6)',
-                        color: '#fff',
+                        color: '#f8f7f2',
                         padding: '6px 12px',
                         borderRadius: 20,
                         fontSize: 13,
@@ -1035,7 +1035,7 @@ export default function Dashboard() {
                   WebkitBackdropFilter: 'blur(8px)',
                   zIndex: 2
                 }}>
-                  <h3 className="model-name-text" style={{ fontSize: 14, fontWeight: 600, margin: 0, color: '#fff', letterSpacing: '0.3px' }}>
+                  <h3 className="model-name-text" style={{ fontSize: 14, fontWeight: 600, margin: 0, color: '#f8f7f2', letterSpacing: '0.3px' }}>
                     {model.first_name} {model.last_name}
                   </h3>
                 </div>
@@ -1097,7 +1097,7 @@ export default function Dashboard() {
                 </div>
 
                 <div style={{ marginBottom: 10 }}>
-                  <p style={{ color: '#6B7280', margin: 0, fontSize: 13, marginBottom: 10 }}>
+                  <p style={{ color: '#050606', margin: 0, fontSize: 13, marginBottom: 10 }}>
                     {(() => {
                       if (model.gender === 'man' || model.gender === 'male') return 'Man';
                       if (model.gender === 'vrouw' || model.gender === 'female') return 'Vrouw';
@@ -1108,26 +1108,26 @@ export default function Dashboard() {
                 </div>
 
                 <div style={{ marginBottom: 7 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: '#6B7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{model.email}</p>
+                  <p style={{ margin: 0, fontSize: 12, color: '#050606', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{model.email}</p>
                 </div>
 
                 <div style={{ marginBottom: 7 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: '#6B7280' }}>{model.phone}</p>
+                  <p style={{ margin: 0, fontSize: 12, color: '#050606' }}>{model.phone}</p>
                 </div>
 
                 <div style={{ marginBottom: 7 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: '#6B7280' }}>{model.city}</p>
+                  <p style={{ margin: 0, fontSize: 12, color: '#050606' }}>{model.city}</p>
                 </div>
 
                 {model.instagram && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
-                    <Instagram style={{ height: 13, width: 13, color: '#6B7280' }} />
+                    <Instagram style={{ height: 13, width: 13, color: '#050606' }} />
                     <a
                       href={`https://instagram.com/${(model.instagram || '').replace("@", "")}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        color: '#2B3E72',
+                        color: '#402e27',
                         textDecoration: 'none',
                         fontSize: 12,
                         fontWeight: 500,
@@ -1136,11 +1136,11 @@ export default function Dashboard() {
                       }}
                       onMouseEnter={e => {
                         e.currentTarget.style.textDecoration = 'underline';
-                        e.currentTarget.style.color = '#2563eb';
+                        e.currentTarget.style.color = '#402e27';
                       }}
                       onMouseLeave={e => {
                         e.currentTarget.style.textDecoration = 'none';
-                        e.currentTarget.style.color = '#2B3E72';
+                        e.currentTarget.style.color = '#402e27';
                       }}
                     >
                       {model.instagram}
@@ -1152,8 +1152,8 @@ export default function Dashboard() {
                   <button
                     onClick={() => handleContactModel(model)}
                     style={{
-                      background: '#2B3E72',
-                      color: '#fff',
+                      background: '#402e27',
+                      color: '#f8f7f2',
                       border: 'none',
                       padding: '10px 12px',
                       borderRadius: 6,
@@ -1176,7 +1176,7 @@ export default function Dashboard() {
                     <label
                       style={{
                         background: '#E5DDD5',
-                        color: '#1F2B4A',
+                        color: '#050606',
                         border: 'none',
                         padding: '10px 12px',
                         borderRadius: 6,
@@ -1235,7 +1235,7 @@ export default function Dashboard() {
                       onClick={() => setViewingQuitclaimFor(model)}
                       style={{
                         background: '#22c55e',
-                        color: '#fff',
+                        color: '#f8f7f2',
                         border: 'none',
                         padding: '10px 12px',
                         borderRadius: 6,
@@ -1260,15 +1260,15 @@ export default function Dashboard() {
         </div>
 
         {filteredModels.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 60, background: '#fff', borderRadius: 12, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)' }}>
-            <p style={{ color: '#6B7280', fontSize: 16 }}>Geen modellen gevonden</p>
+          <div style={{ textAlign: 'center', padding: 60, background: '#f8f7f2', borderRadius: 12, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)' }}>
+            <p style={{ color: '#050606', fontSize: 16 }}>Geen modellen gevonden</p>
           </div>
         )}
 
         {/* Aangemelde collega's sectie onderaan */}
-        <div style={{ background: '#fff', padding: 24, borderRadius: 12, marginTop: 40, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)', position: 'relative' }}>
+        <div style={{ background: '#f8f7f2', padding: 24, borderRadius: 12, marginTop: 40, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#1F2B4A' }}>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#050606' }}>
               Geregistreerde collega's
             </h3>
             <button
@@ -1285,7 +1285,7 @@ export default function Dashboard() {
                 right: 12,
                 padding: '6px 12px',
                 background: 'transparent',
-                color: '#9CA3AF',
+                color: '#050606',
                 border: '1px solid #E5E7EB',
                 borderRadius: 6,
                 fontSize: 12,
@@ -1307,7 +1307,7 @@ export default function Dashboard() {
                     padding: '10px 18px',
                     borderRadius: 8,
                     fontSize: 15,
-                    color: '#1F2B4A',
+                    color: '#050606',
                     fontWeight: 500,
                     display: 'flex',
                     alignItems: 'center',
@@ -1326,7 +1326,7 @@ export default function Dashboard() {
               ))}
             </div>
           ) : (
-            <p style={{ color: '#6B7280', margin: 0, fontSize: 15 }}>Er zijn nog geen collega's geregistreerd.</p>
+            <p style={{ color: '#050606', margin: 0, fontSize: 15 }}>Er zijn nog geen collega's geregistreerd.</p>
           )}
         </div>
       </main>
@@ -1347,7 +1347,7 @@ export default function Dashboard() {
           padding: 20
         }}>
           <div style={{
-            background: '#fff',
+            background: '#f8f7f2',
             borderRadius: 12,
             padding: 32,
             maxWidth: 600,
@@ -1356,13 +1356,13 @@ export default function Dashboard() {
             overflowY: 'auto',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }}>
-            <h2 style={{ margin: 0, marginBottom: 24, fontSize: 28, fontWeight: 700, color: '#1F2B4A' }}>
+            <h2 style={{ margin: 0, marginBottom: 24, fontSize: 28, fontWeight: 700, color: '#050606' }}>
               Talent bewerken
             </h2>
 
             {/* Foto Upload Area */}
             <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#050606' }}>
                 Profielfoto
               </label>
               <div
@@ -1370,7 +1370,7 @@ export default function Dashboard() {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 style={{
-                  border: `2px dashed ${isDragging ? '#2B3E72' : '#6B7280'}`,
+                  border: `2px dashed ${isDragging ? '#402e27' : '#050606'}`,
                   borderRadius: 12,
                   padding: 24,
                   textAlign: 'center',
@@ -1394,22 +1394,22 @@ export default function Dashboard() {
                         margin: '0 auto 12px'
                       }}
                     />
-                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                    <p style={{ margin: 0, fontSize: 14, color: '#050606' }}>
                       Klik of sleep een nieuwe foto om te vervangen
                     </p>
                   </div>
                 ) : (
                   <div>
                     <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2B3E72" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#402e27" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                         <circle cx="12" cy="13" r="4"></circle>
                       </svg>
                     </div>
-                    <p style={{ margin: 0, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
+                    <p style={{ margin: 0, fontSize: 15, color: '#050606', fontWeight: 500 }}>
                       Klik om een foto te uploaden
                     </p>
-                    <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B7280' }}>
+                    <p style={{ margin: '4px 0 0', fontSize: 13, color: '#050606' }}>
                       of sleep een foto hierheen
                     </p>
                   </div>
@@ -1426,7 +1426,7 @@ export default function Dashboard() {
 
             {/* Extra Foto's Sectie */}
             <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#050606' }}>
                 Extra foto's ({editExtraPhotos.length})
               </label>
 
@@ -1456,7 +1456,7 @@ export default function Dashboard() {
               )}
 
               <div>
-                <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
+                <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#050606' }}>
                   Geboortedatum
                 </label>
                 <input
@@ -1467,7 +1467,7 @@ export default function Dashboard() {
                     width: '100%',
                     padding: '12px 16px',
                     background: '#E5DDD5',
-                    color: '#1F2B4A',
+                    color: '#050606',
                     border: 'none',
                     borderRadius: 8,
                     fontSize: 15,
@@ -1475,14 +1475,14 @@ export default function Dashboard() {
                     boxSizing: 'border-box'
                   }}
                 />
-                <div style={{ fontSize: 13, color: '#6B7280', marginTop: 4 }}>
+                <div style={{ fontSize: 13, color: '#050606', marginTop: 4 }}>
                   Leeftijd: {editFormData.birthdate ? `${calculateAge(editFormData.birthdate)} jaar • ${formatDateNL(editFormData.birthdate, true)}` : 'Onbekend'}
                 </div>
               </div>
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#050606' }}>
                 Instagram
               </label>
               <input
@@ -1493,7 +1493,7 @@ export default function Dashboard() {
                   width: '100%',
                   padding: '12px 16px',
                   background: '#E5DDD5',
-                  color: '#1F2B4A',
+                  color: '#050606',
                   border: 'none',
                   borderRadius: 8,
                   fontSize: 15,
@@ -1504,7 +1504,7 @@ export default function Dashboard() {
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#050606' }}>
                 E-mail
               </label>
               <input
@@ -1515,7 +1515,7 @@ export default function Dashboard() {
                   width: '100%',
                   padding: '12px 16px',
                   background: '#E5DDD5',
-                  color: '#1F2B4A',
+                  color: '#050606',
                   border: 'none',
                   borderRadius: 8,
                   fontSize: 15,
@@ -1526,7 +1526,7 @@ export default function Dashboard() {
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#050606' }}>
                 Telefoonnummer
               </label>
               <input
@@ -1537,7 +1537,7 @@ export default function Dashboard() {
                   width: '100%',
                   padding: '12px 16px',
                   background: '#E5DDD5',
-                  color: '#1F2B4A',
+                  color: '#050606',
                   border: 'none',
                   borderRadius: 8,
                   fontSize: 15,
@@ -1548,7 +1548,7 @@ export default function Dashboard() {
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#1F2B4A' }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: '#050606' }}>
                 Woonplaats
               </label>
               <input
@@ -1559,7 +1559,7 @@ export default function Dashboard() {
                   width: '100%',
                   padding: '12px 16px',
                   background: '#E5DDD5',
-                  color: '#1F2B4A',
+                  color: '#050606',
                   border: 'none',
                   borderRadius: 8,
                   fontSize: 15,
@@ -1575,7 +1575,7 @@ export default function Dashboard() {
                 style={{
                   padding: '12px 24px',
                   background: '#dc2626',
-                  color: '#fff',
+                  color: '#f8f7f2',
                   border: 'none',
                   borderRadius: 8,
                   fontSize: 15,
@@ -1596,7 +1596,7 @@ export default function Dashboard() {
                   style={{
                     padding: '12px 24px',
                     background: '#E5DDD5',
-                    color: '#1F2B4A',
+                    color: '#050606',
                     border: 'none',
                     borderRadius: 8,
                     fontSize: 15,
@@ -1611,8 +1611,8 @@ export default function Dashboard() {
                   onClick={handleSaveEdit}
                   style={{
                     padding: '12px 24px',
-                    background: '#2B3E72',
-                    color: '#fff',
+                    background: '#402e27',
+                    color: '#f8f7f2',
                     border: 'none',
                     borderRadius: 8,
                     fontSize: 15,
@@ -1657,7 +1657,7 @@ export default function Dashboard() {
             position: 'absolute',
             top: 20,
             right: 20,
-            color: '#fff',
+            color: '#f8f7f2',
             fontSize: 40,
             cursor: 'pointer',
             zIndex: 2001,
@@ -1691,7 +1691,7 @@ export default function Dashboard() {
                 setImageZoom(Math.max(0.5, imageZoom - 0.25));
               }}
               style={{
-                background: '#fff',
+                background: '#f8f7f2',
                 border: 'none',
                 padding: '8px 16px',
                 borderRadius: 8,
@@ -1702,7 +1702,7 @@ export default function Dashboard() {
             >
               −
             </button>
-            <span style={{ color: '#fff', fontSize: 16, alignSelf: 'center', minWidth: 60, textAlign: 'center' }}>
+            <span style={{ color: '#f8f7f2', fontSize: 16, alignSelf: 'center', minWidth: 60, textAlign: 'center' }}>
               {Math.round(imageZoom * 100)}%
             </span>
             <button
@@ -1711,7 +1711,7 @@ export default function Dashboard() {
                 setImageZoom(Math.min(3, imageZoom + 0.25));
               }}
               style={{
-                background: '#fff',
+                background: '#f8f7f2',
                 border: 'none',
                 padding: '8px 16px',
                 borderRadius: 8,
@@ -1783,7 +1783,7 @@ export default function Dashboard() {
             padding: '0 20px',
             zIndex: 2001
           }}>
-            <h3 style={{ margin: 0, color: '#fff', fontSize: 20, fontWeight: 600 }}>
+            <h3 style={{ margin: 0, color: '#f8f7f2', fontSize: 20, fontWeight: 600 }}>
               {viewingPhotosFor.first_name} {viewingPhotosFor.last_name}
             </h3>
             <button
@@ -1796,7 +1796,7 @@ export default function Dashboard() {
               style={{
                 background: 'rgba(255,255,255,0.2)',
                 border: 'none',
-                color: '#fff',
+                color: '#f8f7f2',
                 fontSize: 28,
                 width: 50,
                 height: 50,
@@ -1837,7 +1837,7 @@ export default function Dashboard() {
                         transform: 'translateY(-50%)',
                         background: 'rgba(255,255,255,0.2)',
                         border: 'none',
-                        color: '#fff',
+                        color: '#f8f7f2',
                         fontSize: 32,
                         width: 60,
                         height: 60,
@@ -1865,7 +1865,7 @@ export default function Dashboard() {
                         transform: 'translateY(-50%)',
                         background: 'rgba(255,255,255,0.2)',
                         border: 'none',
-                        color: '#fff',
+                        color: '#f8f7f2',
                         fontSize: 32,
                         width: 60,
                         height: 60,
@@ -1910,7 +1910,7 @@ export default function Dashboard() {
                   left: '50%',
                   transform: 'translateX(-50%)',
                   background: 'rgba(0,0,0,0.6)',
-                  color: '#fff',
+                  color: '#f8f7f2',
                   padding: '8px 16px',
                   borderRadius: 20,
                   fontSize: 14,
@@ -1950,7 +1950,7 @@ export default function Dashboard() {
                           borderRadius: 6,
                           cursor: 'pointer',
                           opacity: currentPhotoIndex === index ? 1 : 0.5,
-                          border: currentPhotoIndex === index ? '2px solid #fff' : '2px solid transparent',
+                          border: currentPhotoIndex === index ? '2px solid #f8f7f2' : '2px solid transparent',
                           transition: 'all 0.2s ease'
                         }}
                       />
@@ -2138,7 +2138,7 @@ export default function Dashboard() {
           padding: 20
         }}>
           <div style={{
-            background: '#fff',
+            background: '#f8f7f2',
             borderRadius: 12,
             maxWidth: 800,
             width: '100%',
@@ -2155,11 +2155,11 @@ export default function Dashboard() {
               alignItems: 'center',
               position: 'sticky',
               top: 0,
-              background: '#fff',
+              background: '#f8f7f2',
               zIndex: 10
             }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: 24, color: '#1F2B4A' }}>
+                <h2 style={{ margin: 0, fontSize: 24, color: '#050606' }}>
                   Notities voor {viewingNotesFor.first_name} {viewingNotesFor.last_name}
                 </h2>
               </div>
@@ -2170,7 +2170,7 @@ export default function Dashboard() {
                   border: 'none',
                   fontSize: 24,
                   cursor: 'pointer',
-                  color: '#6B7280',
+                  color: '#050606',
                   padding: 8
                 }}
               >
@@ -2187,8 +2187,8 @@ export default function Dashboard() {
                   style={{
                     width: '100%',
                     padding: 16,
-                    background: '#2B3E72',
-                    color: '#fff',
+                    background: '#402e27',
+                    color: '#f8f7f2',
                     border: 'none',
                     borderRadius: 8,
                     fontSize: 16,
@@ -2202,7 +2202,7 @@ export default function Dashboard() {
                     gap: 8
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = '#1F2B4A'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#2B3E72'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#402e27'}
                 >
 
                   <span>Nieuwe notitie toevoegen</span>
@@ -2213,10 +2213,10 @@ export default function Dashboard() {
                   borderRadius: 8,
                   padding: 20,
                   marginBottom: 24,
-                  border: '2px solid #2B3E72'
+                  border: '2px solid #402e27'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <h3 style={{ margin: 0, fontSize: 18, color: '#1F2B4A' }}>
+                    <h3 style={{ margin: 0, fontSize: 18, color: '#050606' }}>
                       Nieuwe notitie toevoegen
                     </h3>
                     <button
@@ -2226,7 +2226,7 @@ export default function Dashboard() {
                         border: 'none',
                         fontSize: 20,
                         cursor: 'pointer',
-                        color: '#6B7280',
+                        color: '#050606',
                         padding: 4
                       }}
                       title="Annuleren"
@@ -2236,7 +2236,7 @@ export default function Dashboard() {
                   </div>
 
                   <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                    <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Notitie *
                     </label>
                     <textarea
@@ -2247,7 +2247,7 @@ export default function Dashboard() {
                       style={{
                         width: '100%',
                         padding: 12,
-                        background: '#fff',
+                        background: '#f8f7f2',
                         border: '1px solid #E5E7EB',
                         borderRadius: 6,
                         fontSize: 14,
@@ -2260,7 +2260,7 @@ export default function Dashboard() {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                     <div>
-                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                         Shoot naam (optioneel)
                       </label>
                       <input
@@ -2271,7 +2271,7 @@ export default function Dashboard() {
                         style={{
                           width: '100%',
                           padding: 12,
-                          background: '#fff',
+                          background: '#f8f7f2',
                           border: '1px solid #E5E7EB',
                           borderRadius: 6,
                           fontSize: 14,
@@ -2282,7 +2282,7 @@ export default function Dashboard() {
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                         Soort vergoeding
                       </label>
                       <select
@@ -2291,7 +2291,7 @@ export default function Dashboard() {
                         style={{
                           width: '100%',
                           padding: 12,
-                          background: '#fff',
+                          background: '#f8f7f2',
                           border: '1px solid #E5E7EB',
                           borderRadius: 6,
                           fontSize: 14,
@@ -2310,7 +2310,7 @@ export default function Dashboard() {
 
                   {(newNote.compensation_type === 'financiële vergoeding' || newNote.compensation_type === 'cadeaubon') && (
                     <div style={{ marginBottom: 16 }}>
-                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#1F2B4A', fontWeight: 500 }}>
+                      <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                         Bedrag (€)
                       </label>
                       <input
@@ -2323,7 +2323,7 @@ export default function Dashboard() {
                         style={{
                           width: '100%',
                           padding: 12,
-                          background: '#fff',
+                          background: '#f8f7f2',
                           border: '1px solid #E5E7EB',
                           borderRadius: 6,
                           fontSize: 14,
@@ -2340,8 +2340,8 @@ export default function Dashboard() {
                       style={{
                         flex: 1,
                         padding: 12,
-                        background: '#2B3E72',
-                        color: '#fff',
+                        background: '#402e27',
+                        color: '#f8f7f2',
                         border: 'none',
                         borderRadius: 6,
                         fontSize: 14,
@@ -2350,7 +2350,7 @@ export default function Dashboard() {
                         fontFamily: 'inherit'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = '#1F2B4A'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = '#2B3E72'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = '#402e27'}
                     >
                       Opslaan
                     </button>
@@ -2367,7 +2367,7 @@ export default function Dashboard() {
                       style={{
                         padding: 12,
                         background: '#E5E7EB',
-                        color: '#1F2B4A',
+                        color: '#050606',
                         border: 'none',
                         borderRadius: 6,
                         fontSize: 14,
@@ -2387,7 +2387,7 @@ export default function Dashboard() {
 
               {/* Bestaande notities */}
               <div>
-                <h3 style={{ margin: '0 0 16px 0', fontSize: 18, color: '#1F2B4A' }}>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: 18, color: '#050606' }}>
                   Eerder toegevoegde notities ({modelNotes.length})
                 </h3>
 
@@ -2395,7 +2395,7 @@ export default function Dashboard() {
                   <div style={{
                     textAlign: 'center',
                     padding: 40,
-                    color: '#9CA3AF',
+                    color: '#050606',
                     fontSize: 14
                   }}>
                     Nog geen notities toegevoegd voor dit model
@@ -2404,7 +2404,7 @@ export default function Dashboard() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {modelNotes.map((note) => (
                       <div key={note.id} style={{
-                        background: '#fff',
+                        background: '#f8f7f2',
                         border: '1px solid #E5E7EB',
                         borderRadius: 8,
                         padding: 16,
@@ -2449,10 +2449,10 @@ export default function Dashboard() {
                         </button>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, paddingRight: 40 }}>
-                          <div style={{ fontSize: 12, color: '#6B7280' }}>
+                          <div style={{ fontSize: 12, color: '#050606' }}>
                             {note.employee_name}
                           </div>
-                          <div style={{ fontSize: 12, color: '#9CA3AF' }}>
+                          <div style={{ fontSize: 12, color: '#050606' }}>
                             {formatDateNL(note.created_at, true)}
                           </div>
                         </div>
@@ -2461,7 +2461,7 @@ export default function Dashboard() {
                           <div style={{
                             fontSize: 14,
                             fontWeight: 600,
-                            color: '#2B3E72',
+                            color: '#402e27',
                             marginBottom: 8
                           }}>
                             {note.shoot_name}
@@ -2470,7 +2470,7 @@ export default function Dashboard() {
 
                         <div style={{
                           fontSize: 14,
-                          color: '#1F2B4A',
+                          color: '#050606',
                           lineHeight: 1.6,
                           marginBottom: 8,
                           whiteSpace: 'pre-wrap'
@@ -2481,7 +2481,7 @@ export default function Dashboard() {
                         {note.compensation_type && (
                           <div style={{
                             fontSize: 13,
-                            color: '#6B7280',
+                            color: '#050606',
                             padding: '6px 12px',
                             background: '#F3F4F6',
                             borderRadius: 4,
@@ -2519,7 +2519,7 @@ export default function Dashboard() {
           padding: 20
         }}>
           <div style={{
-            background: '#fff',
+            background: '#f8f7f2',
             borderRadius: 12,
             width: '95%',
             maxWidth: 1200,
@@ -2536,11 +2536,11 @@ export default function Dashboard() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              background: '#fff',
+              background: '#f8f7f2',
               flexShrink: 0
             }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: 20, color: '#1F2B4A' }}>
+                <h2 style={{ margin: 0, fontSize: 20, color: '#050606' }}>
                   📄 Quitclaim - {viewingQuitclaimFor.first_name} {viewingQuitclaimFor.last_name}
                 </h2>
               </div>
@@ -2551,7 +2551,7 @@ export default function Dashboard() {
                   border: 'none',
                   fontSize: 28,
                   cursor: 'pointer',
-                  color: '#6B7280',
+                  color: '#050606',
                   padding: '4px 8px'
                 }}
               >
@@ -2598,7 +2598,7 @@ export default function Dashboard() {
               display: 'flex',
               gap: 12,
               justifyContent: 'flex-end',
-              background: '#fff'
+              background: '#f8f7f2'
             }}>
               <button
                 onClick={() => {
@@ -2609,7 +2609,7 @@ export default function Dashboard() {
                 }}
                 style={{
                   background: '#1F2B4A',
-                  color: '#fff',
+                  color: '#f8f7f2',
                   border: 'none',
                   padding: '12px 24px',
                   borderRadius: 8,
@@ -2650,7 +2650,7 @@ export default function Dashboard() {
                 }}
                 style={{
                   background: '#ef4444',
-                  color: '#fff',
+                  color: '#f8f7f2',
                   border: 'none',
                   padding: '12px 24px',
                   borderRadius: 8,
@@ -2692,17 +2692,17 @@ export default function Dashboard() {
           padding: 20
         }}>
           <div style={{
-            background: '#fff',
+            background: '#f8f7f2',
             borderRadius: 12,
             padding: 32,
             maxWidth: 500,
             width: '100%',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }}>
-            <h2 style={{ margin: 0, marginBottom: 24, fontSize: 24, fontWeight: 700, color: '#1F2B4A' }}>
+            <h2 style={{ margin: 0, marginBottom: 24, fontSize: 24, fontWeight: 700, color: '#050606' }}>
               Upload privacyverklaring
             </h2>
-            <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 20 }}>
+            <p style={{ fontSize: 14, color: '#050606', marginBottom: 20 }}>
               Upload een <span style={{ textDecoration: 'underline', fontWeight: 600 }}>PDF</span> document met de privacyverklaring die modellen moeten accepteren bij registratie.
             </p>
 
@@ -2726,7 +2726,7 @@ export default function Dashboard() {
                   width: '100%',
                   boxSizing: 'border-box',
                   padding: '12px',
-                  border: '2px dashed #6B7280',
+                  border: '2px dashed #050606',
                   borderRadius: 8,
                   cursor: 'pointer',
                   fontFamily: 'inherit',
@@ -2740,7 +2740,7 @@ export default function Dashboard() {
               <div style={{
                 width: '100%',
                 boxSizing: 'border-box',
-                border: '2px solid #2B3E72',
+                border: '2px solid #402e27',
                 borderRadius: 8,
                 marginBottom: 20,
                 padding: 8,
@@ -2752,9 +2752,9 @@ export default function Dashboard() {
                 <iframe
                   src={pdfPreviewUrl}
                   title="Voorwaarden preview"
-                  style={{ width: '100%', height: 350, border: 'none', background: '#fff', boxSizing: 'border-box' }}
+                  style={{ width: '100%', height: 350, border: 'none', background: '#f8f7f2', boxSizing: 'border-box' }}
                 />
-                <div style={{ fontSize: 13, color: '#2B3E72', marginTop: 8, fontWeight: 600 }}>
+                <div style={{ fontSize: 13, color: '#402e27', marginTop: 8, fontWeight: 600 }}>
                   Voorbeeld van je PDF
                 </div>
               </div>
@@ -2771,7 +2771,7 @@ export default function Dashboard() {
                   flex: 1,
                   padding: '12px',
                   background: '#E5DDD5',
-                  color: '#1F2B4A',
+                  color: '#050606',
                   border: 'none',
                   borderRadius: 8,
                   fontSize: 14,
@@ -2792,8 +2792,8 @@ export default function Dashboard() {
                   style={{
                     flex: 1,
                     padding: '12px',
-                    background: '#2B3E72',
-                    color: '#fff',
+                    background: '#402e27',
+                    color: '#f8f7f2',
                     border: 'none',
                     borderRadius: 8,
                     fontSize: 14,

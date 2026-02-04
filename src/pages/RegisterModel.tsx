@@ -267,7 +267,7 @@ export default function RegisterModel() {
           }}
           aria-label="Inloggen of account wijzigen"
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f8f7f2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
             <circle cx="12" cy="8" r="4" />
             <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
           </svg>
@@ -359,7 +359,7 @@ export default function RegisterModel() {
               </div>
               <div className="form-field">
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  Hoofdfoto * {photoFile && <Check size={18} color="#1F2B4A" />}
+                  Hoofdfoto * {photoFile && <Check size={18} color="#050606" />}
                 </label>
                 <input id="photo-upload-input" type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
                 <div style={{ display: 'flex', gap: 12 }}>
@@ -380,7 +380,7 @@ export default function RegisterModel() {
                       style={{
                         width: 'auto',
                         background: '#DC2626',
-                        color: '#fff',
+                        color: '#f8f7f2',
                         padding: '12px 16px',
                         flex: '0 0 auto'
                       }}
@@ -408,7 +408,7 @@ export default function RegisterModel() {
                   borderRadius: 12,
                   overflow: 'hidden',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                  border: '4px solid #fff'
+                  border: '4px solid #f8f7f2'
                 }}>
                   <img
                     src={photoPreview}
@@ -429,7 +429,7 @@ export default function RegisterModel() {
                     textAlign: 'center',
                     fontSize: 13,
                     fontWeight: 600,
-                    color: '#1F2B4A',
+                    color: '#050606',
                     backdropFilter: 'blur(4px)'
                   }}>
                     Jouw hoofdfoto
@@ -468,16 +468,16 @@ export default function RegisterModel() {
                     marginTop: 10,
                     cursor: 'pointer',
                     flexShrink: 0,
-                    accentColor: '#2B3E72'
+                    accentColor: '#050606'
                   }}
                 />
-                <span style={{ fontSize: 15, color: '#1F2B4A', lineHeight: 1.6 }}>
+                <span style={{ fontSize: 15, color: '#050606', lineHeight: 1.6 }}>
                   Ik ga akkoord met de{' '}
                   {termsUrl ? (
                     <button
                       type="button"
                       style={{
-                        color: '#2B3E72',
+                        color: '#050606',
                         fontWeight: 700,
                         textDecoration: 'underline',
                         background: 'none',
@@ -489,8 +489,8 @@ export default function RegisterModel() {
                         fontFamily: 'inherit',
                         transition: 'color 0.2s'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#1F2B4A'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = '#2B3E72'}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#050606'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#050606'}
                       onClick={() => {
                         console.log('Privacy policy clicked, termsUrl:', termsUrl);
                         setShowTermsModal(true);
@@ -523,7 +523,7 @@ export default function RegisterModel() {
                 onClick={() => setShowTermsModal(false)}
               >
                 <div style={{
-                  background: '#fff',
+                  background: '#f8f7f2',
                   borderRadius: 12,
                   maxWidth: 700,
                   width: '90vw',
@@ -549,7 +549,7 @@ export default function RegisterModel() {
                       fontSize: 20,
                       fontWeight: 'bold',
                       cursor: 'pointer',
-                      color: '#1F2B4A',
+                      color: '#050606',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -577,6 +577,6 @@ export default function RegisterModel() {
   );
 }
 
-const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#1F2B4A;font-weight:700}.success-text{font-size:20px;color:#1F2B4A;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#fff;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;align-items:center;animation:scroll 240s linear infinite;will-change:transform;width:max-content}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#2B3E72;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#1F2B4A}.subtitle{font-size:16px;color:#6B7280;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#fff;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#1F2B4A;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#9CA3AF}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#1F2B4A;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#1F2B4A;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #6B7280}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:10px;cursor:pointer;flex-shrink:0;accent-color:#2B3E72}.checkbox-label span{font-size:15px;color:#1F2B4A;line-height:1.6}
+const styles = `.register-page{min-height:100vh;background:#E5DDD5;font-family:system-ui,-apple-system,sans-serif}.success-page{display:flex;align-items:center;justify-content:center}.success-container{text-align:center;padding:20px;max-width:500px}.success-title{font-size:42px;margin-bottom:16px;color:#050606;font-weight:700}.success-text{font-size:20px;color:#050606;font-weight:500;margin-bottom:32px}.logo-center{display:flex;justify-content:center;margin-bottom:24px}.logo-banner{background:#f8f7f2;padding:12px 0;overflow:hidden;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px}.logo-banner-inner{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;display:flex;align-items:center}.logo-scroll{display:flex;align-items:center;animation:scroll 240s linear infinite;will-change:transform;width:max-content}.logo-scroll img{width:auto;object-fit:contain;filter:grayscale(100%)}.logo-small{height:25px}.logo-normal{height:40px}.logo-large{height:50px}.logo-xlarge{height:60px}@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}.content-section{padding:60px 20px}.header-section{text-align:center;margin-bottom:40px}.button-wrapper{margin-bottom:24px}.primary-btn{padding:12px 24px;background:#402e27;color:#f8f7f2;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.3s ease}.primary-btn:hover{background:#1F2B4A;transform:translateY(-2px)}.main-title{font-size:42px;font-weight:700;margin:0 0 8px 0;color:#050606}.subtitle{font-size:16px;color:#050606;margin:0}.form-wrapper{max-width:800px;margin:0 auto}.register-form{background:#f8f7f2;padding:48px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}.form-field{margin-bottom:24px}.form-row .form-field{margin-bottom:0}.form-field label{display:block;margin-bottom:8px;font-size:15px;color:#050606;font-weight:500}.form-field input,.form-field select{width:100%;padding:12px 16px;background:#E5DDD5;color:#050606;border:none;border-radius:8px;font-size:15px;font-family:inherit;box-sizing:border-box}.form-field select.placeholder{color:#050606}.input-with-prefix{position:relative;display:flex;align-items:center}.input-with-prefix .prefix{position:absolute;left:16px;color:#050606;font-size:15px;font-weight:500;pointer-events:none}.input-with-prefix input{padding-left:36px}.upload-btn{width:100%;padding:12px 16px;background:#E5DDD5;color:#050606;border:none;border-radius:8px;font-size:15px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box}.upload-btn.dashed{border:2px dashed #050606}.photo-preview-container{margin-bottom:12px;text-align:center}.photo-preview{max-width:200px;max-height:200px;border-radius:8px;object-fit:cover}.extra-photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.extra-photo-item{position:relative}.extra-photo-item img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}.remove-btn{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.9);color:#f8f7f2;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold}.checkbox-label{display:flex;align-items:flex-start;gap:12px;cursor:pointer}.checkbox-label input{width:18px !important;height:18px;margin-top:10px;cursor:pointer;flex-shrink:0;accent-color:#050606}.checkbox-label span{font-size:15px;color:#050606;line-height:1.6}
 .mobile-text { display: none; }
-.submit-btn{width:100%;padding:16px;background:#2B3E72;color:#fff;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 20px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}.checkbox-label span{font-size:9px !important;line-height:1.1 !important}}`
+.submit-btn{width:100%;padding:16px;background:#402e27;color:#f8f7f2;font-size:16px;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.3s ease}.submit-btn.disabled{background:#9CA3AF;cursor:not-allowed;opacity:0.6}@media(max-width:768px){.content-section{padding:20px 20px}.header-section{margin-bottom:24px}.main-title{font-size:24px;line-height:1.3}.subtitle{font-size:14px}.primary-btn{padding:10px 18px;font-size:13px}.register-form{padding:20px 16px}.form-row{grid-template-columns:1fr;gap:0;margin-bottom:0}.form-row .form-field{margin-bottom:16px}.form-field{margin-bottom:16px}.form-field input,.form-field select{font-size:16px}.logo-banner{min-height:45px}.logo-small{height:18px}.logo-normal{height:28px}.logo-xlarge{height:42px}.success-title{font-size:28px}.success-text{font-size:16px}.checkbox-label span{font-size:9px !important;line-height:1.1 !important}}`

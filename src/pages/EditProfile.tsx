@@ -114,16 +114,33 @@ const EditProfile: React.FC = () => {
     };
 
     const [newPassword, setNewPassword] = useState('');
+    const [currentPassword, setCurrentPassword] = useState('');
     const [passwordMsg, setPasswordMsg] = useState<string | null>(null);
+    const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
     const [photoMsg, setPhotoMsg] = useState<string | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     const handlePasswordUpdate = async () => {
         if (!newPassword || newPassword.length < 6) return;
+        if (!currentPassword) {
+            setPasswordMsg('Voer je huidige wachtwoord in om te bevestigen.');
+            return;
+        }
+
         setLoading(true);
         setPasswordMsg(null);
 
         try {
+            // Verify current password by attempting to sign in
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: user.email,
+                password: currentPassword
+            });
+
+            if (signInError) {
+                throw new Error('Het huidige wachtwoord is onjuist.');
+            }
+
             const { error } = await supabase.auth.updateUser({
                 password: newPassword
             });
@@ -131,6 +148,24 @@ const EditProfile: React.FC = () => {
             if (error) throw error;
             setPasswordMsg('Wachtwoord succesvol gewijzigd');
             setNewPassword('');
+            setCurrentPassword('');
+        } catch (err: any) {
+            console.error(err);
+            setPasswordMsg(err.message || 'Er ging iets mis bij het wijzigen.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSendResetLink = async () => {
+        setLoading(true);
+        setPasswordMsg(null);
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(profile.email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+            });
+            if (error) throw error;
+            setPasswordMsg('We hebben een herstel-link gestuurd naar je e-mailadres.');
         } catch (err: any) {
             console.error(err);
             setPasswordMsg('Er ging iets mis: ' + err.message);
@@ -333,7 +368,7 @@ const EditProfile: React.FC = () => {
     return (
         <div style={{ minHeight: '100vh', background: '#E5DDD5', fontFamily: 'system-ui, -apple-system, sans-serif', display: 'flex', flexDirection: 'column' }}>
             <ClientLogoBanner />
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', padding: '12px 320px 0 0', position: 'relative', zIndex: 50 }}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', padding: '12px 20px 0 0', position: 'relative', zIndex: 50, boxSizing: 'border-box' }}>
                 <div ref={menuRef} style={{ position: 'relative', marginRight: 24 }}>
                     <button
                         onClick={() => setShowMenu(!showMenu)}
@@ -347,7 +382,7 @@ const EditProfile: React.FC = () => {
                             cursor: 'pointer',
                         }}
                     >
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.05))' }}>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f8f7f2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.05))' }}>
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
@@ -359,7 +394,7 @@ const EditProfile: React.FC = () => {
                             top: '100%',
                             right: 0,
                             marginTop: 8,
-                            background: '#fff',
+                            background: '#f8f7f2',
                             borderRadius: 12,
                             boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
                             minWidth: 200,
@@ -380,7 +415,7 @@ const EditProfile: React.FC = () => {
                                     textAlign: 'left',
                                     cursor: 'pointer',
                                     fontSize: 15,
-                                    color: '#1F2B4A',
+                                    color: '#050606',
                                     fontWeight: 600, // Active state indication perhaps?
                                     transition: 'background 0.2s'
                                 }}
@@ -409,7 +444,7 @@ const EditProfile: React.FC = () => {
                                     textAlign: 'left',
                                     cursor: 'pointer',
                                     fontSize: 15,
-                                    color: '#1F2B4A',
+                                    color: '#050606',
                                     transition: 'background 0.2s'
                                 }}
                                 onMouseEnter={e => e.currentTarget.style.background = '#F3F4F6'}
@@ -439,7 +474,7 @@ const EditProfile: React.FC = () => {
                                     textAlign: 'left',
                                     cursor: 'pointer',
                                     fontSize: 15,
-                                    color: '#DC2626',
+                                    color: '#050606',
                                     transition: 'background 0.2s'
                                 }}
                                 onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
@@ -462,25 +497,30 @@ const EditProfile: React.FC = () => {
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
                         <MiesLogo size={100} />
                     </div>
-                    <h2 style={{ fontSize: 28, color: '#1F2B4A', margin: 0 }}>Mijn Profiel</h2>
+                    <div>
+                        <h2 style={{ fontSize: 28, color: '#050606', margin: 0 }}>Mijn profiel</h2>
+                        <p style={{ margin: '8px 0 0 0', color: '#050606', fontSize: 15 }}>
+                            Voer hier wijzigingen door aan je profiel.
+                        </p>
+                    </div>
 
-                    <div style={{ background: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                        <h3 style={{ marginTop: 0, color: '#2B3E72', marginBottom: 24 }}>Gegevens</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div style={{ background: '#f8f7f2', borderRadius: 16, padding: 32, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                        <h3 style={{ marginTop: 0, color: '#050606', marginBottom: 24 }}>Gegevens</h3>
+                        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 4 }}>Voornaam</label>
+                                <label style={{ display: 'block', fontSize: 13, color: '#050606', marginBottom: 4 }}>Voornaam</label>
                                 <input value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} style={inputStyle} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 4 }}>Achternaam</label>
+                                <label style={{ display: 'block', fontSize: 13, color: '#050606', marginBottom: 4 }}>Achternaam</label>
                                 <input value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} style={inputStyle} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 4 }}>E-mailadres</label>
+                                <label style={{ display: 'block', fontSize: 13, color: '#050606', marginBottom: 4 }}>E-mailadres</label>
                                 <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} style={inputStyle} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 4 }}>Geboortedatum (dd/mm/jjjj)</label>
+                                <label style={{ display: 'block', fontSize: 13, color: '#050606', marginBottom: 4 }}>Geboortedatum (dd/mm/jjjj)</label>
                                 <input
                                     value={form.birthdate || ''}
                                     onChange={e => {
@@ -496,58 +536,150 @@ const EditProfile: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 4 }}>Telefoonnummer</label>
+                                <label style={{ display: 'block', fontSize: 13, color: '#050606', marginBottom: 4 }}>Telefoonnummer</label>
                                 <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} style={inputStyle} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 4 }}>Woonplaats</label>
+                                <label style={{ display: 'block', fontSize: 13, color: '#050606', marginBottom: 4 }}>Woonplaats</label>
                                 <input value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} style={inputStyle} />
                             </div>
 
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ display: 'block', fontSize: 13, color: '#6B7280', marginBottom: 4 }}>Instagram</label>
+                                <label style={{ display: 'block', fontSize: 13, color: '#050606', marginBottom: 4 }}>Instagram</label>
                                 <input value={form.instagram} onChange={e => setForm({ ...form, instagram: e.target.value })} style={inputStyle} />
                             </div>
                         </div>
 
-                        <button onClick={handleUpdateProfile} style={{ marginTop: 24, padding: '12px 24px', background: '#2B3E72', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer', width: '100%' }}>
+                        <button onClick={handleUpdateProfile} style={{ marginTop: 24, padding: '12px 24px', background: '#402e27', color: '#f8f7f2', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer', width: '100%' }}>
                             Wijzigingen opslaan
                         </button>
                         {successMsg && <p style={{ color: '#16A34A', fontSize: 14, textAlign: 'center', marginTop: 12 }}>{successMsg}</p>}
                     </div>
 
-                    <div style={{ background: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                        <h3 style={{ marginTop: 0, color: '#2B3E72', marginBottom: 24 }}>Wachtwoord wijzigen</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            <input
-                                type="password"
-                                placeholder="Nieuw wachtwoord"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                style={inputStyle}
-                            />
-                            <button
-                                onClick={handlePasswordUpdate}
-                                disabled={!newPassword || newPassword.length < 6}
-                                style={{
-                                    padding: '12px 24px',
-                                    background: (!newPassword || newPassword.length < 6) ? '#9CA3AF' : '#2B3E72',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: 8,
-                                    fontWeight: 600,
-                                    cursor: (!newPassword || newPassword.length < 6) ? 'not-allowed' : 'pointer',
-                                    width: '100%'
-                                }}
-                            >
-                                Wachtwoord opslaan
-                            </button>
-                            {passwordMsg && <p style={{ color: passwordMsg.includes('fout') ? '#DC2626' : '#16A34A', fontSize: 14, textAlign: 'center', marginTop: 0 }}>{passwordMsg}</p>}
-                        </div>
+                    <div style={{ background: '#f8f7f2', borderRadius: 16, padding: 32, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                        <h3 style={{ marginTop: 0, color: '#050606', marginBottom: 24 }}>
+                            {forgotPasswordMode ? 'Wachtwoord herstellen' : 'Wachtwoord wijzigen'}
+                        </h3>
+
+                        {!forgotPasswordMode ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 13, color: '#050606', marginBottom: 4 }}>Huidig wachtwoord</label>
+                                    <input
+                                        type="password"
+                                        name="current_password_input_no_autofill"
+                                        autoComplete="new-password"
+                                        placeholder="••••••••••••"
+                                        value={currentPassword}
+                                        onChange={(e) => setCurrentPassword(e.target.value)}
+                                        style={inputStyle}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 13, color: '#050606', marginBottom: 4 }}>Nieuw wachtwoord</label>
+                                    <input
+                                        type="password"
+                                        placeholder="Nieuw wachtwoord (min. 6 tekens)"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        style={inputStyle}
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={handlePasswordUpdate}
+                                    disabled={!newPassword || newPassword.length < 6 || !currentPassword}
+                                    style={{
+                                        padding: '12px 24px',
+                                        background: (!newPassword || newPassword.length < 6 || !currentPassword) ? '#9CA3AF' : '#402e27',
+                                        color: '#f8f7f2',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        fontWeight: 600,
+                                        cursor: (!newPassword || newPassword.length < 6 || !currentPassword) ? 'not-allowed' : 'pointer',
+                                        width: '100%'
+                                    }}
+                                >
+                                    Wachtwoord opslaan
+                                </button>
+
+                                <div style={{ textAlign: 'center' }}>
+                                    <button
+                                        onClick={() => {
+                                            setForgotPasswordMode(true);
+                                            setPasswordMsg(null);
+                                        }}
+                                        style={{ background: 'none', border: 'none', color: '#050606', textDecoration: 'underline', fontSize: 14, cursor: 'pointer' }}
+                                    >
+                                        Wachtwoord vergeten?
+                                    </button>
+                                </div>
+
+                                {passwordMsg && (
+                                    <p style={{
+                                        color: passwordMsg.includes('onjuist') || passwordMsg.includes('mis') ? '#DC2626' : '#16A34A',
+                                        fontSize: 14,
+                                        textAlign: 'center',
+                                        marginTop: 0,
+                                        background: passwordMsg.includes('onjuist') || passwordMsg.includes('mis') ? '#FEF2F2' : '#F0FDF4',
+                                        padding: 8,
+                                        borderRadius: 8
+                                    }}>
+                                        {passwordMsg}
+                                    </p>
+                                )}
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                <p style={{ fontSize: 15, color: '#050606', margin: 0, lineHeight: 1.5 }}>
+                                    Weet je je huidige wachtwoord niet meer? Geen probleem. Klik hieronder om een herstel-link te ontvangen op <strong>{profile?.email || 'je e-mailadres'}</strong>.
+                                </p>
+
+                                <button
+                                    onClick={handleSendResetLink}
+                                    style={{
+                                        padding: '12px 24px',
+                                        background: '#402e27',
+                                        color: '#f8f7f2',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        width: '100%'
+                                    }}
+                                >
+                                    Verstuur herstel-link
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setForgotPasswordMode(false);
+                                        setPasswordMsg(null);
+                                    }}
+                                    style={{ background: 'none', border: 'none', color: '#050606', fontSize: 14, cursor: 'pointer' }}
+                                >
+                                    Terug naar wijzigen
+                                </button>
+
+                                {passwordMsg && (
+                                    <p style={{
+                                        color: passwordMsg.includes('mis') ? '#DC2626' : '#16A34A',
+                                        fontSize: 14,
+                                        textAlign: 'center',
+                                        marginTop: 0,
+                                        background: passwordMsg.includes('mis') ? '#FEF2F2' : '#F0FDF4',
+                                        padding: 8,
+                                        borderRadius: 8
+                                    }}>
+                                        {passwordMsg}
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
-                    <div style={{ background: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                        <h3 style={{ marginTop: 0, color: '#2B3E72', marginBottom: 24 }}>Mijn Foto's</h3>
+                    <div style={{ background: '#f8f7f2', borderRadius: 16, padding: 32, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                        <h3 style={{ marginTop: 0, color: '#050606', marginBottom: 24 }}>Mijn Foto's</h3>
 
                         {/* Hoofdfoto */}
                         <div style={{ marginBottom: 24 }}>
@@ -572,15 +704,15 @@ const EditProfile: React.FC = () => {
                                     />
                                 ) : (
                                     <div style={{ width: '100%', height: '100%', background: '#F3F4F6', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <User size={32} color="#9CA3AF" />
+                                        <User size={32} color="#050606" />
                                     </div>
                                 )}
                                 <label style={{
                                     position: 'absolute',
                                     bottom: -8,
                                     right: -8,
-                                    background: '#2B3E72',
-                                    color: '#fff',
+                                    background: '#402e27',
+                                    color: '#f8f7f2',
                                     borderRadius: '50%',
                                     width: 32,
                                     height: 32,
@@ -619,15 +751,15 @@ const EditProfile: React.FC = () => {
                                                     e.stopPropagation();
                                                     handleDeletePhoto(url);
                                                 }}
-                                                style={{ position: 'absolute', top: -6, right: -6, background: '#EF4444', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
+                                                style={{ position: 'absolute', top: -6, right: -6, background: '#EF4444', color: '#f8f7f2', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
                                                 ×
                                             </button>
                                         </div>
                                     );
                                 })}
                                 <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed #E5E7EB', borderRadius: 8, cursor: 'pointer', minHeight: 100, aspectRatio: '1/1' }}>
-                                    <span style={{ fontSize: 24, color: '#9CA3AF' }}>+</span>
-                                    <span style={{ fontSize: 11, color: '#9CA3AF' }}>Upload</span>
+                                    <span style={{ fontSize: 24, color: '#050606' }}>+</span>
+                                    <span style={{ fontSize: 11, color: '#050606' }}>Upload</span>
                                     <input type="file" multiple accept="image/*" onChange={handlePhotoUpload} style={{ display: 'none' }} />
                                 </label>
                             </div>
@@ -641,8 +773,8 @@ const EditProfile: React.FC = () => {
                             style={{
                                 marginTop: 24,
                                 padding: '12px 24px',
-                                background: '#2B3E72',
-                                color: '#fff',
+                                background: '#402e27',
+                                color: '#f8f7f2',
                                 border: 'none',
                                 borderRadius: 8,
                                 fontWeight: 600,
@@ -672,7 +804,7 @@ const EditProfile: React.FC = () => {
                         />
                         <button
                             onClick={() => setPreviewImage(null)}
-                            style={{ position: 'absolute', top: -40, right: 0, background: 'transparent', border: 'none', color: '#fff', fontSize: 32, cursor: 'pointer' }}
+                            style={{ position: 'absolute', top: -40, right: 0, background: 'transparent', border: 'none', color: '#f8f7f2', fontSize: 32, cursor: 'pointer' }}
                         >
                             ×
                         </button>
@@ -685,6 +817,11 @@ const EditProfile: React.FC = () => {
           @media (max-width: 900px) {
             main { grid-template-columns: 1fr !important; }
           }
+          @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr !important; }
+            /* Zorg dat de Instagram-rij niet meer spant over 2 kolommen als er maar 1 is */
+            .form-grid > div[style*="grid-column"] { grid-column: auto !important; }
+          }
         `}</style>
         </div>
     );
@@ -696,7 +833,8 @@ const inputStyle = {
     borderRadius: 8,
     border: '1px solid #E5E7EB',
     fontSize: 14,
-    color: '#1F2B4A',
+    color: '#050606',
+    background: '#E5DDD5',
     boxSizing: 'border-box' as const,
     fontFamily: 'inherit'
 };

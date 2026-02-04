@@ -285,18 +285,18 @@ const Account: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
               <MiesLogo size={90} />
             </div>
-            <h1 style={{ fontSize: 42, fontWeight: 700, margin: 0, color: '#1F2B4A', marginBottom: 8 }}>
+            <h1 style={{ fontSize: 42, fontWeight: 700, margin: 0, color: '#050606', marginBottom: 8 }}>
               The Unposed Collective
             </h1>
-            <p style={{ fontSize: 16, color: '#6B7280', margin: 0 }}>
+            <p style={{ fontSize: 16, color: '#050606', margin: 0 }}>
               Log in met je accountgegevens
             </p>
           </div>
 
           {!showForgotPassword ? (
-            <form onSubmit={handleLogin} style={{ background: '#fff', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <form onSubmit={handleLogin} style={{ background: '#f8f7f2', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <div style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
                   E-mailadres
                 </label>
                 <input
@@ -309,7 +309,7 @@ const Account: React.FC = () => {
                     width: '100%',
                     padding: '14px 16px',
                     background: '#E5DDD5',
-                    color: '#1F2B4A',
+                    color: '#050606',
                     border: 'none',
                     borderRadius: 8,
                     fontSize: 15,
@@ -320,7 +320,7 @@ const Account: React.FC = () => {
               </div>
 
               <div style={{ marginBottom: 32 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
                   Wachtwoord
                 </label>
                 <input
@@ -333,7 +333,7 @@ const Account: React.FC = () => {
                     width: '100%',
                     padding: '14px 16px',
                     background: '#E5DDD5',
-                    color: '#1F2B4A',
+                    color: '#050606',
                     border: 'none',
                     borderRadius: 8,
                     fontSize: 15,
@@ -350,7 +350,7 @@ const Account: React.FC = () => {
                       border: 'none',
                       padding: 0,
                       fontSize: 13,
-                      color: '#6B7280',
+                      color: '#050606',
                       cursor: 'pointer',
                       textDecoration: 'underline',
                       fontFamily: 'inherit'
@@ -381,8 +381,8 @@ const Account: React.FC = () => {
                 style={{
                   width: '100%',
                   padding: '16px',
-                  background: '#2B3E72',
-                  color: '#fff',
+                  background: '#402e27',
+                  color: '#f8f7f2',
                   fontSize: 16,
                   fontWeight: 600,
                   border: 'none',
@@ -397,21 +397,21 @@ const Account: React.FC = () => {
                 {loggingIn ? 'Even geduld...' : 'Inloggen'}
               </button>
 
-              <div style={{ textAlign: 'center', fontSize: 14, color: '#6B7280', margin: 0 }}>
-                Nog niet aangemeld als talent? <a href="/register-model" style={{ color: '#2B3E72', textDecoration: 'underline' }}>Meld je hier aan</a>
+              <div style={{ textAlign: 'center', fontSize: 14, color: '#050606', margin: 0 }}>
+                Nog niet aangemeld als talent? <a href="/register-model" style={{ color: '#050606', textDecoration: 'underline' }}>Meld je hier aan</a>
               </div>
             </form>
           ) : (
-            <form onSubmit={handlePasswordReset} style={{ background: '#fff', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <form onSubmit={handlePasswordReset} style={{ background: '#f8f7f2', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
               <div style={{ marginBottom: 24 }}>
-                <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 16px 0', color: '#1F2B4A' }}>
+                <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 16px 0', color: '#050606' }}>
                   Wachtwoord herstellen
                 </h2>
-                <p style={{ fontSize: 15, color: '#6B7280', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+                <p style={{ fontSize: 15, color: '#050606', margin: '0 0 24px 0', lineHeight: 1.5 }}>
                   Vul hieronder je e-mailadres in. We sturen je een link om een nieuw wachtwoord in te stellen.
                 </p>
 
-                <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#1F2B4A', fontWeight: 500 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
                   E-mailadres
                 </label>
                 <input
@@ -424,7 +424,7 @@ const Account: React.FC = () => {
                     width: '100%',
                     padding: '14px 16px',
                     background: '#E5DDD5',
-                    color: '#1F2B4A',
+                    color: '#050606',
                     border: 'none',
                     borderRadius: 8,
                     fontSize: 15,
@@ -454,8 +454,8 @@ const Account: React.FC = () => {
                 style={{
                   width: '100%',
                   padding: '16px',
-                  background: '#2B3E72',
-                  color: '#fff',
+                  background: '#402e27',
+                  color: '#f8f7f2',
                   fontSize: 16,
                   fontWeight: 600,
                   border: 'none',
@@ -481,7 +481,7 @@ const Account: React.FC = () => {
                   width: '100%',
                   padding: '12px',
                   background: 'transparent',
-                  color: '#6B7280',
+                  color: '#050606',
                   fontSize: 15,
                   fontWeight: 500,
                   border: 'none',
@@ -518,13 +518,13 @@ const Account: React.FC = () => {
       <ClientLogoBanner />
       <div className="account-header-container" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '32px 40px 16px 40px', position: 'relative', zIndex: 50, boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 13, color: '#6B7280', fontWeight: 500, textTransform: 'capitalize' }}>
+          <div style={{ fontSize: 13, color: '#050606', fontWeight: 500, textTransform: 'capitalize' }}>
             {formatDateNL(new Date().toISOString())}
           </div>
-          <h2 style={{ fontSize: 24, color: '#1F2B4A', margin: 0, fontWeight: 700 }}>
+          <h2 style={{ fontSize: 24, color: '#050606', margin: 0, fontWeight: 700 }}>
             {profile?.first_name ? `Welkom ${profile.first_name}!` : 'Mijn Account'}
           </h2>
-          <p style={{ margin: '4px 0 0 0', color: '#6B7280', fontSize: 15 }}>
+          <p style={{ margin: '4px 0 0 0', color: '#050606', fontSize: 15 }}>
             Hier vind je al jouw aankomende shoots en aanvragen.
           </p>
         </div>
@@ -541,7 +541,7 @@ const Account: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: '#1F2B4A'
+              color: '#050606'
             }}
           >
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="account-icon-svg">
@@ -556,7 +556,7 @@ const Account: React.FC = () => {
               top: '100%',
               right: 0,
               marginTop: 8,
-              background: '#fff',
+              background: '#f8f7f2',
               borderRadius: 12,
               boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
               minWidth: 200,
@@ -580,7 +580,7 @@ const Account: React.FC = () => {
                   textAlign: 'left',
                   cursor: 'pointer',
                   fontSize: 15,
-                  color: '#1F2B4A',
+                  color: '#050606',
                   transition: 'background 0.2s'
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#F3F4F6'}
@@ -608,7 +608,7 @@ const Account: React.FC = () => {
                   textAlign: 'left',
                   cursor: 'pointer',
                   fontSize: 15,
-                  color: '#DC2626',
+                  color: '#050606',
                   transition: 'background 0.2s'
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
@@ -635,7 +635,7 @@ const Account: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {/* Title container - can add filters or other header items here later */}
-            <h2 style={{ fontSize: 28, color: '#1F2B4A', margin: 0 }}>Mijn Shoots</h2>
+            <h2 style={{ fontSize: 28, color: '#050606', margin: 0 }}>Mijn Shoots</h2>
           </div>
 
 
@@ -648,7 +648,7 @@ const Account: React.FC = () => {
                 className="section-title"
                 style={{ marginBottom: isAgendaOpen ? 16 : 0 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2B4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050606" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                   <line x1="16" y1="2" x2="16" y2="6"></line>
                   <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -672,7 +672,7 @@ const Account: React.FC = () => {
               {isAgendaOpen && (
                 <>
                   {futureShoots.length === 0 ? (
-                    <p style={{ color: '#9CA3AF', fontStyle: 'italic', fontSize: 14 }}>Geen shoots op de planning.</p>
+                    <p style={{ color: '#050606', fontStyle: 'italic', fontSize: 14 }}>Geen shoots op de planning.</p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       {futureShoots.map(reg => (
@@ -716,7 +716,7 @@ const Account: React.FC = () => {
                 className="section-title"
                 style={{ marginBottom: isPendingOpen ? 16 : 0 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2B4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050606" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
@@ -738,7 +738,7 @@ const Account: React.FC = () => {
               {isPendingOpen && (
                 <>
                   {pendingShoots.length === 0 ? (
-                    <p style={{ color: '#9CA3AF', fontStyle: 'italic', fontSize: 14 }}>Geen openstaande aanmeldingen.</p>
+                    <p style={{ color: '#050606', fontStyle: 'italic', fontSize: 14 }}>Geen openstaande aanmeldingen.</p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       {pendingShoots.map(reg => (
@@ -798,7 +798,7 @@ const Account: React.FC = () => {
                 className="section-title"
                 style={{ marginBottom: isHistoryOpen ? 16 : 0 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F2B4A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050606" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
@@ -820,7 +820,7 @@ const Account: React.FC = () => {
               {isHistoryOpen && (
                 <>
                   {pastShoots.length === 0 ? (
-                    <p style={{ color: '#9CA3AF', fontStyle: 'italic', fontSize: 14 }}>Nog geen historie.</p>
+                    <p style={{ color: '#050606', fontStyle: 'italic', fontSize: 14 }}>Nog geen historie.</p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       {pastShoots.map(reg => (
@@ -841,7 +841,7 @@ const Account: React.FC = () => {
                             )}
                             <div>
                               <div className="card-title">{reg.shoots?.title}</div>
-                              <div style={{ fontSize: 13, color: '#6B7280' }}>
+                              <div style={{ fontSize: 13, color: '#050606' }}>
                                 {reg.shoots?.shoot_date ? new Date(reg.shoots.shoot_date).toLocaleDateString('nl-NL') : 'Datum onbekend'}
                               </div>
                             </div>
@@ -890,7 +890,7 @@ const Account: React.FC = () => {
       {
         openShoots.length > 0 && (
           <div style={{ width: '100%', padding: '20px 0 0 0', marginTop: 'auto' }}>
-            <h3 style={{ fontSize: 20, color: '#1F2B4A', marginBottom: 8, paddingLeft: 20 }}>
+            <h3 style={{ fontSize: 20, color: '#050606', marginBottom: 8, paddingLeft: 20 }}>
               Bekijk openstaande shoots
             </h3>
             <div style={{ height: 1, background: 'rgba(0,0,0,0.1)', margin: '0 20px 24px 20px' }} />
@@ -919,7 +919,7 @@ const Account: React.FC = () => {
                     style={{
                       minWidth: 280,
                       maxWidth: 280,
-                      background: '#fff',
+                      background: '#f8f7f2',
                       borderRadius: 12,
                       boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 -5px 15px -5px rgba(0, 0, 0, 0.04)',
                       padding: 16,
@@ -941,19 +941,19 @@ const Account: React.FC = () => {
                         />
                         {isExpired && (
                           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 600 }}>Verlopen</span>
+                            <span style={{ background: 'rgba(0,0,0,0.6)', color: '#f8f7f2', padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 600 }}>Verlopen</span>
                           </div>
                         )}
                       </div>
                     )}
-                    <div style={{ fontWeight: 600, color: '#1F2B4A', marginBottom: 4 }}>
+                    <div style={{ fontWeight: 600, color: '#050606', marginBottom: 4 }}>
                       {shoot.title}
                     </div>
-                    <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 8 }}>
+                    <div style={{ fontSize: 13, color: '#050606', marginBottom: 8 }}>
                       {shoot.shoot_date ? new Date(shoot.shoot_date).toLocaleDateString('nl-NL') : 'Datum onbekend'}
                       {shoot.time ? ` • ${shoot.time}` : ''}
                     </div>
-                    <div style={{ fontSize: 13, color: '#4B5563', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ fontSize: 13, color: '#050606', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
@@ -973,7 +973,7 @@ const Account: React.FC = () => {
           <div style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(255, 255, 255, 0.4)',
+            background: 'rgba(248, 247, 242, 0.4)',
             backdropFilter: 'blur(8px)',
             zIndex: 1000,
             display: 'flex',
@@ -982,7 +982,7 @@ const Account: React.FC = () => {
             padding: 20
           }} onClick={() => setSelectedShoot(null)}>
             <div style={{
-              background: '#fff',
+              background: '#f8f7f2',
               borderRadius: 16,
               maxWidth: 500,
               width: '100%',
@@ -999,7 +999,7 @@ const Account: React.FC = () => {
                   right: 12,
                   background: 'rgba(0,0,0,0.5)',
                   border: 'none',
-                  color: '#fff',
+                  color: '#f8f7f2',
                   width: 32,
                   height: 32,
                   borderRadius: '50%',
@@ -1023,7 +1023,7 @@ const Account: React.FC = () => {
               )}
 
               <div style={{ padding: 24 }}>
-                <div style={{ fontSize: 13, color: '#2B3E72', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
+                <div style={{ fontSize: 13, color: '#050606', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
                   {selectedShoot.client_name || selectedShoot.client}
                 </div>
 
@@ -1031,17 +1031,17 @@ const Account: React.FC = () => {
                   {selectedShoot.shoot_date && new Date(selectedShoot.shoot_date) < new Date() ? 'Verlopen' : 'Open'}
                 </div>
 
-                <h3 style={{ fontSize: 22, fontWeight: 700, color: '#1F2B4A', marginBottom: 16, marginTop: 0 }}>
+                <h3 style={{ fontSize: 22, fontWeight: 700, color: '#050606', marginBottom: 16, marginTop: 0 }}>
                   {selectedShoot.title}
                 </h3>
 
                 <div style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#4B5563' }}>
-                    <span style={{ fontSize: 18, color: '#1F2B4A', width: 20, textAlign: 'center' }}>•</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#050606' }}>
+                    <span style={{ fontSize: 18, color: '#050606', width: 20, textAlign: 'center' }}>•</span>
                     {formatDateNL(selectedShoot.shoot_date)}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#4B5563' }}>
-                    <span style={{ fontSize: 18, color: '#1F2B4A', width: 20, textAlign: 'center' }}>•</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#050606' }}>
+                    <span style={{ fontSize: 18, color: '#050606', width: 20, textAlign: 'center' }}>•</span>
                     {(() => {
                       if (selectedShoot.start_time && selectedShoot.end_time) {
                         return `${selectedShoot.start_time.substring(0, 5)} - ${selectedShoot.end_time.substring(0, 5)}`;
@@ -1056,13 +1056,13 @@ const Account: React.FC = () => {
                     })()}
                   </div>
                   {selectedShoot.location && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#4B5563' }}>
-                      <span style={{ fontSize: 18, color: '#1F2B4A', width: 20, textAlign: 'center' }}>•</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#050606' }}>
+                      <span style={{ fontSize: 18, color: '#050606', width: 20, textAlign: 'center' }}>•</span>
                       {selectedShoot.location}
                     </div>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#4B5563' }}>
-                    <span style={{ fontSize: 18, color: '#1F2B4A', width: 20, textAlign: 'center' }}>•</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#050606' }}>
+                    <span style={{ fontSize: 18, color: '#050606', width: 20, textAlign: 'center' }}>•</span>
                     {(() => {
                       if (selectedShoot.compensation_type === 'financiële vergoeding') return `Financiële vergoeding t.w.v. €${selectedShoot.compensation_amount}`;
                       if (selectedShoot.compensation_type === 'cadeaubon') return `Cadeaubon t.w.v. €${selectedShoot.compensation_amount}${selectedShoot.compensation_business_name ? ` bij ${selectedShoot.compensation_business_name}` : ''}`;
@@ -1073,14 +1073,14 @@ const Account: React.FC = () => {
                       return 'Geen vergoeding ingevuld';
                     })()}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#4B5563' }}>
-                    <span style={{ fontSize: 18, color: '#1F2B4A', width: 20, textAlign: 'center' }}>•</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#050606' }}>
+                    <span style={{ fontSize: 18, color: '#050606', width: 20, textAlign: 'center' }}>•</span>
                     {typeof selectedShoot.spots !== 'undefined' ? `${selectedShoot.spots} plekken beschikbaar` : 'Aantal plekken onbekend'}
                   </div>
                 </div>
 
                 {selectedShoot.description && (
-                  <p style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.6, marginBottom: 24 }}>
+                  <p style={{ fontSize: 14, color: '#050606', lineHeight: 1.6, marginBottom: 24 }}>
                     {(() => {
                       if (selectedShoot.description && selectedShoot.title && selectedShoot.description.toLowerCase().startsWith(selectedShoot.title.toLowerCase())) {
                         return selectedShoot.description.slice(selectedShoot.title.length).replace(/^\s*[,-:\.]?\s*/, '');
@@ -1096,9 +1096,9 @@ const Account: React.FC = () => {
                       href={selectedShoot.moodboard_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: 15, color: '#2563EB', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}
+                      style={{ fontSize: 15, color: '#050606', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}
                     >
-                      <span style={{ fontSize: 18, color: '#1F2B4A', width: 20, textAlign: 'center' }}>•</span> Bekijk moodboard →
+                      <span style={{ fontSize: 18, color: '#050606', width: 20, textAlign: 'center' }}>•</span> Bekijk moodboard →
                     </a>
                   )}
                   {selectedShoot.client_website && (
@@ -1106,9 +1106,9 @@ const Account: React.FC = () => {
                       href={selectedShoot.client_website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: 15, color: '#2563EB', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}
+                      style={{ fontSize: 15, color: '#050606', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}
                     >
-                      <span style={{ fontSize: 18, color: '#1F2B4A', width: 20, textAlign: 'center' }}>•</span> Bekijk website →
+                      <span style={{ fontSize: 18, color: '#050606', width: 20, textAlign: 'center' }}>•</span> Bekijk website →
                     </a>
                   )}
                   {selectedShoot.client_instagram && (
@@ -1116,9 +1116,9 @@ const Account: React.FC = () => {
                       href={`https://instagram.com/${selectedShoot.client_instagram.replace('@', '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: 15, color: '#2563EB', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}
+                      style={{ fontSize: 15, color: '#050606', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}
                     >
-                      <span style={{ fontSize: 18, color: '#1F2B4A', width: 20, textAlign: 'center' }}>•</span> {selectedShoot.client_instagram.startsWith('@') ? selectedShoot.client_instagram : '@' + selectedShoot.client_instagram}
+                      <span style={{ fontSize: 18, color: '#050606', width: 20, textAlign: 'center' }}>•</span> {selectedShoot.client_instagram.startsWith('@') ? selectedShoot.client_instagram : '@' + selectedShoot.client_instagram}
                     </a>
                   )}
                 </div>
@@ -1143,7 +1143,7 @@ const Account: React.FC = () => {
           }
           
           .section-card {
-            background: #fff;
+            background: #f8f7f2;
             border-radius: 16px;
             padding: 24px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -1151,7 +1151,7 @@ const Account: React.FC = () => {
 
           .section-title {
             margin-top: 0;
-            color: #1F2B4A;
+            color: #050606;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -1204,17 +1204,17 @@ const Account: React.FC = () => {
 
           .card-title {
             font-weight: 600;
-            color: #1F2B4A;
+            color: #050606;
             font-size: 15px;
           }
 
           .card-date, .card-location {
             font-size: 13px;
-            color: #6B7280;
+            color: #050606;
           }
           .card-location {
             margin-top: 2px;
-            color: #4B5563;
+            color: #050606;
           }
 
           .status-badge-container {
@@ -1235,7 +1235,7 @@ const Account: React.FC = () => {
             background: transparent;
             border: none;
             padding: 8px;
-            color: #DC2626;
+            color: #050606;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
