@@ -4,14 +4,54 @@ import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
 
 export default function RegisterEmployee() {
+  const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [inputCode, setInputCode] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const handleRequestCode = async (e: any) => {
+    e.preventDefault();
+    if (!name || !email) return;
+    setLoading(true);
+
+    try {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setVerificationCode(code);
+
+      console.log('Requesting verification code for:', email);
+
+      const emailResponse = await supabase.functions.invoke('send-email', {
+        body: {
+          name: name,
+          email: email,
+          code: code,
+          type: 'verification'
+        }
+      });
+
+      if (emailResponse.error) throw emailResponse.error;
+
+      setStep(2);
+      alert('✅ Er is een bericht gestuurd naar hello@unposed.nl. Vraag je collega om de verificatiecode die zij hebben ontvangen.');
+    } catch (error: any) {
+      console.error('Error requesting code:', error);
+      alert('Fout bij het aanvragen van de code: ' + (error.message || 'Probeer het opnieuw.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleRegister = async (e: any) => {
     e.preventDefault();
+    if (inputCode !== verificationCode) {
+      alert('❌ Onjuiste verificatiecode. Controleer de code en probeer het opnieuw.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -34,76 +74,49 @@ export default function RegisterEmployee() {
         throw authError;
       }
 
-      console.log('Auth user created:', authData.user?.id);
-      console.log('User confirmed:', authData.user?.confirmed_at);
-
       if (!authData.user) {
         throw new Error('Geen gebruiker aangemaakt');
       }
 
       // 2. Voeg gebruiker toe aan employees tabel
-      if (authData.user) {
-        const { error: dbError } = await supabase
-          .from('employees')
-          .insert([
-            {
-              user_id: authData.user.id,
-              name: name,
-              email: email,
-              role: 'employee'
-            }
-          ]);
-
-        if (dbError) {
-          console.error('Database insert error:', dbError);
-          throw new Error('Fout bij opslaan in database: ' + dbError.message);
-        }
-
-        // 3. Verstuur welkomstmail naar de nieuwe collega
-        try {
-          console.log('Attempting to send welcome email to:', email);
-          console.log('Calling edge function: send-email');
-
-          const emailResponse = await supabase.functions.invoke('send-email', {
-            body: {
-              name: name,
-              email: email
-            }
-          });
-
-          console.log('Email response:', emailResponse);
-          console.log('Email response data:', emailResponse.data);
-          console.log('Email response error:', emailResponse.error);
-
-          if (emailResponse.error) {
-            console.error('Email error details:', {
-              message: emailResponse.error.message,
-              context: emailResponse.error.context,
-              name: emailResponse.error.name
-            });
-            alert('⚠️ Account aangemaakt, maar email kon niet worden verstuurd: ' + emailResponse.error.message);
-          } else {
-            console.log('✅ Welkomstmail verstuurd naar:', email);
-            alert('✅ Account aangemaakt en welkomstmail verstuurd!');
+      const { error: dbError } = await supabase
+        .from('employees')
+        .insert([
+          {
+            user_id: authData.user.id,
+            name: name,
+            email: email,
+            role: 'employee'
           }
-        } catch (emailError: any) {
-          console.error('Failed to send welcome email:', emailError);
-          console.error('Error details:', emailError.message, emailError.stack);
-          alert('⚠️ Account aangemaakt, maar email kon niet worden verstuurd.');
-        }
+        ]);
+
+      if (dbError) {
+        console.error('Database insert error:', dbError);
+        throw new Error('Fout bij opslaan in database: ' + dbError.message);
       }
 
-      alert('✅ Account succesvol aangemaakt! Je wordt automatisch ingelogd...');
+      // 3. Verstuur welkomstmail naar de nieuwe collega
+      try {
+        await supabase.functions.invoke('send-email', {
+          body: {
+            name: name,
+            email: email,
+            type: 'welcome'
+          }
+        });
+      } catch (emailError: any) {
+        console.error('Failed to send welcome email:', emailError);
+      }
 
-      // 4. Log automatisch in met de nieuwe credentials
+      alert('✅ Account succesvol aangemaakt! Je wordt nu ingelogd...');
+
+      // 4. Log automatisch in
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (signInError) {
-        console.error('Auto sign-in error:', signInError);
-        alert('Account is aangemaakt, maar automatisch inloggen is mislukt. Probeer handmatig in te loggen op /login');
         navigate('/login');
       } else {
         navigate('/dashboard');
@@ -135,110 +148,185 @@ export default function RegisterEmployee() {
             Collega registratie
           </h1>
           <p style={{ fontSize: 16, color: '#050606', margin: 0 }}>
-            Maak een account aan om The Unposed Collective te beheren
+            {step === 1
+              ? 'Vul je gegevens in om de registratie te starten'
+              : 'Verifieer je account om de registratie te voltooien'}
           </p>
         </div>
 
-        <form onSubmit={handleRegister} style={{ background: '#f8f7f2', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-          <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
-              Volledige naam *
-            </label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Voor- en achternaam"
+        {step === 1 ? (
+          <form onSubmit={handleRequestCode} style={{ background: '#f8f7f2', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
+                Volledige naam *
+              </label>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Voor- en achternaam"
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  background: '#E5DDD5',
+                  color: '#050606',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 15,
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 32 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
+                E-mailadres *
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="naam@unposed.nl"
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  background: '#E5DDD5',
+                  color: '#050606',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 15,
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
               style={{
                 width: '100%',
-                padding: '14px 16px',
-                background: '#E5DDD5',
-                color: '#050606',
+                padding: '16px',
+                background: '#402e27',
+                color: '#f8f7f2',
+                fontSize: 16,
+                fontWeight: 600,
                 border: 'none',
                 borderRadius: 8,
-                fontSize: 15,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.6 : 1,
                 fontFamily: 'inherit',
                 boxSizing: 'border-box'
               }}
-            />
-          </div>
+            >
+              {loading ? 'Code aanvragen...' : 'Code aanvragen'}
+            </button>
+            <p style={{ textAlign: 'center', fontSize: 14, color: '#050606', marginTop: 20 }}>
+              Al een account? <a href="/login" style={{ color: '#050606', textDecoration: 'underline' }}>Log in</a>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={handleRegister} style={{ background: '#f8f7f2', padding: 48, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
+                Verificatiecode *
+              </label>
+              <input
+                type="text"
+                required
+                value={inputCode}
+                onChange={(e) => setInputCode(e.target.value)}
+                placeholder="6-cijferige code"
+                maxLength={6}
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  background: '#E5DDD5',
+                  color: '#050606',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  letterSpacing: '5px',
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box'
+                }}
+              />
+              <p style={{ fontSize: 13, color: '#6B7280', marginTop: 8 }}>
+                De code is gestuurd naar hello@unposed.nl
+              </p>
+            </div>
 
-          <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
-              E-mailadres *
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="naam@miesmedia.nl"
+            <div style={{ marginBottom: 32 }}>
+              <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
+                Kies een wachtwoord *
+              </label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Minimaal 6 tekens"
+                minLength={6}
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  background: '#E5DDD5',
+                  color: '#050606',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 15,
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
               style={{
                 width: '100%',
-                padding: '14px 16px',
-                background: '#E5DDD5',
-                color: '#050606',
+                padding: '16px',
+                background: '#16A34A',
+                color: '#f8f7f2',
+                fontSize: 16,
+                fontWeight: 600,
                 border: 'none',
                 borderRadius: 8,
-                fontSize: 15,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.6 : 1,
                 fontFamily: 'inherit',
                 boxSizing: 'border-box'
               }}
-            />
-          </div>
+            >
+              {loading ? 'Account aanmaken...' : 'Registratie voltooien'}
+            </button>
 
-          <div style={{ marginBottom: 32 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontSize: 15, color: '#050606', fontWeight: 500 }}>
-              Wachtwoord *
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Minimaal 6 tekens"
-              minLength={6}
+            <button
+              type="button"
+              onClick={() => setStep(1)}
               style={{
                 width: '100%',
-                padding: '14px 16px',
-                background: '#E5DDD5',
-                color: '#050606',
+                padding: '12px',
+                background: 'transparent',
+                color: '#402e27',
+                fontSize: 14,
                 border: 'none',
-                borderRadius: 8,
-                fontSize: 15,
+                cursor: 'pointer',
+                marginTop: 12,
                 fontFamily: 'inherit',
-                boxSizing: 'border-box'
+                textDecoration: 'underline'
               }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: '#402e27',
-              color: '#f8f7f2',
-              fontSize: 16,
-              fontWeight: 600,
-              border: 'none',
-              borderRadius: 8,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.6 : 1,
-              fontFamily: 'inherit',
-              marginBottom: 20,
-              boxSizing: 'border-box'
-            }}
-          >
-            {loading ? 'Account aanmaken...' : 'Registreren'}
-          </button>
-
-          <p style={{ textAlign: 'center', fontSize: 14, color: '#050606', margin: 0 }}>
-            Al een account? <a href="/login" style={{ color: '#050606', textDecoration: 'underline' }}>Log in</a>
-          </p>
-        </form>
+            >
+              Terug naar stap 1
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

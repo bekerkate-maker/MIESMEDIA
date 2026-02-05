@@ -21,6 +21,9 @@ export default function ManageShoots() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageScale, setImageScale] = useState(1);
+  const [session, setSession] = useState<any>(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
 
   const [newShoot, setNewShoot] = useState<{
     client: string;
@@ -109,7 +112,26 @@ export default function ManageShoots() {
   useEffect(() => {
     fetchShoots();
     fetchRegistrations();
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
+
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
 
   // Verwijder een registratie uit Supabase
   const handleDeleteRegistration = async (registrationId: number) => {
@@ -509,8 +531,77 @@ export default function ManageShoots() {
         flexDirection: 'column'
       }}>
         {/* Banner bovenaan met scrollende logos */}
-        {/* Banner bovenaan met scrollende logos */}
         <ClientLogoBanner />
+
+        {/* Account icon direct onder de banner */}
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', padding: '12px 0 0 0', position: 'relative', zIndex: 100 }}>
+          <div ref={menuRef} style={{ position: 'relative', marginRight: 24 }}>
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                width: 44,
+                height: 44,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#f8f7f2'
+              }}
+              aria-label={session ? 'Account opties' : 'Inloggen'}
+            >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 8px rgba(44,62,80,0.18))' }}>
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4" />
+              </svg>
+            </button>
+
+            {showMenu && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: 8,
+                background: '#f8f7f2',
+                borderRadius: 12,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                minWidth: 180,
+                overflow: 'hidden',
+                padding: '8px 0',
+                zIndex: 1000
+              }}>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    width: '100%',
+                    padding: '12px 20px',
+                    background: 'transparent',
+                    border: 'none',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontSize: 15,
+                    color: '#050606',
+                    transition: 'background 0.2s',
+                    fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  Uitloggen
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
         {/* Hoofdcontent */}
         <div style={{ padding: '60px 20px', flex: 1 }}>
           <div style={{ marginBottom: 40 }}>
@@ -1598,7 +1689,9 @@ W: Unposed.nl
 E: hello@unposed.nl`;
 
                                             // Maak Gmail compose URL met BCC
-                                            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                            const composeUrl = `https://mail.google.com/mail/u/hello@unposed.nl/?view=cm&fs=1&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                            // Forceer via AccountChooser voor login check
+                                            const gmailUrl = `https://accounts.google.com/AccountChooser?Email=hello@unposed.nl&continue=${encodeURIComponent(composeUrl)}`;
 
                                             // Open Gmail in nieuw tabblad
                                             window.open(gmailUrl, '_blank');
@@ -1647,7 +1740,9 @@ W: Unposed.nl
 E: hello@unposed.nl`;
 
                                             // Maak Gmail compose URL met BCC
-                                            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                            const composeUrl = `https://mail.google.com/mail/u/hello@unposed.nl/?view=cm&fs=1&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                            // Forceer via AccountChooser voor login check
+                                            const gmailUrl = `https://accounts.google.com/AccountChooser?Email=hello@unposed.nl&continue=${encodeURIComponent(composeUrl)}`;
 
                                             // Open Gmail in nieuw tabblad
                                             window.open(gmailUrl, '_blank');

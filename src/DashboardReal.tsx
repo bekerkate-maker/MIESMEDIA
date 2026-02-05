@@ -403,11 +403,16 @@ export default function Dashboard() {
   };
 
   const handleContactModel = (model: Model) => {
-    const subject = encodeURIComponent("Opdracht The Unposed Collective");
-    const body = encodeURIComponent(
-      `Beste ${model.first_name},\n\nWij zouden je graag willen vragen voor een opdracht.\n\nMet vriendelijke groet,\nThe Unposed Collective`
-    );
-    window.location.href = `mailto:${model.email}?subject=${subject}&body=${body}`;
+    const subject = "Opdracht The Unposed Collective";
+    const body = `Beste ${model.first_name},\n\nWij zouden je graag willen vragen voor een opdracht.\n\nMet vriendelijke groet,\nThe Unposed Collective`;
+
+    // Maak Gmail compose URL
+    const composeUrl = `https://mail.google.com/mail/u/hello@unposed.nl/?view=cm&fs=1&to=${encodeURIComponent(model.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    // Forceer via AccountChooser voor login check
+    const gmailUrl = `https://accounts.google.com/AccountChooser?Email=hello@unposed.nl&continue=${encodeURIComponent(composeUrl)}`;
+
+    window.open(gmailUrl, '_blank');
   };
 
   const handleEditModel = (model: Model) => {
