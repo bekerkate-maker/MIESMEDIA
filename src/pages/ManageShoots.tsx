@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import MiesLogo from '@/components/MiesLogo';
@@ -15,6 +15,12 @@ export default function ManageShoots() {
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [pendingShootData, setPendingShootData] = useState<any>(null);
   const [isSendingEmails, setIsSendingEmails] = useState(false);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [tempBannerImage, setTempBannerImage] = useState<string | null>(null);
+  const [cropPosition, setCropPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [imageScale, setImageScale] = useState(1);
 
   const [newShoot, setNewShoot] = useState<{
     client: string;
@@ -243,7 +249,7 @@ export default function ManageShoots() {
 
         if (updateResult.error) throw updateResult.error;
         if (!updateResult.data || updateResult.data.length === 0) {
-          throw new Error("Geen shoot bijgewerkt. Mogelijk heb je geen rechten of is de shoot niet gevonden.");
+          throw new Error("Geen shoot bijgewerkt. Mogelijk heb je geen rechten of is de shoot niet gevonden");
         }
         alert('✅ Shoot bijgewerkt!');
       } else {
@@ -308,9 +314,18 @@ export default function ManageShoots() {
     }
   };
 
+  const registrationsByShoot = useMemo(() => {
+    const map: Record<number, any[]> = {};
+    registrations.forEach(reg => {
+      if (!map[reg.shoot_id]) map[reg.shoot_id] = [];
+      map[reg.shoot_id].push(reg);
+    });
+    return map;
+  }, [registrations]);
+
   // Get registrations for a shoot
   const getRegistrationsForShoot = (shootId: number) => {
-    return registrations.filter(reg => reg.shoot_id === shootId);
+    return registrationsByShoot[shootId] || [];
   };
 
 
@@ -397,14 +412,14 @@ export default function ManageShoots() {
 
       if (functionError) {
         console.error('Error sending emails:', functionError);
-        alert('✅ Shoot toegevoegd! ⚠️ Let op: Er ging iets mis bij het versturen van de emails naar de talenten.');
+        alert('✅ Shoot toegevoegd! ⚠️ Let op: Er ging iets mis bij het versturen van de emails naar de talenten');
       } else {
         console.log('Emails sent successfully:', functionData);
         alert(`✅ Shoot toegevoegd en emails verzonden naar ${functionData.successCount || 'alle'} talenten!`);
       }
     } catch (emailError) {
       console.error('Error invoking email function:', emailError);
-      alert('✅ Shoot toegevoegd! ⚠️ Let op: Er ging iets mis bij het versturen van de emails naar de talenten.');
+      alert('✅ Shoot toegevoegd! ⚠️ Let op: Er ging iets mis bij het versturen van de emails naar de talenten');
     } finally {
       // Reset state
       setIsSendingEmails(false); // Stop loading
@@ -436,7 +451,7 @@ export default function ManageShoots() {
 
   // Annuleer email verzending
   const handleSkipSendEmails = async () => {
-    alert('✅ Shoot toegevoegd! Geen emails verzonden naar models.');
+    alert('✅ Shoot toegevoegd! Geen emails verzonden naar models');
 
     // Reset state
     setShowEmailConfirmation(false);
@@ -570,11 +585,29 @@ export default function ManageShoots() {
                     </label>
                     {/* Preview huidige banner als die er is en er geen nieuwe gekozen is */}
                     {newShoot.bannerPhotoUrl && !newShoot.bannerPhoto && (
-                      <img
-                        src={newShoot.bannerPhotoUrl}
-                        alt="Huidige banner"
-                        style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8, marginBottom: 8, border: '2px solid #E5DDD5' }}
-                      />
+                      <div style={{ marginBottom: 8 }}>
+                        <img
+                          src={newShoot.bannerPhotoUrl}
+                          alt="Huidige banner"
+                          style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8, marginBottom: 8, border: '2px solid #E5DDD5' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setNewShoot(s => ({ ...s, bannerPhotoUrl: '' }))}
+                          style={{
+                            padding: '8px 16px',
+                            background: '#EF4444',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 8,
+                            fontSize: 14,
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Verwijder banner
+                        </button>
+                      </div>
                     )}
                     {/* Preview nieuwe banner als die gekozen is */}
                     {newShoot.bannerPhoto && (
@@ -584,15 +617,27 @@ export default function ManageShoots() {
                         style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}
                       />
                     )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={e => {
-                        const file = e.target.files?.[0] || null;
-                        setNewShoot(s => ({ ...s, bannerPhoto: file }));
-                      }}
-                      style={{ marginBottom: 8 }}
-                    />
+                    {/* Toon upload input alleen als er geen bestaande banner is */}
+                    {!newShoot.bannerPhotoUrl && (
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setTempBannerImage(event.target?.result as string);
+                              setCropPosition({ x: 0, y: 0 });
+                              setImageScale(1);
+                              setShowCropModal(true);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        style={{ marginBottom: 8 }}
+                      />
+                    )}
                     <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Klant *
                     </label>
@@ -886,706 +931,649 @@ export default function ManageShoots() {
                 Alle shoots ({shoots.length})
               </h2>
 
-              <div className="manage-shoots-grid" style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-                gap: 24
-              }}>
-                {shoots.map(shoot => {
-                  const isExpanded = expandedShoot === shoot.id;
-                  const isFocusMode = expandedShoot !== null;
+              {useMemo(() => (
+                <div className="manage-shoots-grid" style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                  gap: 24
+                }}>
+                  {shoots.map(shoot => {
+                    const isExpanded = expandedShoot === shoot.id;
+                    const isFocusMode = expandedShoot !== null;
 
-                  return (
-                    <div key={shoot.id} style={{
-                      background: '#f8f7f2',
-                      borderRadius: 12,
-                      padding: 0,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 0,
-                      alignItems: 'start',
-                      transition: 'all 0.2s ease',
-                      position: 'relative'
-                    }}>
-                      {shoot.banner_photo_url && (
-                        <div
-                          style={{
-                            width: '100%',
-                            height: 200,
-                            overflow: 'hidden',
-                            cursor: 'pointer',
-                            borderTopLeftRadius: 12,
-                            borderTopRightRadius: 12
-                          }}
-                          className="shoot-banner-container"
-                          onClick={() => setPreviewImage(shoot.banner_photo_url)}
-                          title="Klik voor voorbeeld"
-                        >
-                          <img
-                            src={shoot.banner_photo_url}
-                            alt="Banner shoot"
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              display: 'block'
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="shoot-card-content" style={{
-                        padding: 24,
-                        textAlign: 'left',
-                        flex: 1,
+                    return (
+                      <div key={shoot.id} style={{
+                        background: '#f8f7f2',
+                        borderRadius: 12,
+                        padding: 0,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                         display: 'flex',
-                        flexDirection: 'column'
+                        flexDirection: 'column',
+                        gap: 0,
+                        alignItems: 'start',
+                        transition: 'all 0.2s ease',
+                        position: 'relative'
                       }}>
-                        <div style={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          color: '#050606',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          marginBottom: 2
-                        }}>
-                          {shoot.client_name || shoot.client}
-                        </div>
-                        {(() => {
-                          const endDate = shoot.shoot_date ? new Date(shoot.shoot_date) : null;
-                          const now = new Date();
-                          let statusLabel = '';
-                          if (endDate && endDate < now) {
-                            statusLabel = 'verlopen';
-                          } else {
-                            statusLabel = 'open';
-                          }
-                          return (
-                            <div style={{ fontSize: 12, color: statusLabel === 'verlopen' ? '#DC2626' : '#10B981', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase' }}>{statusLabel}</div>
-                          );
-                        })()}
-                        <h3 className="shoot-title" style={{
-                          fontSize: 20,
-                          fontWeight: 600,
-                          color: '#050606',
-                          marginBottom: 12
-                        }}>
-                          {shoot.title || shoot.description?.split('\n\n')[0]}
-                        </h3>
-                        <div className="shoot-details" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-                          <div style={{
-                            fontSize: 14,
-                            color: '#050606',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8
-                          }}>
-                            <span style={{ fontSize: 18, color: '#050606' }}>•</span> {formatDateNL(shoot.shoot_date || shoot.date)}
-                          </div>
-                          {shoot.start_time && shoot.end_time && (
-                            <div style={{
-                              fontSize: 14,
-                              color: '#050606',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 8
-                            }}>
-                              <span style={{ fontSize: 18, color: '#050606' }}>•</span> {shoot.start_time.substring(0, 5)} - {shoot.end_time.substring(0, 5)}
-                            </div>
-                          )}
-                          <div style={{
-                            fontSize: 14,
-                            color: '#050606',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8
-                          }}>
-                            <span style={{ fontSize: 18, color: '#050606' }}>•</span> {shoot.location}
-                          </div>
-                          <div style={{
-                            fontSize: 14,
-                            color: '#050606',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8
-                          }}>
-                            <span style={{ fontSize: 18, color: '#050606' }}>•</span> {shoot.spots} plekken
-                          </div>
-                          {shoot.compensation_type && (
-                            <div style={{
-                              fontSize: 14,
-                              color: '#050606',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 8
-                            }}>
-                              <span style={{ fontSize: 18, color: '#050606' }}>•</span>
-                              {(() => {
-                                if (shoot.compensation_type === 'financiële vergoeding') return `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
-                                if (shoot.compensation_type === 'cadeaubon') return `Cadeaubon t.w.v. €${shoot.compensation_amount}${shoot.compensation_business_name ? ` bij ${shoot.compensation_business_name}` : ''}`;
-                                if (shoot.compensation_type === 'geen') return `Geen vergoeding`;
-                                // Fallback voor oude data
-                                if (shoot.compensation_type === 'bedrag') return `€${shoot.compensation_amount}`;
-                                if (shoot.compensation_type === 'eten') return `Eten betaald`;
-                                return shoot.compensation_type;
-                              })()}
-                            </div>
-                          )}
-                        </div>
-                        <p className="shoot-description" style={{
-                          fontSize: 14,
-                          color: '#050606',
-                          lineHeight: 1.6,
-                          marginBottom: 16,
-                          flex: 1
-                        }}>
-                          {shoot.description?.split('\n\n').slice(1).join('\n\n') || shoot.description}
-                        </p>
-
-                        <div style={{ borderTop: '1px solid #E5E7EB', margin: '20px 0' }} />
-
-                        {shoot.moodboard_link && (
-                          <a
-                            href={shoot.moodboard_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'inline-block',
-                              fontSize: 13,
-                              color: '#050606',
-                              textDecoration: 'none',
-                              fontWeight: 600,
-                              marginBottom: 12
-                            }}
-                          >
-                            Bekijk moodboard &#8594;
-                          </a>
-                        )}
-
-                        {(shoot.client_website || shoot.clientWebsite) ? (
-                          <a
-                            href={shoot.client_website || shoot.clientWebsite}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'inline-block',
-                              fontSize: 13,
-                              color: '#050606',
-                              textDecoration: 'none',
-                              fontWeight: 600,
-                              marginBottom: 16
-                            }}
-                          >
-                            Bekijk website &#8594;
-                          </a>
-                        ) : (
-                          <div style={{ height: 21, marginBottom: 16 }}></div> /* Spacer to keep alignment */
-                        )}
-
-                        {(shoot.client_instagram || shoot.clientInstagram) && (shoot.client_instagram || shoot.clientInstagram) !== '@' && (
-                          <a
-                            href={`https://instagram.com/${(shoot.client_instagram || shoot.clientInstagram).replace('@', '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'inline-block',
-                              fontSize: 13,
-                              color: '#050606',
-                              textDecoration: 'none',
-                              fontWeight: 600,
-                              marginBottom: 16
-                            }}
-                          >
-                            {(shoot.client_instagram || shoot.clientInstagram).startsWith('@')
-                              ? (shoot.client_instagram || shoot.clientInstagram)
-                              : '@' + (shoot.client_instagram || shoot.clientInstagram)}
-                          </a>
-                        )}
-
-
-
-                        {/* Footer Actions Row */}
-                        <div className="shoot-actions" style={{
-                          marginTop: 10,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          flexWrap: 'wrap',
-                          gap: 16
-                        }}>
-                          {/* Left: Aanmeldingen Button */}
-                          <button
-                            onClick={() => setExpandedShoot(expandedShoot === shoot.id ? null : shoot.id)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 8,
-                              padding: '8px 12px',
-                              background: getRegistrationsForShoot(shoot.id).length > 0 ? '#DBEAFE' : '#F3F4F6',
-                              color: getRegistrationsForShoot(shoot.id).length > 0 ? '#050606' : '#050606',
-                              border: 'none',
-                              borderRadius: 6,
-                              fontSize: 13,
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease',
-                              fontFamily: 'inherit'
-                            }}
-                          >
-
-                            <span>Bekijk aanmeldingen ({getRegistrationsForShoot(shoot.id).length})</span>
-                          </button>
-
-                          {/* Right: Edit/Delete Buttons */}
-                          <div style={{ display: 'flex', gap: 12 }}>
-                            <button
-                              onClick={() => handleEditShoot(shoot)}
-                              title="Bewerken"
-                              style={{
-                                padding: '8px 12px',
-                                background: '#E5DDD5',
-                                color: '#050606',
-                                border: 'none',
-                                borderRadius: 8,
-                                fontSize: 14,
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                                fontFamily: 'inherit',
-                                whiteSpace: 'nowrap',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 6
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#D1C7BB';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#E5DDD5';
-                              }}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                              </svg>
-                              Bewerken
-                            </button>
-                            <button
-                              onClick={() => handleDeleteShoot(shoot.id)}
-                              title="Verwijderen"
-                              style={{
-                                padding: '8px 12px',
-                                background: '#FEE2E2',
-                                color: '#DC2626',
-                                border: 'none',
-                                borderRadius: 8,
-                                fontSize: 14,
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                                fontFamily: 'inherit',
-                                whiteSpace: 'nowrap',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 6
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#FCA5A5';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#FEE2E2';
-                              }}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                              </svg>
-                              Verwijderen
-                            </button>
-                          </div>
-                        </div>
-
-                      </div>
-
-
-                      {/* Add global styles for mobile responsiveness */}
-                      <style>{`
-                @media (max-width: 768px) {
-                  .manage-shoots-grid {
-                    grid-template-columns: 1fr 1fr !important;
-                    gap: 16px !important;
-                  }
-                  /* Override inline styles for logo */
-                  .manage-page-logo img {
-                    height: 100px !important;
-                    width: auto !important;
-                  }
-                  /* Compact card styles for mobile */
-                  .shoot-card-content {
-                    padding: 12px !important;
-                  }
-                  .shoot-banner-container {
-                     height: 110px !important;
-                  }
-                  .shoot-title {
-                    font-size: 15px !important;
-                    margin-bottom: 6px !important;
-                    line-height: 1.2 !important;
-                  }
-                  .shoot-details {
-                    gap: 4px !important;
-                    margin-bottom: 8px !important;
-                  }
-                  .shoot-details > div {
-                    font-size: 11px !important;
-                    gap: 4px !important;
-                  }
-                  .shoot-details span {
-                    font-size: 12px !important;
-                  }
-                  .shoot-description {
-                    font-size: 11px !important;
-                    line-height: 1.3 !important;
-                    margin-bottom: 12px !important;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 3;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                  }
-                  .shoot-actions {
-                    flex-direction: column;
-                    align-items: stretch !important;
-                    gap: 8px !important;
-                  }
-                  .shoot-actions button {
-                    font-size: 11px !important;
-                    padding: 6px 10px !important;
-                    justify-content: center;
-                  }
-                  .shoot-actions > div {
-                     width: 100%;
-                     display: grid;
-                     grid-template-columns: 1fr 1fr;
-                  }
-                }
-              `}</style>
-
-                      {/* Expandable Registrations List (Full Width Below) */}
-                      {expandedShoot === shoot.id && (
-                        <div
-                          style={{
-                            position: 'fixed',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            zIndex: 9999,
-                            background: 'rgba(0,0,0,0.5)',
-                            backdropFilter: 'blur(4px)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                          onClick={() => setExpandedShoot(null)}
-                        >
+                        {shoot.banner_photo_url && (
                           <div
-                            onClick={(e) => e.stopPropagation()}
                             style={{
                               width: '100%',
-                              maxWidth: 1000,
-                              maxHeight: '85vh',
-                              background: '#f8f7f2',
-                              borderRadius: 16,
-                              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                              display: 'flex',
-                              flexDirection: 'column',
+                              height: 200,
                               overflow: 'hidden',
-                              margin: 20
+                              cursor: 'pointer',
+                              borderTopLeftRadius: 12,
+                              borderTopRightRadius: 12
                             }}
+                            className="shoot-banner-container"
+                            onClick={() => setPreviewImage(shoot.banner_photo_url)}
+                            title="Klik voor voorbeeld"
                           >
-                            {/* Header with Shoot Info */}
+                            <img
+                              src={shoot.banner_photo_url}
+                              alt="Banner shoot"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                display: 'block'
+                              }}
+                            />
+                          </div>
+                        )}
+                        <div className="shoot-card-content" style={{
+                          padding: 24,
+                          textAlign: 'left',
+                          flex: 1,
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <div style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: '#050606',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px',
+                            marginBottom: 2
+                          }}>
+                            {shoot.client_name || shoot.client}
+                          </div>
+                          {(() => {
+                            const endDate = shoot.shoot_date ? new Date(shoot.shoot_date) : null;
+                            const now = new Date();
+                            let statusLabel = '';
+                            if (endDate && endDate < now) {
+                              statusLabel = 'verlopen';
+                            } else {
+                              statusLabel = 'open';
+                            }
+                            return (
+                              <div style={{ fontSize: 12, color: statusLabel === 'verlopen' ? '#DC2626' : '#10B981', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase' }}>{statusLabel}</div>
+                            );
+                          })()}
+                          <h3 className="shoot-title" style={{
+                            fontSize: 20,
+                            fontWeight: 600,
+                            color: '#050606',
+                            marginBottom: 12
+                          }}>
+                            {shoot.title || shoot.description?.split('\n\n')[0]}
+                          </h3>
+                          <div className="shoot-details" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
                             <div style={{
-                              padding: '24px 32px',
-                              background: '#F9FAFB',
-                              borderBottom: '1px solid #E5E7EB',
+                              fontSize: 14,
+                              color: '#050606',
                               display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start'
+                              alignItems: 'center',
+                              gap: 8
                             }}>
-                              <div>
-                                <div style={{ marginBottom: 16 }}>
-                                  <div style={{
-                                    fontSize: 12,
-                                    fontWeight: 600,
-                                    color: '#050606',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.5px',
-                                    marginBottom: 4
-                                  }}>
-                                    {shoot.client_name || shoot.client}
-                                  </div>
-                                  <h2 style={{ fontSize: 24, fontWeight: 700, color: '#050606', margin: 0 }}>
-                                    {shoot.title || shoot.description?.split('\n\n')[0]}
-                                  </h2>
-                                </div>
-                                <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#050606', flexWrap: 'wrap' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    {shoot.location}
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    {formatDateNL(shoot.shoot_date || shoot.date)}
-                                  </div>
-                                </div>
-                              </div>
-                              <div style={{ paddingTop: 0 }}>
-                                {getRegistrationsForShoot(shoot.id).some(r => ['selected', 'rejected_draft'].includes(r.status)) && (
-                                  <button
-                                    onClick={async () => {
-                                      if (!window.confirm('Weet je zeker dat je alle concept-wijzigingen wilt doorvoeren? Dit maakt ze zichtbaar voor talenten.')) return;
-
-                                      const drafts = getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status));
-
-                                      for (const draft of drafts) {
-                                        const newStatus = draft.status === 'selected' ? 'accepted' : 'rejected';
-                                        await updateRegistrationStatus(draft.id, newStatus);
-                                      }
-                                    }}
-                                    style={{
-                                      padding: '8px 16px',
-                                      background: '#402e27',
-                                      color: '#f8f7f2',
-                                      border: 'none',
-                                      borderRadius: 8,
-                                      fontSize: 14,
-                                      fontWeight: 600,
-                                      cursor: 'pointer'
-                                    }}
-                                  >
-                                    Push naar talentaccount ({getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status)).length})
-                                  </button>
-                                )}
-                              </div>
+                              <span style={{ fontSize: 18, color: '#050606' }}>•</span> {formatDateNL(shoot.shoot_date || shoot.date)}
                             </div>
+                            {shoot.start_time && shoot.end_time && (
+                              <div style={{
+                                fontSize: 14,
+                                color: '#050606',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8
+                              }}>
+                                <span style={{ fontSize: 18, color: '#050606' }}>•</span> {shoot.start_time.substring(0, 5)} - {shoot.end_time.substring(0, 5)}
+                              </div>
+                            )}
+                            <div style={{
+                              fontSize: 14,
+                              color: '#050606',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8
+                            }}>
+                              <span style={{ fontSize: 18, color: '#050606' }}>•</span> {shoot.location}
+                            </div>
+                            <div style={{
+                              fontSize: 14,
+                              color: '#050606',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8
+                            }}>
+                              <span style={{ fontSize: 18, color: '#050606' }}>•</span> {shoot.spots} plekken
+                            </div>
+                            {shoot.compensation_type && (
+                              <div style={{
+                                fontSize: 14,
+                                color: '#050606',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8
+                              }}>
+                                <span style={{ fontSize: 18, color: '#050606' }}>•</span>
+                                {(() => {
+                                  if (shoot.compensation_type === 'financiële vergoeding') return `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
+                                  if (shoot.compensation_type === 'cadeaubon') return `Cadeaubon t.w.v. €${shoot.compensation_amount}${shoot.compensation_business_name ? ` bij ${shoot.compensation_business_name}` : ''}`;
+                                  if (shoot.compensation_type === 'geen') return `Geen vergoeding`;
+                                  // Fallback voor oude data
+                                  if (shoot.compensation_type === 'bedrag') return `€${shoot.compensation_amount}`;
+                                  if (shoot.compensation_type === 'eten') return `Eten betaald`;
+                                  return shoot.compensation_type;
+                                })()}
+                              </div>
+                            )}
+                          </div>
+                          <p className="shoot-description" style={{
+                            fontSize: 14,
+                            color: '#050606',
+                            lineHeight: 1.6,
+                            marginBottom: 16,
+                            flex: 1
+                          }}>
+                            {shoot.description?.split('\n\n').slice(1).join('\n\n') || shoot.description}
+                          </p>
 
-                            {/* Registrations Board */}
-                            <div style={{ padding: '0 32px 32px 32px', overflowY: 'auto', flex: 1, background: '#F3F4F6' }}>
-                              {(() => {
-                                const shootRegistrations = getRegistrationsForShoot(shoot.id);
+                          <div style={{ borderTop: '1px solid #E5E7EB', margin: '20px 0' }} />
 
-                                const pending = shootRegistrations.filter(r => !r.status || r.status === 'pending');
-                                const accepted = shootRegistrations.filter(r => ['accepted', 'selected'].includes(r.status));
-                                const rejected = shootRegistrations.filter(r => ['rejected', 'rejected_draft'].includes(r.status));
+                          {shoot.moodboard_link && (
+                            <a
+                              href={shoot.moodboard_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: 'inline-block',
+                                fontSize: 13,
+                                color: '#050606',
+                                textDecoration: 'none',
+                                fontWeight: 600,
+                                marginBottom: 12
+                              }}
+                            >
+                              Bekijk moodboard &#8594;
+                            </a>
+                          )}
 
-                                const Column = ({ title, items, status, color, bgColor }: any) => (
-                                  <div style={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                          {(shoot.client_website || shoot.clientWebsite) ? (
+                            <a
+                              href={shoot.client_website || shoot.clientWebsite}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: 'inline-block',
+                                fontSize: 13,
+                                color: '#050606',
+                                textDecoration: 'none',
+                                fontWeight: 600,
+                                marginBottom: 16
+                              }}
+                            >
+                              Bekijk website &#8594;
+                            </a>
+                          ) : (
+                            <div style={{ height: 21, marginBottom: 16 }}></div> /* Spacer to keep alignment */
+                          )}
+
+                          {(shoot.client_instagram || shoot.clientInstagram) && (shoot.client_instagram || shoot.clientInstagram) !== '@' && (
+                            <a
+                              href={`https://instagram.com/${(shoot.client_instagram || shoot.clientInstagram).replace('@', '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: 'inline-block',
+                                fontSize: 13,
+                                color: '#050606',
+                                textDecoration: 'none',
+                                fontWeight: 600,
+                                marginBottom: 16
+                              }}
+                            >
+                              {(shoot.client_instagram || shoot.clientInstagram).startsWith('@')
+                                ? (shoot.client_instagram || shoot.clientInstagram)
+                                : '@' + (shoot.client_instagram || shoot.clientInstagram)}
+                            </a>
+                          )}
+
+
+
+                          {/* Footer Actions Row */}
+                          <div className="shoot-actions" style={{
+                            marginTop: 10,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: 16
+                          }}>
+                            {/* Left: Aanmeldingen Button */}
+                            <button
+                              onClick={() => setExpandedShoot(expandedShoot === shoot.id ? null : shoot.id)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                padding: '8px 12px',
+                                background: getRegistrationsForShoot(shoot.id).length > 0 ? '#DBEAFE' : '#F3F4F6',
+                                color: getRegistrationsForShoot(shoot.id).length > 0 ? '#050606' : '#050606',
+                                border: 'none',
+                                borderRadius: 6,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                fontFamily: 'inherit'
+                              }}
+                            >
+
+                              <span>Bekijk aanmeldingen ({getRegistrationsForShoot(shoot.id).length})</span>
+                            </button>
+
+                            {/* Right: Edit/Delete Buttons */}
+                            <div style={{ display: 'flex', gap: 12 }}>
+                              <button
+                                onClick={() => handleEditShoot(shoot)}
+                                title="Bewerken"
+                                style={{
+                                  padding: '8px 12px',
+                                  background: '#E5DDD5',
+                                  color: '#050606',
+                                  border: 'none',
+                                  borderRadius: 8,
+                                  fontSize: 14,
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  transition: 'all 0.3s ease',
+                                  fontFamily: 'inherit',
+                                  whiteSpace: 'nowrap',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 6
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = '#D1C7BB';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = '#E5DDD5';
+                                }}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Bewerken
+                              </button>
+                              <button
+                                onClick={() => handleDeleteShoot(shoot.id)}
+                                title="Verwijderen"
+                                style={{
+                                  padding: '8px 12px',
+                                  background: '#FEE2E2',
+                                  color: '#DC2626',
+                                  border: 'none',
+                                  borderRadius: 8,
+                                  fontSize: 14,
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  transition: 'all 0.3s ease',
+                                  fontFamily: 'inherit',
+                                  whiteSpace: 'nowrap',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 6
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = '#FCA5A5';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = '#FEE2E2';
+                                }}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="3 6 5 6 21 6"></polyline>
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                                Verwijderen
+                              </button>
+                            </div>
+                          </div>
+
+                        </div>
+
+
+                        {/* Registraties lijst logic */}
+
+                        {/* Expandable Registrations List (Full Width Below) */}
+                        {expandedShoot === shoot.id && (
+                          <div
+                            style={{
+                              position: 'fixed',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              zIndex: 9999,
+                              background: 'rgba(0,0,0,0.5)',
+                              backdropFilter: 'blur(4px)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                            onClick={() => setExpandedShoot(null)}
+                          >
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                width: '100%',
+                                maxWidth: 1000,
+                                maxHeight: '85vh',
+                                background: '#f8f7f2',
+                                borderRadius: 16,
+                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                overflow: 'hidden',
+                                margin: 20
+                              }}
+                            >
+                              {/* Header with Shoot Info */}
+                              <div style={{
+                                padding: '24px 32px',
+                                background: '#F9FAFB',
+                                borderBottom: '1px solid #E5E7EB',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start'
+                              }}>
+                                <div>
+                                  <div style={{ marginBottom: 16 }}>
                                     <div style={{
-                                      position: 'sticky',
-                                      top: 0,
-                                      padding: '24px 0 16px 0',
-                                      background: '#F3F4F6',
-                                      zIndex: 10,
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'space-between'
+                                      fontSize: 12,
+                                      fontWeight: 600,
+                                      color: '#050606',
+                                      textTransform: 'uppercase',
+                                      letterSpacing: '0.5px',
+                                      marginBottom: 4
                                     }}>
-                                      <h3 style={{ fontSize: 16, fontWeight: 700, color: '#050606', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
-                                        {title}
-                                      </h3>
-                                      <span style={{
-                                        background: '#E5E7EB',
-                                        color: '#050606',
-                                        padding: '2px 8px',
-                                        borderRadius: 12,
-                                        fontSize: 12,
-                                        fontWeight: 600
-                                      }}>
-                                        {items.length}
-                                      </span>
+                                      {shoot.client_name || shoot.client}
                                     </div>
+                                    <h2 style={{ fontSize: 24, fontWeight: 700, color: '#050606', margin: 0 }}>
+                                      {shoot.title || shoot.description?.split('\n\n')[0]}
+                                    </h2>
+                                  </div>
+                                  <div style={{ display: 'flex', gap: 24, fontSize: 14, color: '#050606', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      {shoot.location}
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      {formatDateNL(shoot.shoot_date || shoot.date)}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div style={{ paddingTop: 0 }}>
+                                  {getRegistrationsForShoot(shoot.id).some(r => ['selected', 'rejected_draft'].includes(r.status)) && (
+                                    <button
+                                      onClick={async () => {
+                                        if (!window.confirm('Weet je zeker dat je alle concept-wijzigingen wilt doorvoeren? Dit maakt ze zichtbaar voor talenten.')) return;
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 24, flex: 1 }}>
-                                      {items.length === 0 ? (
-                                        <div style={{
-                                          padding: 24,
-                                          textAlign: 'center',
+                                        const drafts = getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status));
+
+                                        for (const draft of drafts) {
+                                          const newStatus = draft.status === 'selected' ? 'accepted' : 'rejected';
+                                          await updateRegistrationStatus(draft.id, newStatus);
+                                        }
+                                      }}
+                                      style={{
+                                        padding: '8px 16px',
+                                        background: '#402e27',
+                                        color: '#f8f7f2',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        fontSize: 14,
+                                        fontWeight: 600,
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      Push naar talentaccount ({getRegistrationsForShoot(shoot.id).filter(r => ['selected', 'rejected_draft'].includes(r.status)).length})
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Registrations Board */}
+                              <div style={{ padding: '0 32px 32px 32px', overflowY: 'auto', flex: 1, background: '#F3F4F6' }}>
+                                {(() => {
+                                  const shootRegistrations = getRegistrationsForShoot(shoot.id);
+
+                                  const pending = shootRegistrations.filter(r => !r.status || r.status === 'pending');
+                                  const accepted = shootRegistrations.filter(r => ['accepted', 'selected'].includes(r.status));
+                                  const rejected = shootRegistrations.filter(r => ['rejected', 'rejected_draft'].includes(r.status));
+
+                                  const Column = ({ title, items, status, color, bgColor }: any) => (
+                                    <div style={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
+                                      <div style={{
+                                        position: 'sticky',
+                                        top: 0,
+                                        padding: '24px 0 16px 0',
+                                        background: '#F3F4F6',
+                                        zIndex: 10,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between'
+                                      }}>
+                                        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#050606', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+                                          {title}
+                                        </h3>
+                                        <span style={{
+                                          background: '#E5E7EB',
                                           color: '#050606',
-                                          background: '#f8f7f2',
+                                          padding: '2px 8px',
                                           borderRadius: 12,
-                                          border: '1px dashed #E5E7EB',
-                                          fontSize: 13
+                                          fontSize: 12,
+                                          fontWeight: 600
                                         }}>
-                                          Geen talenten
-                                        </div>
-                                      ) : (
-                                        items.map((reg: any) => (
-                                          <div key={reg.id} style={{
-                                            background: '#f8f7f2',
-                                            borderRadius: 12,
-                                            padding: 16,
-                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                                            border: '1px solid #E5E7EB',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: 12,
-                                            position: 'relative'
-                                          }}>
-                                            {['selected', 'rejected_draft'].includes(reg.status) && (
-                                              <div style={{
-                                                position: 'absolute',
-                                                top: 8,
-                                                right: 8,
-                                                background: '#FEF3C7',
-                                                color: '#D97706',
-                                                fontSize: 10,
-                                                fontWeight: 700,
-                                                padding: '2px 6px',
-                                                borderRadius: 4,
-                                                zIndex: 2
-                                              }}>
-                                                CONCEPT
-                                              </div>
-                                            )}
-                                            {['accepted', 'rejected'].includes(reg.status) && (
-                                              <div style={{
-                                                position: 'absolute',
-                                                top: 8,
-                                                right: 8,
-                                                background: '#DCFCE7',
-                                                color: '#166534',
-                                                fontSize: 10,
-                                                fontWeight: 700,
-                                                padding: '2px 6px',
-                                                borderRadius: 4,
-                                                zIndex: 2
-                                              }}>
-                                                DEFINITIEF
-                                              </div>
-                                            )}
-                                            <div
-                                              style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: reg.model_id ? 'pointer' : 'default' }}
-                                              onClick={() => reg.model_id && window.open(`/dashboard?model=${reg.model_id}`, '_blank')}
-                                            >
-                                              <div style={{
-                                                width: 40,
-                                                height: 40,
-                                                borderRadius: '50%',
-                                                overflow: 'hidden',
-                                                background: '#F3F4F6',
-                                                border: '2px solid #f8f7f2',
-                                                flexShrink: 0,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                              }}>
-                                                {reg.models?.photo_url ? (
-                                                  <img
-                                                    src={
-                                                      reg.models.photo_url.startsWith('http')
-                                                        ? reg.models.photo_url
-                                                        : supabase.storage.from('model-photos').getPublicUrl(reg.models.photo_url).data.publicUrl
-                                                    }
-                                                    alt={reg.name}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                  />
-                                                ) : (
-                                                  <span style={{ fontSize: 10, color: '#050606' }}>Geen foto</span>
-                                                )}
-                                              </div>
-                                              <div style={{ flex: 1, minWidth: 0 }}>
-                                                <div
-                                                  style={{ fontWeight: 600, color: '#050606', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                                                  onMouseEnter={(e) => reg.model_id && (e.currentTarget.style.textDecoration = 'underline')}
-                                                  onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
-                                                >
-                                                  {reg.name}
-                                                </div>
-                                                {reg.model_id && (
-                                                  <div style={{ fontSize: 11, color: '#050606' }}>Bekijk profiel</div>
-                                                )}
-                                              </div>
-                                            </div>
+                                          {items.length}
+                                        </span>
+                                      </div>
 
-                                            {reg.message && (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 24, flex: 1 }}>
+                                        {items.length === 0 ? (
+                                          <div style={{
+                                            padding: 24,
+                                            textAlign: 'center',
+                                            color: '#050606',
+                                            background: '#fff',
+                                            borderRadius: 12,
+                                            border: '1px dashed #E5E7EB',
+                                            fontSize: 13
+                                          }}>
+                                            Geen talenten
+                                          </div>
+                                        ) : (
+                                          items.map((reg: any) => (
+                                            <div key={reg.id} style={{
+                                              background: '#fff',
+                                              borderRadius: 12,
+                                              padding: 16,
+                                              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                              border: '2px solid #fff',
+                                              display: 'flex',
+                                              flexDirection: 'column',
+                                              gap: 12,
+                                              position: 'relative'
+                                            }}>
+                                              {['selected', 'rejected_draft'].includes(reg.status) && (
+                                                <div style={{
+                                                  position: 'absolute',
+                                                  top: 8,
+                                                  right: 8,
+                                                  background: '#FEF3C7',
+                                                  color: '#D97706',
+                                                  fontSize: 10,
+                                                  fontWeight: 700,
+                                                  padding: '2px 6px',
+                                                  borderRadius: 4,
+                                                  zIndex: 2
+                                                }}>
+                                                  CONCEPT
+                                                </div>
+                                              )}
+                                              {['accepted', 'rejected'].includes(reg.status) && (
+                                                <div style={{
+                                                  position: 'absolute',
+                                                  top: 8,
+                                                  right: 8,
+                                                  background: '#DCFCE7',
+                                                  color: '#166534',
+                                                  fontSize: 10,
+                                                  fontWeight: 700,
+                                                  padding: '2px 6px',
+                                                  borderRadius: 4,
+                                                  zIndex: 2
+                                                }}>
+                                                  DEFINITIEF
+                                                </div>
+                                              )}
+                                              <div
+                                                style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: reg.model_id ? 'pointer' : 'default' }}
+                                                onClick={() => reg.model_id && window.open(`/dashboard?model=${reg.model_id}`, '_blank')}
+                                              >
+                                                <div style={{
+                                                  width: 40,
+                                                  height: 40,
+                                                  borderRadius: '50%',
+                                                  overflow: 'hidden',
+                                                  background: '#F3F4F6',
+                                                  border: '2px solid #f8f7f2',
+                                                  flexShrink: 0,
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  justifyContent: 'center'
+                                                }}>
+                                                  {reg.models?.photo_url ? (
+                                                    <img
+                                                      src={
+                                                        reg.models.photo_url.startsWith('http')
+                                                          ? reg.models.photo_url
+                                                          : supabase.storage.from('model-photos').getPublicUrl(reg.models.photo_url).data.publicUrl
+                                                      }
+                                                      alt={reg.name}
+                                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                    />
+                                                  ) : (
+                                                    <span style={{ fontSize: 10, color: '#050606' }}>Geen foto</span>
+                                                  )}
+                                                </div>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                  <div
+                                                    style={{ fontWeight: 600, color: '#050606', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                                    onMouseEnter={(e) => reg.model_id && (e.currentTarget.style.textDecoration = 'underline')}
+                                                    onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                                                  >
+                                                    {reg.name}
+                                                  </div>
+                                                  {reg.model_id && (
+                                                    <div style={{ fontSize: 11, color: '#050606' }}>Bekijk profiel</div>
+                                                  )}
+                                                </div>
+                                              </div>
+
                                               <div style={{
-                                                background: '#F9FAFB',
-                                                padding: '8px 10px',
+                                                background: reg.message ? '#F9FAFB' : 'transparent',
+                                                padding: reg.message ? '4px 10px' : 0,
                                                 borderRadius: 8,
                                                 fontSize: 12,
                                                 color: '#050606',
-                                                fontStyle: 'italic'
+                                                fontStyle: 'italic',
+                                                height: 24,
+                                                overflow: 'hidden',
+                                                display: 'flex',
+                                                alignItems: 'center'
                                               }}>
-                                                "{reg.message}"
+                                                {reg.message && `"${reg.message}"`}
                                               </div>
-                                            )}
 
-                                            <div style={{ display: 'flex', gap: 8, paddingTop: 8, borderTop: '1px solid #F3F4F6' }}>
-                                              {status === 'pending' && (
-                                                <>
+                                              <div style={{ display: 'flex', gap: 8, paddingTop: 8, borderTop: '1px solid #F3F4F6' }}>
+                                                {status === 'pending' && (
+                                                  <>
+                                                    <button
+                                                      onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'selected'); }}
+                                                      style={{ flex: 1, padding: '6px', background: '#DCFCE7', color: '#166534', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                                    >
+                                                      Selecteren
+                                                    </button>
+                                                    <button
+                                                      onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'rejected_draft'); }}
+                                                      style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                                    >
+                                                      Niet nu
+                                                    </button>
+                                                  </>
+                                                )}
+                                                {status === 'accepted' && (
                                                   <button
-                                                    onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'selected'); }}
-                                                    style={{ flex: 1, padding: '6px', background: '#DCFCE7', color: '#166534', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                                                  >
-                                                    Selecteren
-                                                  </button>
-                                                  <button
-                                                    onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'rejected_draft'); }}
+                                                    onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
                                                     style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                                                   >
-                                                    Niet nu
+                                                    Terugzetten
                                                   </button>
-                                                </>
-                                              )}
-                                              {status === 'accepted' && (
-                                                <button
-                                                  onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
-                                                  style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                                                >
-                                                  Terugzetten
-                                                </button>
-                                              )}
-                                              {status === 'rejected' && (
-                                                <button
-                                                  onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
-                                                  style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                                                >
-                                                  Terugzetten
-                                                </button>
-                                              )}
+                                                )}
+                                                {status === 'rejected' && (
+                                                  <button
+                                                    onClick={(e) => { e.stopPropagation(); updateRegistrationStatus(reg.id, 'pending'); }}
+                                                    style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#050606', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                                  >
+                                                    Terugzetten
+                                                  </button>
+                                                )}
+                                              </div>
                                             </div>
-                                          </div>
-                                        ))
-                                      )}
-                                    </div>
+                                          ))
+                                        )}
+                                      </div>
 
-                                    {/* Action Buttons for Group Email */}
-                                    {items.length > 0 && status === 'accepted' && (
-                                      <button
-                                        onClick={() => {
-                                          // Verzamel alle emailadressen van geselecteerde talenten
-                                          const emails = items.map((reg: any) => reg.email).filter(Boolean);
+                                      {/* Action Buttons for Group Email */}
+                                      {items.length > 0 && status === 'accepted' && (
+                                        <button
+                                          onClick={() => {
+                                            // Verzamel alle emailadressen van geselecteerde talenten
+                                            const emails = items.map((reg: any) => reg.email).filter(Boolean);
 
-                                          // Maak het onderwerp
-                                          const subject = `Je bent geselecteerd voor een Unposed shoot!`;
+                                            // Maak het onderwerp
+                                            const subject = `Je bent geselecteerd voor een Unposed shoot!`;
 
-                                          // Maak de body van het bericht met shoot details
-                                          const shootDate = formatDateNL(shoot.shoot_date || shoot.date, true);
-                                          const startTime = shoot.start_time?.slice(0, 5) || '';
-                                          const endTime = shoot.end_time?.slice(0, 5) || '';
+                                            // Maak de body van het bericht met shoot details
+                                            const shootDate = formatDateNL(shoot.shoot_date || shoot.date, true);
+                                            const startTime = shoot.start_time?.slice(0, 5) || '';
+                                            const endTime = shoot.end_time?.slice(0, 5) || '';
 
-                                          // Bereken vergoeding tekst
-                                          let compensationText = '';
-                                          if (shoot.compensation_type === 'financiële vergoeding' && shoot.compensation_amount) {
-                                            compensationText = `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
-                                          } else if (shoot.compensation_type === 'cadeaubon' && shoot.compensation_amount && shoot.compensation_business_name) {
-                                            compensationText = `Cadeaubon t.w.v. €${shoot.compensation_amount} bij ${shoot.compensation_business_name}`;
-                                          } else if (shoot.compensation_type === 'geen') {
-                                            compensationText = 'Geen vergoeding';
-                                          }
+                                            // Bereken vergoeding tekst
+                                            let compensationText = '';
+                                            if (shoot.compensation_type === 'financiële vergoeding' && shoot.compensation_amount) {
+                                              compensationText = `Financiële vergoeding t.w.v. €${shoot.compensation_amount}`;
+                                            } else if (shoot.compensation_type === 'cadeaubon' && shoot.compensation_amount && shoot.compensation_business_name) {
+                                              compensationText = `Cadeaubon t.w.v. €${shoot.compensation_amount} bij ${shoot.compensation_business_name}`;
+                                            } else if (shoot.compensation_type === 'geen') {
+                                              compensationText = 'Geen vergoeding';
+                                            }
 
-                                          const body = `Hi,
+                                            const body = `Hi,
 
 Leuk nieuws: je bent geselecteerd voor een Unposed shoot!
 
@@ -1599,7 +1587,7 @@ ${compensationText}
 Voorbereiding & styling
 🔴 [Vul hier specifieke instructies in, zoals kledingvoorschriften, stylingtips, moodboardlink, sfeeromschrijving of andere praktische info.] 🔴
 
-Bevestig je deelname door te reageren op deze mail. Kun je er toch niet bij zijn? Laat het ons dan zo snel mogelijk weten.
+Bevestig je deelname door te reageren op deze mail. Kun je er toch niet bij zijn? Laat het ons dan zo snel mogelijk weten
 
 We kijken ernaar uit je binnenkort op set te zien!
 
@@ -1609,46 +1597,46 @@ Team Unposed
 W: Unposed.nl
 E: hello@unposed.nl`;
 
-                                          // Maak Gmail compose URL met BCC
-                                          const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                            // Maak Gmail compose URL met BCC
+                                            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-                                          // Open Gmail in nieuw tabblad
-                                          window.open(gmailUrl, '_blank');
-                                        }}
-                                        style={{
-                                          padding: '12px',
-                                          background: '#402e27',
-                                          color: '#f8f7f2',
-                                          border: 'none',
-                                          borderRadius: 8,
-                                          fontWeight: 600,
-                                          cursor: 'pointer',
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          gap: 8,
-                                          marginTop: 'auto'
-                                        }}
-                                      >
-                                        Uitnodiging sturen ({items.length})
-                                      </button>
-                                    )}
-                                    {items.length > 0 && status === 'rejected' && (
-                                      <button
-                                        onClick={() => {
-                                          // Verzamel alle emailadressen van niet-geselecteerde talenten
-                                          const emails = items.map((reg: any) => reg.email).filter(Boolean);
+                                            // Open Gmail in nieuw tabblad
+                                            window.open(gmailUrl, '_blank');
+                                          }}
+                                          style={{
+                                            padding: '12px',
+                                            background: '#402e27',
+                                            color: '#f8f7f2',
+                                            border: 'none',
+                                            borderRadius: 8,
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 8,
+                                            marginTop: 'auto'
+                                          }}
+                                        >
+                                          Mail versturen ({items.length})
+                                        </button>
+                                      )}
+                                      {items.length > 0 && status === 'rejected' && (
+                                        <button
+                                          onClick={() => {
+                                            // Verzamel alle emailadressen van niet-geselecteerde talenten
+                                            const emails = items.map((reg: any) => reg.email).filter(Boolean);
 
-                                          // Maak het onderwerp
-                                          const subject = `Update over je aanmelding voor een Unposed shoot.`;
+                                            // Maak het onderwerp
+                                            const subject = `Update over je aanmelding voor een Unposed shoot.`;
 
-                                          // Maak de body van het bericht
-                                          const shootName = shoot.title || shoot.description?.split('\n\n')[0];
-                                          const body = `Hi,
+                                            // Maak de body van het bericht
+                                            const shootName = shoot.title || shoot.description?.split('\n\n')[0];
+                                            const body = `Hi,
 
 Bedankt voor je aanmelding voor de ${shootName} en leuk dat je interesse had om hieraan deel te nemen.
 
-Voor deze shoot hebben we inmiddels een selectie gemaakt, en helaas ben je niet uitgekozen. Bij nieuwe shoots die passen bij jouw profiel laten we altijd weer van ons horen.
+Voor deze shoot hebben we inmiddels een selectie gemaakt, en helaas ben je niet uitgekozen. Bij nieuwe shoots die passen bij jouw profiel laten we altijd weer van ons horen
 
 Dankjewel voor je enthousiasme en wie weet zien we je bij een volgende Unposed shoot!
 
@@ -1658,49 +1646,50 @@ Team Unposed
 W: Unposed.nl
 E: hello@unposed.nl`;
 
-                                          // Maak Gmail compose URL met BCC
-                                          const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                            // Maak Gmail compose URL met BCC
+                                            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&authuser=hello@unposed.nl&bcc=${encodeURIComponent(emails.join(','))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-                                          // Open Gmail in nieuw tabblad
-                                          window.open(gmailUrl, '_blank');
-                                        }}
-                                        style={{
-                                          padding: '12px',
-                                          background: '#f8f7f2',
-                                          color: '#050606',
-                                          border: '1px solid #D1D5DB',
-                                          borderRadius: 8,
-                                          fontWeight: 600,
-                                          cursor: 'pointer',
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          gap: 8,
-                                          marginTop: 'auto'
-                                        }}
-                                      >
-                                        Afwijzing sturen ({items.length})
-                                      </button>
-                                    )}
-                                  </div>
-                                );
+                                            // Open Gmail in nieuw tabblad
+                                            window.open(gmailUrl, '_blank');
+                                          }}
+                                          style={{
+                                            padding: '12px',
+                                            background: '#f8f7f2',
+                                            color: '#050606',
+                                            border: '1px solid #D1D5DB',
+                                            borderRadius: 8,
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 8,
+                                            marginTop: 'auto'
+                                          }}
+                                        >
+                                          Mail versturen ({items.length})
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
 
-                                return (
-                                  <div style={{ display: 'flex', gap: 24, paddingBottom: 40, alignItems: 'flex-start', height: '100%' }}>
-                                    <Column title="Nieuwe aanmeldingen" items={pending} status="pending" color="#3B82F6" bgColor="#EFF6FF" />
-                                    <Column title="Geselecteerd" items={accepted} status="accepted" color="#22C55E" bgColor="#F0FDF4" />
-                                    <Column title="Niet geselecteerd" items={rejected} status="rejected" color="#9CA3AF" bgColor="#F9FAFB" />
-                                  </div>
-                                );
-                              })()}
+                                  return (
+                                    <div style={{ display: 'flex', gap: 24, paddingBottom: 40, alignItems: 'stretch', height: '100%' }}>
+                                      <Column title="Nieuwe aanmeldingen" items={pending} status="pending" color="#3B82F6" bgColor="#EFF6FF" />
+                                      <Column title="Geselecteerd" items={accepted} status="accepted" color="#22C55E" bgColor="#F0FDF4" />
+                                      <Column title="Niet geselecteerd" items={rejected} status="rejected" color="#EF4444" bgColor="#F9FAFB" />
+                                    </div>
+                                  );
+                                })()}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ), [shoots, registrationsByShoot, expandedShoot, previewImage])}
 
               {/* Fixed Registration Overlay Banner */}
 
@@ -1748,12 +1737,8 @@ E: hello@unposed.nl`;
               </button>
               <style>{`
             @keyframes scroll {
-              0% {
-                transform: translateX(0);
-              }
-              100% {
-                transform: translateX(-50%);
-              }
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
             }
             .logo-scroll {
               animation: scroll 240s linear infinite;
@@ -1764,17 +1749,56 @@ E: hello@unposed.nl`;
               object-fit: contain;
               filter: grayscale(100%);
             }
-            .logo-small {
-              height: 25px;
-            }
-            .logo-normal {
-              height: 40px;
-            }
-            .logo-large {
-              height: 50px;
-            }
-            .logo-xlarge {
-              height: 60px;
+            .logo-small { height: 25px; }
+            .logo-normal { height: 40px; }
+            .logo-large { height: 50px; }
+            .logo-xlarge { height: 60px; }
+
+            /* Mobile responsiveness for management grid */
+            @media (max-width: 768px) {
+              .manage-shoots-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 16px !important;
+              }
+              .manage-page-logo img {
+                height: 80px !important; /* Smaller logo on mobile */
+                width: auto !important;
+              }
+              .shoot-card-content { padding: 12px !important; }
+              .shoot-banner-container { height: 110px !important; }
+              .shoot-title {
+                font-size: 15px !important;
+                margin-bottom: 6px !important;
+                line-height: 1.2 !important;
+              }
+              .shoot-details { gap: 4px !important; margin-bottom: 8px !important; }
+              .shoot-details > div { font-size: 11px !important; gap: 4px !important; }
+              .shoot-details span { font-size: 12px !important; }
+              .shoot-description {
+                font-size: 11px !important;
+                line-height: 1.3 !important;
+                margin-bottom: 12px !important;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+              }
+              .shoot-actions {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 8px !important;
+              }
+              .shoot-actions button {
+                font-size: 11px !important;
+                padding: 6px 10px !important;
+                justify-content: center;
+              }
+              .shoot-actions > div {
+                 width: 100%;
+                 display: grid;
+                 grid-template-columns: 1fr 1fr;
+                 gap: 8px !important;
+              }
             }
           `}</style>
             </div>
@@ -2026,8 +2050,223 @@ E: hello@unposed.nl`;
             )
           }
 
+
         </div>
       </div>
+
+      {/* Banner Crop Modal */}
+      {showCropModal && tempBannerImage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            padding: 20
+          }}
+          onClick={() => {
+            setShowCropModal(false);
+            setTempBannerImage(null);
+          }}
+        >
+          <div
+            style={{
+              background: '#f8f7f2',
+              borderRadius: 12,
+              padding: 32,
+              maxWidth: 800,
+              width: '100%',
+              maxHeight: '90vh',
+              overflow: 'auto'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0, marginBottom: 16, color: '#050606' }}>Banner kaderen</h3>
+            <p style={{ marginBottom: 16, color: '#050606', fontSize: 14 }}>
+              Sleep de afbeelding om te positioneren. De banner wordt automatisch gekaderd naar 16:9 formaat
+            </p>
+
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              paddingBottom: '56.25%',
+              background: '#E5DDD5',
+              borderRadius: 8,
+              overflow: 'hidden',
+              marginBottom: 24,
+              cursor: isDragging ? 'grabbing' : 'grab'
+            }}
+              onMouseDown={(e) => {
+                setIsDragging(true);
+                setDragStart({ x: e.clientX - cropPosition.x, y: e.clientY - cropPosition.y });
+              }}
+              onMouseMove={(e) => {
+                if (isDragging) {
+                  setCropPosition({
+                    x: e.clientX - dragStart.x,
+                    y: e.clientY - dragStart.y
+                  });
+                }
+              }}
+              onMouseUp={() => setIsDragging(false)}
+              onMouseLeave={() => setIsDragging(false)}
+            >
+              <img
+                src={tempBannerImage}
+                alt="Crop preview"
+                id="cropPreviewImage"
+                draggable={false}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: `translate(calc(-50% + ${cropPosition.x}px), calc(-50% + ${cropPosition.y}px)) scale(${imageScale})`,
+                  maxWidth: 'none',
+                  width: '100%',
+                  height: 'auto',
+                  userSelect: 'none'
+                }}
+              />
+              {/* 16:9 Grid Overlay */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                pointerEvents: 'none',
+                border: '3px solid #402e27',
+                borderRadius: 8
+              }}>
+                {/* Rule of thirds grid */}
+                <div style={{ position: 'absolute', top: '33.33%', left: 0, right: 0, height: 1, background: 'rgba(64, 46, 39, 0.3)' }} />
+                <div style={{ position: 'absolute', top: '66.66%', left: 0, right: 0, height: 1, background: 'rgba(64, 46, 39, 0.3)' }} />
+                <div style={{ position: 'absolute', left: '33.33%', top: 0, bottom: 0, width: 1, background: 'rgba(64, 46, 39, 0.3)' }} />
+                <div style={{ position: 'absolute', left: '66.66%', top: 0, bottom: 0, width: 1, background: 'rgba(64, 46, 39, 0.3)' }} />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowCropModal(false);
+                  setTempBannerImage(null);
+                }}
+                style={{
+                  padding: '12px 24px',
+                  background: '#E5DDD5',
+                  color: '#050606',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={() => {
+                  // Create canvas to crop the image
+                  const img = document.getElementById('cropPreviewImage') as HTMLImageElement;
+                  const container = img.parentElement;
+
+                  if (!img || !container) return;
+
+                  // Get container dimensions (16:9 aspect ratio)
+                  const containerRect = container.getBoundingClientRect();
+                  const containerWidth = containerRect.width;
+                  const containerHeight = containerRect.height;
+
+                  // Create a new image to get original dimensions
+                  const sourceImg = new Image();
+                  sourceImg.onload = () => {
+                    // Calculate the scale factor between displayed and original image
+                    const displayedWidth = img.offsetWidth;
+                    const displayedHeight = img.offsetHeight;
+                    const scaleX = sourceImg.width / displayedWidth;
+                    const scaleY = sourceImg.height / displayedHeight;
+
+                    // Calculate crop area in original image coordinates
+                    // The container center is at (containerWidth/2, containerHeight/2)
+                    // The image center is at (containerWidth/2 + cropPosition.x, containerHeight/2 + cropPosition.y)
+                    const imgCenterX = containerWidth / 2 + cropPosition.x;
+                    const imgCenterY = containerHeight / 2 + cropPosition.y;
+
+                    // Calculate where the container edges intersect with the image
+                    const cropLeft = (containerWidth / 2 - imgCenterX) * scaleX;
+                    const cropTop = (containerHeight / 2 - imgCenterY) * scaleY;
+                    const cropWidth = containerWidth * scaleX;
+                    const cropHeight = containerHeight * scaleY;
+
+                    // Calculate which part of the original image is visible in the container
+                    const imgOffsetX = (containerWidth - displayedWidth) / 2 + cropPosition.x;
+                    const imgOffsetY = (containerHeight - displayedHeight) / 2 + cropPosition.y;
+                    const sourceX = Math.max(0, -imgOffsetX * scaleX);
+                    const sourceY = Math.max(0, -imgOffsetY * scaleY);
+                    const sourceWidth = Math.min(sourceImg.width - sourceX, containerWidth * scaleX);
+                    const sourceHeight = Math.min(sourceImg.height - sourceY, containerHeight * scaleY);
+
+                    // Create canvas for cropping
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 1920; // Standard 16:9 width
+                    canvas.height = 1080; // Standard 16:9 height
+                    const ctx = canvas.getContext('2d');
+
+                    if (ctx) {
+                      // Fill with background color
+                      ctx.fillStyle = '#E5DDD5';
+                      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                      // Draw the cropped portion
+                      ctx.drawImage(
+                        sourceImg,
+                        sourceX,
+                        sourceY,
+                        sourceWidth,
+                        sourceHeight,
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                      );
+
+                      // Convert canvas to blob
+                      canvas.toBlob((blob) => {
+                        if (blob) {
+                          const file = new File([blob], 'banner.jpg', { type: 'image/jpeg' });
+                          setNewShoot(s => ({ ...s, bannerPhoto: file }));
+                          setShowCropModal(false);
+                          setTempBannerImage(null);
+                        }
+                      }, 'image/jpeg', 0.95);
+                    }
+                  };
+                  sourceImg.src = tempBannerImage;
+                }}
+                style={{
+                  padding: '12px 24px',
+                  background: '#402e27',
+                  color: '#f8f7f2',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Toepassen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -444,7 +444,7 @@ export default function Dashboard() {
       alert('✅ Talent succesvol bijgewerkt!');
     } catch (error) {
       console.error('Error updating model:', error);
-      alert('❌ Er is iets fout gegaan bij het bijwerken.');
+      alert('❌ Er is iets fout gegaan bij het bijwerken');
     }
   };
 
@@ -575,7 +575,7 @@ export default function Dashboard() {
       alert('✅ Algemene voorwaarden verwijderd!');
       await fetchActiveTerms();
     } catch (err) {
-      alert('❌ Fout bij verwijderen van voorwaarden.');
+      alert('❌ Fout bij verwijderen van voorwaarden');
     }
   };
 
@@ -589,14 +589,14 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#E5DDD5', paddingBottom: 40, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      <header style={{ background: 'transparent', padding: '16px 20px' }}>
+      <header style={{ background: 'transparent', padding: '16px 24px' }}>
         <div className="header-container" style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div className="header-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
 
             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', height: 56, minHeight: 56 }}>
                 {/* Zet het logo links, verticaal gecentreerd */}
-                <MiesLogo size={40} style={{ margin: 0 }} />
+                <MiesLogo size={40} style={{ margin: 0, marginLeft: -10, alignItems: 'flex-start', width: 'auto' }} />
               </div>
               <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0, marginLeft: 'auto' }}>
 
@@ -628,7 +628,7 @@ export default function Dashboard() {
                     e.currentTarget.style.transform = 'translateY(0)';
                   }}
                 >
-                  <span className="btn-text">Shoots Beheren</span>
+                  <span className="btn-text">Shoots beheren</span>
                 </button>
                 <div ref={userMenuRef} style={{ position: 'relative' }}>
                   <button
@@ -719,9 +719,9 @@ export default function Dashboard() {
           </div>
         )}
         <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#050606' }}>Talenten Dashboard</h1>
+          <h1 style={{ fontSize: 42, margin: 0, fontWeight: 700, color: '#050606' }}>Talenten dashboard</h1>
           <p className="dashboard-subtitle" style={{ marginTop: 12, color: '#050606', maxWidth: '800px', lineHeight: 1.5 }}>
-            Filter op kenmerken, vind de perfecte match en nodig talenten direct uit voor je volgende productie.
+            Filter op kenmerken, vind de perfecte match en nodig talenten direct uit voor je volgende productie
           </p>
           <style>{`
             .dashboard-subtitle {
@@ -1154,18 +1154,21 @@ export default function Dashboard() {
                     style={{
                       background: '#402e27',
                       color: '#f8f7f2',
-                      border: 'none',
-                      padding: '10px 12px',
+                      border: '1px solid transparent',
+                      height: 36,
                       borderRadius: 6,
                       fontWeight: 600,
-                      fontSize: 12,
+                      fontSize: 11,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: 5,
+                      gap: 4,
                       fontFamily: 'inherit',
-                      flex: 1
+                      flex: '1 1 0%',
+                      minWidth: 0,
+                      whiteSpace: 'nowrap',
+                      boxSizing: 'border-box'
                     }}
                   >
                     <Mail style={{ height: 13, width: 13 }} />
@@ -1177,18 +1180,21 @@ export default function Dashboard() {
                       style={{
                         background: '#E5DDD5',
                         color: '#050606',
-                        border: 'none',
-                        padding: '10px 12px',
+                        border: '1px solid transparent',
+                        height: 36,
                         borderRadius: 6,
                         fontWeight: 600,
-                        fontSize: 12,
+                        fontSize: 11,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: 5,
+                        gap: 4,
                         fontFamily: 'inherit',
-                        flex: 1
+                        flex: '1 1 0%',
+                        minWidth: 0,
+                        whiteSpace: 'nowrap',
+                        boxSizing: 'border-box'
                       }}
                     >
                       <span>Quitclaim</span>
@@ -1212,7 +1218,7 @@ export default function Dashboard() {
 
                               if (error) {
                                 console.error('Error updating contract:', error);
-                                alert('❌ Kon contract niet opslaan in database.');
+                                alert('❌ Kon contract niet opslaan in database');
                                 return;
                               }
 
@@ -1234,22 +1240,28 @@ export default function Dashboard() {
                     <button
                       onClick={() => setViewingQuitclaimFor(model)}
                       style={{
-                        background: '#22c55e',
-                        color: '#f8f7f2',
-                        border: 'none',
-                        padding: '10px 12px',
+                        background: '#E5DDD5',
+                        color: '#050606',
+                        border: '1px solid #4ade80',
+                        height: 36,
                         borderRadius: 6,
                         fontWeight: 600,
-                        fontSize: 12,
+                        fontSize: 11,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: 5,
+                        gap: 4,
                         fontFamily: 'inherit',
-                        flex: 1
+                        flex: '1 1 0%',
+                        minWidth: 0,
+                        whiteSpace: 'nowrap',
+                        boxSizing: 'border-box'
                       }}
                     >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
                       <span>Bekijk Quitclaim</span>
                     </button>
                   )}
@@ -1266,7 +1278,7 @@ export default function Dashboard() {
         )}
 
         {/* Aangemelde collega's sectie onderaan */}
-        <div style={{ background: '#f8f7f2', padding: 24, borderRadius: 12, marginTop: 40, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)', position: 'relative' }}>
+        <div className="employee-section-container" style={{ background: '#f8f7f2', padding: 24, borderRadius: 12, marginTop: 40, border: '1px solid rgba(0, 0, 0, 0.08)', boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#050606' }}>
               Geregistreerde collega's
@@ -1298,10 +1310,11 @@ export default function Dashboard() {
             </button>
           </div>
           {loggedInEmployees.length > 0 ? (
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <div className="employee-badges-container" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {loggedInEmployees.map((employee, index) => (
                 <div
                   key={index}
+                  className="employee-badge"
                   style={{
                     background: '#E5DDD5',
                     padding: '10px 18px',
@@ -1311,7 +1324,7 @@ export default function Dashboard() {
                     fontWeight: 500,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10
+                    gap: 6
                   }}
                 >
                   <span style={{
@@ -1326,7 +1339,7 @@ export default function Dashboard() {
               ))}
             </div>
           ) : (
-            <p style={{ color: '#050606', margin: 0, fontSize: 15 }}>Er zijn nog geen collega's geregistreerd.</p>
+            <p style={{ color: '#050606', margin: 0, fontSize: 15 }}>Er zijn nog geen collega's geregistreerd</p>
           )}
         </div>
       </main>
@@ -1587,7 +1600,7 @@ export default function Dashboard() {
                   gap: 8
                 }}
               >
-                Talent Verwijderen
+                Talent verwijderen
               </button>
 
               <div style={{ display: 'flex', gap: 12 }}>
@@ -2043,6 +2056,16 @@ export default function Dashboard() {
           .header-top {
             flex-wrap: wrap;
           }
+          header {
+            padding: 16px 16px !important;
+          }
+          .header-container {
+            padding: 0 !important;
+          }
+          /* Logo alignment on mobile */
+          .header-top > div:first-child > div:first-child {
+             margin-left: -6px !important;
+          }
           /* Header buttons smaller */
           .header-btn {
             padding: 6px 10px !important;
@@ -2052,7 +2075,25 @@ export default function Dashboard() {
             gap: 8px !important;
           }
           .btn-text {
-            display: none;
+            display: inline !important;
+            font-size: 11px !important;
+          }
+          .shoots-btn {
+            padding: 5px 10px !important;
+          }
+          /* Employee badges on mobile */
+          .employee-badges-container {
+            gap: 6px !important;
+          }
+          .employee-badge {
+            padding: 4px 8px !important;
+            font-size: 11px !important;
+            flex: 0 1 auto !important;
+            min-width: 0;
+          }
+          .employee-section-container {
+            padding: 12px 16px !important;
+            margin-top: 24px !important;
           }
           /* Model cards op mobiel */
           .models-grid > div {
@@ -2634,7 +2675,7 @@ export default function Dashboard() {
 
                     if (error) {
                       console.error('Error deleting quitclaim:', error);
-                      alert('❌ Kon quitclaim niet verwijderen.');
+                      alert('❌ Kon quitclaim niet verwijderen');
                       return;
                     }
 

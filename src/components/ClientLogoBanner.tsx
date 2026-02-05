@@ -4,10 +4,10 @@ import logoKoekela from '@/components/logo_klanten/logo-koekela-winkels-denieuwe
 import logoJordys from '@/components/logo_klanten/JORDYS_LOGO.png';
 import logoMorganMees from '@/components/logo_klanten/morganmees_logo.png';
 import logoDudok from '@/components/logo_klanten/dudok_logo.png';
-import logoDeBeren from '@/components/logo_klanten/de_beren_logo.png';
-import logoHeineken from '@/components/logo_klanten/heineken_logo.png';
+import logoDeBeren from '@/components/logo_klanten/de_beren__logo.png';
+import logoHeineken from '@/components/logo_klanten/heineken_logo.jpg';
 
-const ClientLogoBanner: React.FC = () => {
+const ClientLogoBanner: React.FC = React.memo(() => {
   return (
     <div className="logo-banner-wrapper">
       <div className="logo-banner">
@@ -62,14 +62,15 @@ const ClientLogoBanner: React.FC = () => {
         .logo-scroll img {
           width: auto;
           object-fit: contain;
-          filter: grayscale(100%);
+          filter: grayscale(100%); /* Geen extreme filters meer voor maximale scherpte */
           flex-shrink: 0;
+          mix-blend-mode: multiply;
         }
         .logo-small { height: 25px; }
         .logo-normal { height: 40px; }
         .logo-large { height: 50px; }
         .logo-xlarge { height: 60px; }
-        .logo-xxlarge { height: 45px; transform: scale(2.2); margin: 0 15px; }
+        .logo-xxlarge { height: 32px; transform: scale(1.5); margin: 0 10px; } /* Heineken nog iets subtieler */
 
         @keyframes scroll {
           0% { transform: translateX(0); }
@@ -88,6 +89,6 @@ const ClientLogoBanner: React.FC = () => {
       `}</style>
     </div>
   );
-};
+});
 
 export default ClientLogoBanner;

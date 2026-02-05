@@ -1,8 +1,6 @@
-
+import React from 'react';
 import headLogo from '@/assets/Head logo.png';
-
-// ... imports
-export default function MiesLogo({ size = 40, style, className }: { size?: number; style?: React.CSSProperties; className?: string }) {
+const MiesLogo = React.memo(({ size = 40, style, className }: { size?: number; style?: React.CSSProperties; className?: string }) => {
   return (
     <div
       className={className}
@@ -29,5 +27,7 @@ export default function MiesLogo({ size = 40, style, className }: { size?: numbe
       />
     </div>
   );
-}
+});
+
+export default MiesLogo;
 
