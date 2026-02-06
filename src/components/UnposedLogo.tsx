@@ -30,4 +30,6 @@ const UnposedLogo = React.memo(({ size = 40, style, className }: { size?: number
     );
 });
 
+UnposedLogo.displayName = 'UnposedLogo';
+
 export default UnposedLogo;

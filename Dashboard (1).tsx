@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogOut, Mail, Instagram } from "lucide-react";
-import logo from "@/assets/mies-media-logo.png";
+import logo from "@/assets/Head logo.png";
 
 type Model = {
   id: string;
@@ -96,9 +96,9 @@ export default function Dashboard() {
   };
 
   const handleContactModel = (model: Model) => {
-    const subject = encodeURIComponent("Opdracht Mies Media");
+    const subject = encodeURIComponent("Opdracht The Unposed Collective");
     const body = encodeURIComponent(
-      `Beste ${model.first_name},\n\nWij zouden je graag willen vragen voor een opdracht.\n\nMet vriendelijke groet,\nMies Media`
+      `Beste ${model.first_name},\n\nWij zouden je graag willen vragen voor een opdracht.\n\nMet vriendelijke groet,\nThe Unposed Collective`
     );
     window.location.href = `mailto:${model.email}?subject=${subject}&body=${body}`;
   };

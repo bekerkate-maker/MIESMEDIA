@@ -24,8 +24,8 @@ export interface Employee {
   last_login: string;
 }
 
-const DB_KEY_MODELS = 'mies_media_models';
-const DB_KEY_EMPLOYEES = 'mies_media_employees';
+const DB_KEY_MODELS = 'unposed_models';
+const DB_KEY_EMPLOYEES = 'unposed_employees';
 
 // Initialize database met sample data
 export const initDatabase = () => {
@@ -124,7 +124,7 @@ export const initDatabase = () => {
       {
         id: '1',
         name: 'Kate Beker',
-        email: 'kate@miesmedia.nl',
+        email: 'hello@unposed.nl',
         last_login: new Date().toISOString()
       }
     ];
