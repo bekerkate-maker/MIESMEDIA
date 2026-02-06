@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import MiesLogo from '@/components/MiesLogo';
+import UnposedLogo from '@/components/UnposedLogo';
 import ClientLogoBanner from '@/components/ClientLogoBanner';
 
 export default function ShootRegistration() {
@@ -190,7 +190,7 @@ export default function ShootRegistration() {
       <div className="registration-page success-page">
         <div className="success-container">
           <div className="logo-center">
-            <MiesLogo size={120} />
+            <UnposedLogo size={120} />
           </div>
           <h1 className="success-title">Aanmelding geslaagd!</h1>
           <p className="success-text">
@@ -277,7 +277,7 @@ export default function ShootRegistration() {
                 </div>
               ) : (
                 <div className="card-image-placeholder">
-                  <MiesLogo size={60} />
+                  <UnposedLogo size={60} />
                 </div>
               )}
 
@@ -586,7 +586,7 @@ const styles = `
 /* Body */
 .card-body {
   padding: 32px;
-  background: #FAFAFA;
+  background: #f8f7f2;
 }
 
 .section-title {
@@ -610,8 +610,8 @@ const styles = `
 
 .compact-option {
   flex: 1;
-  background: #f8f7f2;
-  border: 1px solid #E5E7EB;
+  background: #E5DDD5;
+  border: 1px solid #D1D5DB;
   border-radius: 12px;
   padding: 20px;
   cursor: pointer;
@@ -684,7 +684,7 @@ const styles = `
 
 .form-group input, .form-group textarea {
   width: 100%; padding: 10px 12px;
-  background: #f8f7f2; border: 1px solid #D1D5DB;
+  background: #E5DDD5; border: 1px solid #D1D5DB;
   border-radius: 8px; font-size: 14px; font-family: inherit;
   transition: border-color 0.2s;
   box-sizing: border-box;

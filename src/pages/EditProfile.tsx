@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import MiesLogo from '@/components/MiesLogo';
+import UnposedLogo from '@/components/UnposedLogo';
 import { useNavigate } from 'react-router-dom';
 import ClientLogoBanner from '@/components/ClientLogoBanner';
 import { User } from 'lucide-react';
@@ -495,7 +495,7 @@ const EditProfile: React.FC = () => {
             <main style={{ maxWidth: 800, margin: '0 auto', padding: '40px 20px', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-                        <MiesLogo size={100} />
+                        <UnposedLogo size={100} />
                     </div>
                     <div>
                         <h2 style={{ fontSize: 28, color: '#050606', margin: 0 }}>Mijn profiel</h2>

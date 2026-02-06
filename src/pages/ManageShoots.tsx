@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import MiesLogo from '@/components/MiesLogo';
+import UnposedLogo from '@/components/UnposedLogo';
 import ClientLogoBanner from '@/components/ClientLogoBanner';
 
 export default function ManageShoots() {
@@ -603,10 +603,10 @@ export default function ManageShoots() {
           </div>
         </div>
         {/* Hoofdcontent */}
-        <div style={{ padding: '60px 20px', flex: 1 }}>
+        <div className="manage-content-section" style={{ flex: 1 }}>
           <div style={{ marginBottom: 40 }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-              <MiesLogo size={110} />
+              <UnposedLogo size={110} className="manage-page-logo" />
             </div>
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
               <h1 style={{ fontSize: 32, fontWeight: 700, color: '#050606', margin: 0 }}>Shoots beheren</h1>
@@ -746,7 +746,7 @@ export default function ManageShoots() {
                     <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Website klant / instagram klant
                     </label>
-                    <div style={{ display: 'flex', gap: 8 }}>
+                    <div className="form-row-stackable">
                       <input
                         type="url"
                         placeholder="https://lacazuela.nl"
@@ -808,7 +808,7 @@ export default function ManageShoots() {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
+                  <div className="form-grid-stackable" style={{ marginBottom: 16 }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                         Datum *
@@ -894,7 +894,7 @@ export default function ManageShoots() {
                     <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#050606', fontWeight: 500 }}>
                       Soort vergoeding *
                     </label>
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <div className="form-row-stackable">
                       <select
                         required
                         value={newShoot.compensationType}
@@ -913,7 +913,7 @@ export default function ManageShoots() {
                         <option value="cadeaubon">Cadeaubon</option>
                         <option value="geen">Geen vergoeding</option>
                       </select>
-
+                      ...
                       {newShoot.compensationType === 'financiële vergoeding' && (
                         <input
                           required
@@ -924,11 +924,12 @@ export default function ManageShoots() {
                           value={newShoot.compensationAmount}
                           onChange={(e) => setNewShoot({ ...newShoot, compensationAmount: e.target.value })}
                           style={{ width: '150px', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                          className="compensation-amount-input"
                         />
                       )}
 
                       {newShoot.compensationType === 'cadeaubon' && (
-                        <>
+                        <div className="gift-card-row" style={{ display: 'flex', gap: 12, flex: 2 }}>
                           <input
                             required
                             type="number"
@@ -938,6 +939,7 @@ export default function ManageShoots() {
                             value={newShoot.compensationAmount}
                             onChange={(e) => setNewShoot({ ...newShoot, compensationAmount: e.target.value })}
                             style={{ width: '120px', padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                            className="compensation-amount-input"
                           />
                           <input
                             required
@@ -947,7 +949,7 @@ export default function ManageShoots() {
                             onChange={(e) => setNewShoot({ ...newShoot, compensationBusinessName: e.target.value })}
                             style={{ flex: 1, padding: '12px', background: '#E5DDD5', border: 'none', borderRadius: 8, fontSize: 15, fontFamily: 'inherit', boxSizing: 'border-box' }}
                           />
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -1013,7 +1015,7 @@ export default function ManageShoots() {
               margin: '0 auto',
               position: 'relative'
             }}>
-              <h2 style={{
+              <h2 className="manage-shoots-title" style={{
                 fontSize: 24,
                 fontWeight: 600,
                 color: '#050606',
@@ -1033,7 +1035,7 @@ export default function ManageShoots() {
                     const isFocusMode = expandedShoot !== null;
 
                     return (
-                      <div key={shoot.id} style={{
+                      <div key={shoot.id} className="manage-shoot-card" style={{
                         background: '#f8f7f2',
                         borderRadius: 12,
                         padding: 0,
@@ -1043,7 +1045,9 @@ export default function ManageShoots() {
                         gap: 0,
                         alignItems: 'start',
                         transition: 'all 0.2s ease',
-                        position: 'relative'
+                        position: 'relative',
+                        minWidth: 0,
+                        overflow: 'hidden'
                       }}>
                         {shoot.banner_photo_url && (
                           <div
@@ -1831,32 +1835,27 @@ E: hello@unposed.nl`;
                 ← Terug naar Dashboard
               </button>
               <style>{`
-            @keyframes scroll {
-              0% { transform: translateX(0); }
-              100% { transform: translateX(-50%); }
+
+
+            .manage-content-section {
+              padding: 60px 20px;
             }
-            .logo-scroll {
-              animation: scroll 240s linear infinite;
-              will-change: transform;
-            }
-            .logo-scroll img {
-              width: auto;
-              object-fit: contain;
-              filter: grayscale(100%);
-            }
-            .logo-small { height: 25px; }
-            .logo-normal { height: 40px; }
-            .logo-large { height: 50px; }
-            .logo-xlarge { height: 60px; }
 
             /* Mobile responsiveness for management grid */
             @media (max-width: 768px) {
+              .manage-content-section {
+                padding: 24px 12px;
+              }
+              .manage-shoots-title {
+                font-size: 18px !important;
+                margin-bottom: 16px !important;
+              }
               .manage-shoots-grid {
-                grid-template-columns: 1fr 1fr !important;
-                gap: 16px !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 8px !important;
               }
               .manage-page-logo img {
-                height: 80px !important; /* Smaller logo on mobile */
+                height: 70px !important; /* Smaller logo on mobile */
                 width: auto !important;
               }
               .shoot-card-content { padding: 12px !important; }
@@ -1884,9 +1883,12 @@ E: hello@unposed.nl`;
                 gap: 8px !important;
               }
               .shoot-actions button {
-                font-size: 11px !important;
-                padding: 6px 10px !important;
+                font-size: 10px !important;
+                padding: 6px 4px !important;
                 justify-content: center;
+                white-space: normal !important;
+                text-align: center;
+                line-height: 1.2;
               }
               .shoot-actions > div {
                  width: 100%;
@@ -1894,6 +1896,31 @@ E: hello@unposed.nl`;
                  grid-template-columns: 1fr 1fr;
                  gap: 8px !important;
               }
+              .form-row-stackable {
+                flex-direction: column;
+                gap: 12px;
+              }
+              .form-grid-stackable {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+              }
+              .compensation-amount-input {
+                width: 100% !important;
+              }
+              .gift-card-row {
+                flex-direction: column;
+                width: 100% !important;
+                gap: 12px !important;
+              }
+            }
+            .form-row-stackable {
+              display: flex;
+              gap: 12px;
+            }
+            .form-grid-stackable {
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;
+              gap: 16px;
             }
           `}</style>
             </div>

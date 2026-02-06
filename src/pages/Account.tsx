@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import MiesLogo from '@/components/MiesLogo';
+import UnposedLogo from '@/components/UnposedLogo';
 import { useNavigate } from 'react-router-dom';
 import ClientLogoBanner from '@/components/ClientLogoBanner';
 
@@ -295,7 +295,7 @@ const Account: React.FC = () => {
           <div style={{ width: '100%', maxWidth: 480 }}>
             <div style={{ textAlign: 'center', marginBottom: 40 }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-                <MiesLogo size={90} />
+                <UnposedLogo size={90} />
               </div>
               <h1 style={{ fontSize: 42, fontWeight: 700, margin: 0, color: '#050606', marginBottom: 8 }}>
                 The Unposed Collective
@@ -513,17 +513,38 @@ const Account: React.FC = () => {
 
   // DASHBOARD SCREEN
   const futureShoots = myShoots.filter(s => {
-    const shootDate = new Date(s.shoots?.shoot_date);
+    const shootDate = s.shoots?.shoot_date ? new Date(s.shoots.shoot_date) : null;
     const now = new Date();
-    return shootDate >= now && s.status === 'accepted';
+    now.setHours(0, 0, 0, 0);
+    if (!shootDate) return false;
+    const targetDate = new Date(shootDate);
+    targetDate.setHours(0, 0, 0, 0);
+    return targetDate >= now && s.status === 'accepted';
   });
 
-  const pendingShoots = myShoots.filter(s => ['pending', 'selected', 'rejected_draft'].includes(s.status));
+  const pendingShoots = myShoots.filter(s => {
+    const shootDate = s.shoots?.shoot_date ? new Date(s.shoots.shoot_date) : null;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    if (!shootDate) return ['pending', 'selected', 'rejected_draft'].includes(s.status);
+    const targetDate = new Date(shootDate);
+    targetDate.setHours(0, 0, 0, 0);
+    return ['pending', 'selected', 'rejected_draft'].includes(s.status) && targetDate >= now;
+  });
 
   const pastShoots = myShoots.filter(s => {
-    const shootDate = new Date(s.shoots?.shoot_date);
+    const shootDate = s.shoots?.shoot_date ? new Date(s.shoots.shoot_date) : null;
     const now = new Date();
-    return shootDate < now || s.status === 'completed' || s.status === 'rejected';
+    now.setHours(0, 0, 0, 0);
+
+    // Altijd in historie als weigeren of voltooid
+    if (s.status === 'completed' || s.status === 'rejected') return true;
+
+    // Anders alleen als de datum verstreken is
+    if (!shootDate) return false;
+    const targetDate = new Date(shootDate);
+    targetDate.setHours(0, 0, 0, 0);
+    return targetDate < now;
   });
 
   return (

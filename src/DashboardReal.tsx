@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, Instagram, Filter } from "lucide-react";
-import MiesLogo from "@/components/MiesLogo";
+import UnposedLogo from "@/components/UnposedLogo";
 
 type Model = {
   id: string;
@@ -601,7 +601,7 @@ export default function Dashboard() {
             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', height: 56, minHeight: 56 }}>
                 {/* Zet het logo links, verticaal gecentreerd */}
-                <MiesLogo size={40} style={{ margin: 0, marginLeft: -10, alignItems: 'flex-start', width: 'auto' }} />
+                <UnposedLogo size={40} style={{ margin: 0, marginLeft: -10, alignItems: 'flex-start', width: 'auto' }} />
               </div>
               <div className="header-buttons" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0, marginLeft: 'auto' }}>
 

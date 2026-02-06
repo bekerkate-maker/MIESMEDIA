@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 // import { supabase } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
-import MiesLogo from '@/components/MiesLogo';
+import UnposedLogo from '@/components/UnposedLogo';
 import ClientLogoBanner from '@/components/ClientLogoBanner';
 
 function formatDateNL(dateString?: string, long: boolean = false): string {
@@ -20,6 +20,7 @@ const OpenShoots: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<any>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchShoots = async () => {
@@ -88,7 +89,7 @@ const OpenShoots: React.FC = () => {
       <div className="content-section">
         <div className="header-section">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 0, marginTop: 0 }}>
-            <MiesLogo size={110} />
+            <UnposedLogo size={110} />
             <div className="button-wrapper" style={{ marginTop: 6, display: 'flex', gap: 12 }}>
               <button onClick={() => window.location.href = '/register-model'} className="primary-btn">
                 Meld je aan als nieuw talent
@@ -102,7 +103,11 @@ const OpenShoots: React.FC = () => {
           {shoots.map(shoot => (
             <div key={shoot.id} className="shoot-card" style={{ opacity: shoot.shoot_date && new Date(shoot.shoot_date) < new Date() ? 0.7 : 1 }}>
               {shoot.banner_photo_url && (
-                <div className="shoot-banner">
+                <div
+                  className="shoot-banner"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setPreviewImage(shoot.banner_photo_url)}
+                >
                   <img src={shoot.banner_photo_url} alt="Banner shoot" />
                 </div>
               )}
@@ -221,6 +226,64 @@ const OpenShoots: React.FC = () => {
         {shoots.length === 0 && (
           <div style={{ textAlign: 'center', padding: 60, color: '#050606' }}>
             <p style={{ fontSize: 18 }}>Geen shoots gevonden</p>
+          </div>
+        )}
+
+        {/* Image Preview Modal */}
+        {previewImage && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              padding: 24,
+              cursor: 'pointer'
+            }}
+            onClick={() => setPreviewImage(null)}
+          >
+            <div style={{ position: 'relative', maxWidth: '90%', maxHeight: '90%' }} onClick={e => e.stopPropagation()}>
+              <img
+                src={previewImage}
+                alt="Preview"
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '90vh',
+                  borderRadius: 12,
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                  display: 'block'
+                }}
+              />
+              <button
+                onClick={() => setPreviewImage(null)}
+                style={{
+                  position: 'absolute',
+                  top: -15,
+                  right: -15,
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  background: '#f8f7f2',
+                  color: '#050606',
+                  border: 'none',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '16px'
+                }}
+              >
+                ×
+              </button>
+            </div>
           </div>
         )}
       </div>

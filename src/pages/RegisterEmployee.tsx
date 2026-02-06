@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import MiesLogo from '@/components/MiesLogo';
+import UnposedLogo from '@/components/UnposedLogo';
 
 export default function RegisterEmployee() {
   const [step, setStep] = useState(1);
@@ -142,7 +142,7 @@ export default function RegisterEmployee() {
       <div style={{ width: '100%', maxWidth: 480 }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-            <MiesLogo size={110} />
+            <UnposedLogo size={110} />
           </div>
           <h1 style={{ fontSize: 42, fontWeight: 700, margin: 0, color: '#050606', marginBottom: 8 }}>
             Collega registratie
