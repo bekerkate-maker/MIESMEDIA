@@ -54,7 +54,7 @@ const ClientLogoBanner: React.FC = React.memo(() => {
         .logo-scroll {
           display: flex;
           align-items: center;
-          animation: infinite-scroll 60s linear infinite;
+          animation: infinite-scroll 240s linear infinite;
           will-change: transform;
           white-space: nowrap;
           width: max-content;
@@ -75,7 +75,7 @@ const ClientLogoBanner: React.FC = React.memo(() => {
         }
         .logo-small { height: 25px; }
         .logo-normal { height: 40px; }
-        .logo-large { height: 62px; }
+        .logo-large { height: 50px; }
         .logo-xlarge { height: 60px; }
         .logo-xxlarge { 
           height: 32px; 
@@ -95,12 +95,13 @@ const ClientLogoBanner: React.FC = React.memo(() => {
         }
 
         @media (max-width: 768px) {
-          .logo-large { height: 44px; }
-          .logo-xlarge { height: 50px; }
-          .logo-morgan { height: 36px; }
+          .logo-large { height: 50px; }
+          .logo-xlarge { height: 58px; }
+          .logo-morgan { height: 42px; }
+          .logo-jordys { height: 44px; }
           .logo-xxlarge { 
-            height: 42px; 
-            transform: scale(2.0);
+            height: 28px; 
+            transform: scale(1.5);
             filter: grayscale(100%) brightness(1.2) contrast(1.1) !important;
           }
         }
