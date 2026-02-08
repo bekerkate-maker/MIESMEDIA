@@ -473,7 +473,7 @@ export default function RegisterModel() {
                   }}
                 />
                 <div style={{ fontSize: 15, color: '#050606', lineHeight: 1.6 }}>
-                  <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer' }}>Ik ga akkoord met de{' '}</label>
+                  <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer', display: 'inline' }}>Ik ga akkoord met de{' '}</label>
                   {termsUrl ? (
                     <button
                       type="button"
@@ -504,7 +504,7 @@ export default function RegisterModel() {
                   ) : (
                     <span style={{ fontWeight: 700, textDecoration: 'underline' }}>privacyverklaring</span>
                   )}
-                  <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer' }}>
+                  <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer', display: 'inline' }}>
                     <span className="desktop-only">
                       {' '}van Unposed en geef toestemming voor het opslaan en gebruiken van mijn gegevens voor casting- en shootdoeleinden.
                     </span>
