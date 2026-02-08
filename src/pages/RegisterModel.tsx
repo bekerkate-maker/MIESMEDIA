@@ -459,20 +459,21 @@ export default function RegisterModel() {
             <div className="form-field">
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                 <input
+                  id="agree-terms-checkbox"
                   type="checkbox"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   style={{
-                    width: 18,
-                    height: 18,
-                    marginTop: 10,
+                    width: 20,
+                    height: 20,
+                    marginTop: 3,
                     cursor: 'pointer',
                     flexShrink: 0,
                     accentColor: '#050606'
                   }}
                 />
-                <span style={{ fontSize: 15, color: '#050606', lineHeight: 1.6 }}>
-                  Ik ga akkoord met de{' '}
+                <div style={{ fontSize: 15, color: '#050606', lineHeight: 1.6 }}>
+                  <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer' }}>Ik ga akkoord met de{' '}</label>
                   {termsUrl ? (
                     <button
                       type="button"
@@ -491,7 +492,9 @@ export default function RegisterModel() {
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.color = '#050606'}
                       onMouseLeave={(e) => e.currentTarget.style.color = '#050606'}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         console.log('Privacy policy clicked, termsUrl:', termsUrl);
                         setShowTermsModal(true);
                       }}
@@ -501,10 +504,12 @@ export default function RegisterModel() {
                   ) : (
                     <span style={{ fontWeight: 700, textDecoration: 'underline' }}>privacyverklaring</span>
                   )}
-                  <span className="desktop-only">
-                    {' '}van Unposed en geef toestemming voor het opslaan en gebruiken van mijn gegevens voor casting- en shootdoeleinden.
-                  </span>
-                </span>
+                  <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer' }}>
+                    <span className="desktop-only">
+                      {' '}van Unposed en geef toestemming voor het opslaan en gebruiken van mijn gegevens voor casting- en shootdoeleinden.
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
 
