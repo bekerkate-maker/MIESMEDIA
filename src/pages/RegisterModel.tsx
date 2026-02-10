@@ -475,9 +475,8 @@ export default function RegisterModel() {
                 <div style={{ fontSize: 15, color: '#050606', lineHeight: 1.6 }}>
                   <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer', display: 'inline' }}>Ik ga akkoord met de{' '}</label>
                   {termsUrl ? (
-                    <span
-                      role="button"
-                      tabIndex={0}
+                    <a
+                      href="#"
                       style={{
                         color: '#050606',
                         fontWeight: 700,
@@ -491,23 +490,15 @@ export default function RegisterModel() {
                         fontFamily: 'inherit',
                         transition: 'color 0.2s'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#050606'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = '#050606'}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Privacy policy clicked, termsUrl:', termsUrl);
                         setShowTermsModal(true);
                       }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setShowTermsModal(true);
-                        }
-                      }}
                     >
                       privacyverklaring
-                    </span>
+                    </a>
                   ) : (
                     <span style={{ fontWeight: 700, textDecoration: 'underline' }}>privacyverklaring</span>
                   )}
