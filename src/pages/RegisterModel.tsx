@@ -476,7 +476,9 @@ export default function RegisterModel() {
                   <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer', display: 'inline' }}>Ik ga akkoord met de{' '}</label>
                   {termsUrl ? (
                     <a
-                      href="#"
+                      href={termsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{
                         color: '#050606',
                         fontWeight: 700,
@@ -484,11 +486,14 @@ export default function RegisterModel() {
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        padding: 0,
+                        padding: '4px 0', // Added vertical padding for better touch target
                         display: 'inline',
                         fontSize: 'inherit',
                         fontFamily: 'inherit',
-                        transition: 'color 0.2s'
+                        transition: 'color 0.2s',
+                        position: 'relative', // Ensure it sits above other elements
+                        zIndex: 10,
+                        touchAction: 'manipulation'
                       }}
                       onClick={(e) => {
                         e.preventDefault();
@@ -500,7 +505,25 @@ export default function RegisterModel() {
                       privacyverklaring
                     </a>
                   ) : (
-                    <span style={{ fontWeight: 700, textDecoration: 'underline' }}>privacyverklaring</span>
+                    <button
+                      type="button"
+                      style={{
+                        fontWeight: 700,
+                        textDecoration: 'underline',
+                        background: 'none',
+                        border: 'none',
+                        padding: '4px 0',
+                        font: 'inherit',
+                        cursor: 'pointer',
+                        color: '#050606'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        alert('De voorwaarden konden niet geladen worden. Probeer de pagina te verversen.');
+                      }}
+                    >
+                      privacyverklaring
+                    </button>
                   )}
                   <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer', display: 'inline' }}>
                     <span className="desktop-only">
