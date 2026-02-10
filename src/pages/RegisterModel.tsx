@@ -475,8 +475,9 @@ export default function RegisterModel() {
                 <div style={{ fontSize: 15, color: '#050606', lineHeight: 1.6 }}>
                   <label htmlFor="agree-terms-checkbox" style={{ cursor: 'pointer', display: 'inline' }}>Ik ga akkoord met de{' '}</label>
                   {termsUrl ? (
-                    <button
-                      type="button"
+                    <span
+                      role="button"
+                      tabIndex={0}
                       style={{
                         color: '#050606',
                         fontWeight: 700,
@@ -498,9 +499,15 @@ export default function RegisterModel() {
                         console.log('Privacy policy clicked, termsUrl:', termsUrl);
                         setShowTermsModal(true);
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setShowTermsModal(true);
+                        }
+                      }}
                     >
                       privacyverklaring
-                    </button>
+                    </span>
                   ) : (
                     <span style={{ fontWeight: 700, textDecoration: 'underline' }}>privacyverklaring</span>
                   )}
