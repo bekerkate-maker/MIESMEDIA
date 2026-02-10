@@ -40,21 +40,38 @@ export default function RegisterModel() {
   const [termsUrl, setTermsUrl] = useState<string | null>(null);
 
   // Fetch terms and conditions document
+  // Fetch terms and conditions document
   useEffect(() => {
     const fetchTerms = async () => {
       try {
-        const { data, error } = await supabase
+        // Eerst proberen actieve voorwaarden op te halen
+        let { data, error } = await supabase
           .from('terms_and_conditions')
           .select('document_url')
           .eq('is_active', true)
           .order('uploaded_at', { ascending: false })
           .limit(1);
 
+        // Als er geen actieve voorwaarden zijn, probeer de nieuwste (ook als die inactief is)
+        if ((!data || data.length === 0) && !error) {
+          console.log('Geen actieve voorwaarden gevonden, zoeken naar fallback...');
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('terms_and_conditions')
+            .select('document_url')
+            .order('uploaded_at', { ascending: false })
+            .limit(1);
+
+          if (!fallbackError && fallbackData && fallbackData.length > 0) {
+            data = fallbackData;
+            console.log('Fallback voorwaarden gevonden');
+          }
+        }
+
         if (!error && data && data.length > 0) {
           setTermsUrl(data[0].document_url);
           console.log('Terms URL loaded:', data[0].document_url);
         } else {
-          console.log('No active terms found');
+          console.log('No terms found (active or inactive)');
         }
       } catch (err) {
         console.error('Error fetching terms:', err);
@@ -519,7 +536,8 @@ export default function RegisterModel() {
                       }}
                       onClick={(e) => {
                         e.preventDefault();
-                        alert('De voorwaarden konden niet geladen worden. Probeer de pagina te verversen.');
+                        alert('Geen voorwaarden gevonden. Zorg dat er algemene voorwaarden zijn geüpload via het dashboard.');
+                        console.log('Terms URL missing, check database table terms_and_conditions');
                       }}
                     >
                       privacyverklaring
